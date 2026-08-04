@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</title>
+  <title>ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน (PTG)</title>
   
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -86,64 +86,6 @@
       border: 1px solid #fde68a;
     }
 
-    .bg-ai-gradient {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-      color: white;
-    }
-    
-    .border-ai {
-      border-color: #8b5cf6 !important;
-    }
-
-    .ai-chat-drawer {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 380px;
-      max-width: 90vw;
-      height: 500px;
-      z-index: 1050;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      background: #ffffff;
-      overflow: hidden;
-      transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-    }
-
-    .ai-chat-drawer.collapsed {
-      transform: translateY(calc(100% + 40px));
-    }
-
-    .ai-chat-toggle-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1049;
-      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
-      border-radius: 50px;
-    }
-
-    .chat-bubble-user {
-      background-color: #e0e7ff;
-      color: #3730a3;
-      border-radius: 14px 14px 2px 14px;
-      padding: 10px 14px;
-      max-width: 85%;
-      align-self: flex-end;
-    }
-
-    .chat-bubble-ai {
-      background-color: #f3f4f6;
-      color: #1f2937;
-      border-radius: 14px 14px 14px 2px;
-      padding: 10px 14px;
-      max-width: 85%;
-      align-self: flex-start;
-      border-left: 3px solid #8b5cf6;
-    }
-
     .toast-container-custom {
       position: fixed;
       top: 20px;
@@ -179,18 +121,15 @@
         <i class="fa-solid fa-gas-pump fs-4 me-3 text-warning"></i>
         <div>
           <span class="fs-5 d-block">ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</span>
-          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">โครงการ Model A, B, C (เชื่อมต่อ Google Sheet Database)</small>
+          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐาน</small>
         </div>
       </a>
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-          <i class="fa-solid fa-plug me-1"></i> ตั้งค่าเชื่อมต่อ Google Sheet
+          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Google Sheet
         </button>
-        <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#apiKeyModal">
-          <i class="fa-solid fa-key me-1"></i> Gemini API Key
-        </button>
-        <span class="badge bg-success px-3 py-2 border text-white" id="dbStatusBadge">
-          <i class="fa-solid fa-table me-1"></i> Google Sheet Live Data
+        <span class="badge bg-info px-3 py-2 border text-dark" id="dbStatusBadge">
+          <i class="fa-solid fa-database me-1"></i> Ready
         </span>
       </div>
     </div>
@@ -198,21 +137,21 @@
 
   <div class="container-fluid px-4">
 
-    <!-- Connection Guide Alert -->
+    <!-- Connection Alert -->
     <div class="alert alert-info alert-dismissible fade show mb-4 shadow-sm" id="fetchErrorAlert" role="alert">
       <div class="d-flex align-items-start gap-3">
         <i class="fa-solid fa-cloud-arrow-up fs-3 text-primary mt-1"></i>
         <div class="flex-grow-1">
           <h6 class="fw-bold mb-1">สถานะการเชื่อมต่อฐานข้อมูล Google Sheet:</h6>
           <div class="fs-7 text-dark" id="fetchErrorMessage">
-            ขณะนี้ระบบกำลังดึงข้อมูลโครงการตรงจาก <b>Google Sheet</b> ของคุณ คุณสามารถบันทึกผลการประเมินได้ทันที หากต้องการเปิดใช้งานการบันทึกผ่าน Apps Script โปรดใส่ <b>Web App URL (ที่ลงท้ายด้วย <code>/exec</code>)</b> ในเมนู <b>"ตั้งค่าเชื่อมต่อ Google Sheet"</b>
+            ระบบพร้อมใช้งาน คลิก "ตั้งค่า Google Sheet" เพื่อเชื่อมต่อกับไฟล์ Google Sheet ของคุณ
           </div>
           <div class="mt-2 d-flex gap-2 align-items-center flex-wrap">
             <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า Web App URL / Google Sheet ID
+              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า Google Sheet ID
             </button>
             <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()">
-              <i class="fa-solid fa-arrows-rotate me-1"></i> โหลดข้อมูลใหม่
+              <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลใหม่
             </button>
           </div>
         </div>
@@ -280,101 +219,29 @@
         </div>
 
         <div class="card card-custom p-4 bg-white mb-4">
-          <ul class="nav nav-tabs nav-fill mb-3" id="reportSubTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active fw-bold" id="tab-sub-station" data-bs-toggle="tab" data-bs-target="#sub-view-station" type="button">
-                <i class="fa-solid fa-building-flag me-2"></i>1. รายงานสถานีบริการน้ำมัน
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link fw-bold" id="tab-sub-contractor" data-bs-toggle="tab" data-bs-target="#sub-view-contractor" type="button" onclick="renderContractorReport()">
-                <i class="fa-solid fa-hard-hat me-2"></i>2. รายงานแยกตามผู้รับเหมา
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link fw-bold" id="tab-sub-grade" data-bs-toggle="tab" data-bs-target="#sub-view-grade" type="button" onclick="renderGradeReport()">
-                <i class="fa-solid fa-award me-2"></i>3. รายงานสรุปตาม Grade
-              </button>
-            </li>
-          </ul>
-
-          <div class="tab-content" id="reportSubTabsContent">
-            
-            <div class="tab-pane fade show active" id="sub-view-station" role="tabpanel">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list me-2 text-primary"></i>รายการสถานีบริการน้ำมันและสถานะการประเมิน</h6>
-                <div>
-                  <button class="btn btn-sm btn-outline-secondary me-2" onclick="fetchDataFromGoogleSheet()">
-                    <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลจาก Sheet
-                  </button>
-                  <span class="fs-7 text-muted">* คำนวณ Weighted Score ถ่วงน้ำหนัก 4 ฝ่าย 12 หัวข้อ</span>
-                </div>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle" id="projectTable">
-                  <thead class="table-light">
-                    <tr>
-                      <th>รหัสสาขา / ชื่อสถานี</th>
-                      <th>Model</th>
-                      <th>ชื่อผู้รับเหมา</th>
-                      <th>มูลค่า (MB)</th>
-                      <th>สถานะการประเมิน (4 ฝ่าย)</th>
-                      <th class="text-center">คะแนนรวม</th>
-                      <th class="text-center">เกรด</th>
-                      <th class="text-end">การจัดการ</th>
-                    </tr>
-                  </thead>
-                  <tbody id="projectTableBody">
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="tab-pane fade" id="sub-view-contractor" role="tabpanel">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-users me-2 text-primary"></i>สรุปผลงานและการประเมินแยกตามรายผู้รับเหมา</h6>
-                <span class="fs-7 text-muted">* คำนวณจากโครงการที่ประเมินเสร็จสิ้นแล้ว</span>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th>ชื่อผู้รับเหมา</th>
-                      <th class="text-center">จำนวนโครงการที่ดูแล</th>
-                      <th class="text-center">ประเมินแล้ว</th>
-                      <th class="text-center">คะแนนเฉลี่ย (%)</th>
-                      <th class="text-center">เกรดเฉลี่ย</th>
-                      <th class="text-center">สถานะสิทธิ์ประมูลงาน</th>
-                    </tr>
-                  </thead>
-                  <tbody id="contractorTableBody">
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div class="tab-pane fade" id="sub-view-grade" role="tabpanel">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-chart-column me-2 text-primary"></i>การจัดกลุ่มตามระดับเกรด (Grade Distribution)</h6>
-              </div>
-              <div class="row g-3 mb-4" id="gradeCardsContainer">
-              </div>
-              <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th style="width: 120px;">ระดับเกรด</th>
-                      <th>เกณฑ์คะแนน</th>
-                      <th>จำนวนโครงการ</th>
-                      <th>รายชื่อสถานีบริการ</th>
-                    </tr>
-                  </thead>
-                  <tbody id="gradeTableBody">
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list me-2 text-primary"></i>รายการสถานีบริการน้ำมันและสถานะการประเมิน</h6>
+            <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()">
+              <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลจาก Sheet
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="projectTable">
+              <thead class="table-light">
+                <tr>
+                  <th>รหัสสาขา / ชื่อสถานี</th>
+                  <th>Model</th>
+                  <th>ชื่อผู้รับเหมา</th>
+                  <th>มูลค่า (MB)</th>
+                  <th>สถานะการประเมิน (4 ฝ่าย)</th>
+                  <th class="text-center">คะแนนรวม</th>
+                  <th class="text-center">เกรด</th>
+                  <th class="text-end">การจัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="projectTableBody">
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -399,10 +266,10 @@
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label fw-bold">2. ฝ่ายผู้ทำการประเมิน:</label>
               <select class="form-select" id="evalDeptSelect" onchange="renderRubricCards()">
-                <option value="1">ฝ่ายที่ 1: วิศวกรรมและบริหารโครงการ (30%)</option>
-                <option value="2">ฝ่ายที่ 2: ควบคุมคุณภาพงาน QC (30%)</option>
-                <option value="3">ฝ่ายที่ 3: ความปลอดภัย SHE (20%)</option>
-                <option value="4">ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ (20%)</option>
+                <option value="1">ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย (65%)</option>
+                <option value="2">ฝ่ายที่ 2: จัดซื้อจัดจ้าง (10%)</option>
+                <option value="3">ฝ่ายที่ 3: ความปลอดภัย Safety (10%)</option>
+                <option value="4">ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ (15%)</option>
               </select>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
@@ -413,34 +280,9 @@
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label fw-bold">4. อีเมลผู้ประเมิน:</label>
-              <input type="email" id="evaluatorEmail" class="form-control" placeholder="user@company.com" value="evaluator@company.com">
+              <input type="email" id="evaluatorEmail" class="form-control" placeholder="user@company.com">
             </div>
           </div>
-        </div>
-
-        <div class="card card-custom p-4 bg-white mb-4 border-ai shadow-sm">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-bold text-dark mb-0">
-              <i class="fa-solid fa-wand-magic-sparkles text-purple me-2" style="color: #8b5cf6;"></i>
-              Gemini AI Smart Assistant: วิเคราะห์คะแนนจากบันทึกตรวจหน้างาน (Auto-Rubric Scorer)
-            </h6>
-            <span class="badge bg-ai-gradient fs-7"><i class="fa-solid fa-bolt me-1"></i>Gemini 3 Flash</span>
-          </div>
-          <p class="text-muted fs-7 mb-3">
-            พิมพ์หรือวางบันทึกการตรวจหน้างาน (Inspection Notes / Defect Logs) เพื่อให้ Gemini AI ช่วยวิเคราะห์ประเมินระดับคะแนน 1-5 ทั้ง 12 หัวข้อให้อัตโนมัติด้วย AI Structured Outputs
-          </p>
-          <div class="mb-2">
-            <textarea id="aiInspectionNotes" class="form-control fs-7" rows="3" placeholder="ตัวอย่างบันทึก: งานโครงสร้างเสร็จทันตามแผนงาน แต่พบรอยแตกร้าวเล็กน้อยที่ผนังอาคาร พนักงานใส่ PPE ครบถ้วน Safety Talk ทุกเช้า ระบบท่อผ่านการทดสอบ Pressure Test ในรอบแรก งานสายดินถูกต้อง..."></textarea>
-          </div>
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="insertSampleNotes()">
-              <i class="fa-solid fa-lightbulb me-1"></i> ลองใส่ข้อความตัวอย่าง
-            </button>
-            <button type="button" class="btn btn-primary btn-sm bg-ai-gradient border-0 px-3 fw-bold" id="btnRunAiAutoScore" onclick="runAiAutoScorer()">
-              <i class="fa-solid fa-microchip me-1"></i> ให้ AI วิเคราะห์คะแนน 12 หัวข้อ
-            </button>
-          </div>
-          <div id="aiAnalysisFeedback" class="mt-2 text-primary fs-7 fw-bold d-none"></div>
         </div>
 
         <form id="evaluationForm" onsubmit="handleFormSubmit(event)">
@@ -460,7 +302,7 @@
           <div class="d-flex justify-content-end gap-2 mb-5">
             <button type="reset" class="btn btn-light border px-4">ล้างข้อมูล</button>
             <button type="submit" class="btn btn-success fw-bold px-5 py-2" id="btnSubmitForm">
-              <i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมินลง Google Sheet
+              <i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน
             </button>
           </div>
         </form>
@@ -472,7 +314,7 @@
   <div id="printReportArea" class="d-none p-5">
     <div class="text-center mb-4 pb-3 border-bottom border-2">
       <h3 class="fw-bold mb-1">รายงานสรุปผลการประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</h3>
-      <p class="text-muted mb-0">ใบประเมินมาตรฐานวิศวกรรม ความปลอดภัย และการบริหารโครงการ (4 ฝ่าย)</p>
+      <p class="text-muted mb-0">ใบประเมินมาตรฐาน (4 ฝ่าย)</p>
     </div>
 
     <div class="row mb-4 fs-6">
@@ -517,13 +359,13 @@
 
     <div class="row mt-5 pt-4 text-center">
       <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายวิศวกรรม)</small></div>
+        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายวิศวกรรมและความปลอดภัย)</small></div>
       </div>
       <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่าย QC)</small></div>
+        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายจัดซื้อจัดจ้าง)</small></div>
       </div>
       <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่าย SHE)</small></div>
+        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่าย Safety)</small></div>
       </div>
       <div class="col-3">
         <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายบริหารสถานี)</small></div>
@@ -541,142 +383,27 @@
         </div>
         <div class="modal-body p-4">
           <div class="mb-3">
-            <label class="form-label fw-bold">1. Google Sheet ID (สำหรับดึงข้อมูลโครงการ):</label>
-            <input type="text" id="sheetIdInput" class="form-control mb-1" placeholder="1rGvvwW0LKSRpVz8ZyZpiQanQhNJn1zudDW1zXieiPZs" value="1rGvvwW0LKSRpVz8ZyZpiQanQhNJn1zudDW1zXieiPZs">
-            <small class="text-muted fs-8">รหัส Sheet ID จาก URL ของคุณ</small>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">2. Google Apps Script Web App URL (สำหรับบันทึกการประเมิน):</label>
-            <input type="url" id="sheetWebAppUrlInput" class="form-control mb-1" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
-            <div class="form-text text-danger" id="urlValidationMsg"></div>
+            <label class="form-label fw-bold">Google Sheet ID:</label>
+            <input type="text" id="sheetIdInput" class="form-control mb-1" placeholder="ใส่ Sheet ID ของคุณ">
+            <small class="text-muted fs-8">รหัส Sheet ID จาก URL: https://docs.google.com/spreadsheets/d/[SHEET_ID]/edit</small>
           </div>
 
           <div class="alert alert-info fs-7 mb-0">
-            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนเปิดใช้งาน 100%:</h6>
+            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนการตั้งค่า:</h6>
             <ol class="mb-0 ps-3">
-              <li>เปิด Google Sheet ของคุณ &gt; กด <b>Share (แชร์)</b> &gt; เลือก <b>Anyone with the link can view (ทุกคนที่มีลิงก์มีสิทธิ์ดู)</b></li>
-              <li>ไปที่เมนู <b>Extensions &gt; Apps Script</b> วางโค้ด <code>Code.gs</code> กด Deploy เลือก <b>"Who has access: Anyone"</b></li>
-              <li>นำ Web App URL (ลงท้าย <code>/exec</code>) มาวางช่องที่ 2 แล้วกดบันทึก</li>
+              <li>เปิด Google Sheet ของคุณ &gt; กด <b>Share (แชร์)</b> &gt; เลือก <b>Anyone with the link can view</b></li>
+              <li>ตรวจสอบว่า Sheet มี column: ID, BranchName, Model, Contractor, Budget</li>
+              <li>ใส่ Sheet ID ด้านบนแล้วกดบันทึก</li>
             </ol>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
           <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="saveSheetSettings()">
-            <i class="fa-solid fa-plug me-1"></i> บันทึกการเชื่อมต่อ
+            <i class="fa-solid fa-check me-1"></i> บันทึกการเชื่อมต่อ
           </button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- API Key Modal -->
-  <div class="modal fade" id="apiKeyModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-key me-2 text-warning"></i>ตั้งค่า Gemini API Key</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <p class="fs-7 text-muted mb-2">หากต้องการใช้งานระบบฟีเจอร์ AI Smart Assistant กรุณาระบุ Gemini API Key ของคุณ:</p>
-          <input type="password" id="userApiKeyInput" class="form-control mb-2" placeholder="AIzaSy...">
-          <small class="text-muted d-block fs-8">* API Key จะถูกบันทึกไว้ใน Browser ของคุณเท่านั้น ไม่มีการส่งออกภายนอก</small>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ปิด</button>
-          <button type="button" class="btn btn-primary btn-sm" onclick="saveApiKey()">บันทึก Key</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="aiSummaryModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-ai-gradient text-white">
-          <h5 class="modal-title fw-bold">
-            <i class="fa-solid fa-brain me-2"></i>รายงานวิเคราะห์เชิงลึกโดย Gemini AI (Executive Risk & Performance)
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="d-flex align-items-center mb-3">
-            <div class="spinner-border text-primary me-3 d-none" id="aiSummarySpinner" role="status"></div>
-            <div>
-              <h6 class="fw-bold mb-0" id="aiSummaryBranchTitle">กำลังวิเคราะห์ผลงานโครงการ...</h6>
-              <span class="text-muted fs-7">ประมวลผลข้อมูลคะแนนทั้ง 4 ฝ่ายร่วมกับเกณฑ์มาตรฐานวิศวกรรม</span>
-            </div>
-          </div>
-          
-          <div id="aiSummaryContent" class="p-3 bg-light rounded border fs-7" style="min-height: 200px; white-space: pre-line; line-height: 1.7;">
-            คลิกปุ่มเพื่อเริ่มประมวลผลด้วย Gemini AI...
-          </div>
-        </div>
-        <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-          <button type="button" class="btn bg-ai-gradient text-white fw-bold" onclick="generateAiSummaryReport()">
-            <i class="fa-solid fa-arrows-rotate me-1"></i> ประมวลผลใหม่
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="emailModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-warning-subtle">
-          <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-envelope me-2"></i>ส่ง Email ติดตามฝ่ายที่ค้างประเมิน</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <p class="fs-7 text-muted">ระบบจะทำการส่ง Email อัตโนมัติไปยังฝ่ายที่ยังไม่ได้ทำรายการประเมินสำหรับสาขานี้:</p>
-          <div class="p-3 bg-light rounded border mb-3">
-            <div class="fw-bold text-primary mb-1" id="emlBranchTitle">-</div>
-            <div class="fs-7"><b>ฝ่ายที่ค้างประเมิน:</b> <span id="emlPendingDepts" class="text-danger fw-bold">-</span></div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fs-7 fw-bold">ข้อความเพิ่มเติมถึงผู้ประเมิน:</label>
-            <textarea id="emlCustomMsg" class="form-control fs-7" rows="2" placeholder="รบกวนเร่งรัดการประเมินภายในสัปดาห์นี้เพื่อสรุปผลงานก่อสร้าง..."></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
-          <button type="button" class="btn btn-warning btn-sm fw-bold" onclick="sendEmailReminderSubmit()">
-            <i class="fa-solid fa-paper-plane me-1"></i> ยืนยันส่ง Email แจ้งเตือน
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <button class="btn bg-ai-gradient text-white fw-bold ai-chat-toggle-btn px-4 py-2" id="aiChatToggleBtn" onclick="toggleAiChat()">
-    <i class="fa-solid fa-comments me-2"></i>ปรึกษา Gemini AI
-  </button>
-
-  <div class="ai-chat-drawer collapsed" id="aiChatDrawer">
-    <div class="bg-ai-gradient p-3 text-white d-flex justify-content-between align-items-center">
-      <div class="d-flex align-items-center">
-        <i class="fa-solid fa-robot fs-5 me-2"></i>
-        <div>
-          <h6 class="fw-bold mb-0">Gemini Construction Advisor</h6>
-          <span class="fs-8 text-white-50">ผู้ช่วยมาตรฐานก่อสร้างปั๊มน้ำมัน</span>
-        </div>
-      </div>
-      <button class="btn-close btn-close-white btn-sm" onclick="toggleAiChat()"></button>
-    </div>
-    <div class="p-3 flex-grow-1 overflow-auto d-flex flex-column gap-2" id="chatMessageContainer">
-      <div class="chat-bubble-ai fs-7">
-        สวัสดีครับ! ผมคือ Gemini AI ผู้ช่วยด้านมาตรฐานงานก่อสร้างและเกณฑ์การตรวจรับงานสถานีบริการน้ำมัน สอบถามผมเกี่ยวกับเกณฑ์ SHE, ท่อส่งน้ำมัน หรือโครงสร้างได้เลยครับ
-      </div>
-    </div>
-    <div class="p-2 border-top bg-light d-flex gap-2">
-      <input type="text" id="chatInputText" class="form-control form-control-sm" placeholder="ถามเกี่ยวกับเกณฑ์ตรวจรับงาน..." onkeydown="if(event.key==='Enter') sendChatMessage()">
-      <button class="btn btn-primary btn-sm bg-ai-gradient border-0" onclick="sendChatMessage()">
-        <i class="fa-solid fa-paper-plane"></i>
-      </button>
     </div>
   </div>
 
@@ -686,110 +413,134 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const GEMINI_MODEL = "gemini-3-flash-preview";
-    const DEFAULT_SHEET_ID = "1rGvvwW0LKSRpVz8ZyZpiQanQhNJn1zudDW1zXieiPZs";
+    const DEFAULT_SHEET_ID = "";
 
-    // Master Data: 12 Evaluation Topics
+    // 12 Evaluation Criteria - ตรงกับ Excel
     const criteria12 = [
       {
-        id: 1, title: "1. การบริหารระยะเวลาและแผนงานก่อสร้าง", weight: 12,
-        r1: "งานล่าช้ากว่าแผน > 30 วัน ไม่มีแผนแก้ไขที่เป็นรูปธรรม",
-        r2: "งานล่าช้ากว่าแผน 15-30 วัน ส่งแผนแก้ไขแต่ทำไม่ได้ตามที่ส่ง",
-        r3: "งานเสร็จตามแผนหรือล่าช้า < 15 วัน มีการปรับงานตามสถานการณ์",
-        r4: "งานเสร็จตามแผนงานหลัก รายงานความก้าวหน้าตรงเวลาสม่ำเสมอ",
-        r5: "งานเสร็จก่อนกำหนด มีการบริหารแผนงานดีเยี่ยมและเป็นระบบ"
+        id: 1, 
+        title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับวิชาชีพ", 
+        weight: 12,
+        r5: "มีทั้งวิศวกรควบคุมงาน, โฟร์แมนควบคุมงาน และเจ้าหน้าที่ความปลอดภัย ปฏิบัติงานประจำโครงการตลอดระยะเวลา",
+        r4: "มีวิศวกรควบคุมงาน หรือโฟร์แมนควบคุมงานท่านหนึ่งท่านใด และเจ้าหน้าที่ความปลอดภัย ปฏิบัติงานประจำโครงการ",
+        r3: "มีวิศวกรควบคุมงาน และเจ้าหน้าที่ความปลอดภัย แต่มีโฟร์แมนควบคุมงาน ปฏิบัติงานประจำ",
+        r2: "ไม่มีวิศวกรควบคุมงาน และเจ้าหน้าที่ความปลอดภัย มีเพียงโฟร์แมนควบคุมงาน ปฏิบัติงานประจำ",
+        r1: "ไม่มีวิศวกรควบคุมงาน, เจ้าหน้าที่ความปลอดภัย และโฟร์แมนควบคุมงาน"
       },
       {
-        id: 2, title: "2. คุณภาพงานโครงสร้างและอาคารสถานี", weight: 12,
-        r1: "พบ Defect โครงสร้างร้ายแรง รอยแตกร้าวใหญ่ การทรุดตัว ไม่ได้มาตรฐาน",
-        r2: "มี Defect โครงสร้างปานกลาง การเก็บงานผิวและงานฉาบปูนยังไม่เรียบร้อย",
-        r3: "โครงสร้างถูกต้องตามแบบวิศวกรรม มี Defect เล็กน้อยที่แก้ไขได้ง่าย",
-        r4: "งานโครงสร้างประณีตถูกต้องตามข้อกำหนดวิศวกรรมครบถ้วน",
-        r5: "งานโครงสร้างคุณภาพสูงมาก ไม่มี Defect ผ่านการ QC ครั้งเดียว"
+        id: 2, 
+        title: "2. เครื่องมือช่าง เครื่องจักร และอุปกรณ์ที่จำเป็น", 
+        weight: 12,
+        r5: "มีเครื่องมือและอุปกรณ์ครบเพียงพอ พร้อมใช้งาน และมีการตรวจสอบ Checklist อย่างสม่ำเสมอ",
+        r4: "มีเครื่องมือและอุปกรณ์ครบเพียงพอ พร้อมใช้งาน แต่ขาดการตรวจสอบ Checklist อย่างสม่ำเสมอ",
+        r3: "มีเครื่องมือและอุปกรณ์ที่จำเป็นแต่ไม่เพียงพอ แต่มีการตรวจสอบ Checklist อย่างสม่ำเสมอ",
+        r2: "มีเครื่องมือและอุปกรณ์ที่จำเป็นแต่ไม่เพียงพอ ขาดการตรวจสอบ Checklist",
+        r1: "ไม่มีเครื่องมือและอุปกรณ์ที่จำเป็น หรือไม่พร้อมใช้งาน"
       },
       {
-        id: 3, title: "3. งานติดตั้งระบบท่อน้ำมันใต้ดินและถังเก็บน้ำมัน", weight: 10,
-        r1: "ระบบท่อไม่ผ่าน Pressure Test พบจุดรั่วซึม อุปกรณ์ไม่ได้มาตรฐาน",
-        r2: "ติดตั้งผิดสเปกบางจุด ต้องแก้ไขระบบท่อทดสอบ Pressure สองครั้งขึ้นไป",
-        r3: "ติดตั้งถูกต้องตามสเปก ทดสอบผ่านตามมาตรฐานวิศวกรรม",
-        r4: "งานติดตั้งท่อประณีต จัดวางระบบวาล์วและถังน้ำมันเป็นระเบียบชัดเจน",
-        r5: "ติดตั้งดีเยี่ยมตามมาตรฐานสากล Safety สูงสุด ไม่มีข้อบกพร่อง"
+        id: 3, 
+        title: "3. ความพร้อมของผู้ปฏิบัติงาน และ PPE (Personal Protective Equipment)", 
+        weight: 12,
+        r5: "มี PPE ครบถ้วนทั้งพื้นฐานและตามงานความเสี่ยง ผู้ปฏิบัติงานสวมใส่ครบทุกคน ตลอดระยะเวลา",
+        r4: "มี PPE ครบถ้วน ผู้ปฏิบัติงานสวมใส่ไม่ครบทุกคน หรือมีการรายงานตรวจพบ 1-2 ครั้ง",
+        r3: "มี PPE พื้นฐานครบ PPE ตามงานความเสี่ยงไม่ครบ มีการรายงานตรวจพบ 3-4 ครั้ง",
+        r2: "มี PPE พื้นฐานครบ PPE ตามงานความเสี่ยงไม่ครบ มีการรายงานตรวจพบ 5-6 ครั้ง",
+        r1: "ไม่มี PPE พื้นฐาน ผู้ปฏิบัติงานไม่สวมใส่ มีการรายงานตรวจพบมากกว่า 8 ครั้ง"
       },
       {
-        id: 4, title: "4. งานระบบไฟฟ้า ตู้จ่ายน้ำมัน และระบบสายดิน", weight: 10,
-        r1: "ค่าความต้านทานสายดินไม่ผ่านเกณฑ์ สายไฟไม่ร้อยท่อเสี่ยงอัคคีภัย",
-        r2: "ติดตั้งตู้จ่ายน้ำมัน/ตู้คอนโทรลมีข้อบกพร่อง การทำเบอร์สายไฟไม่ครบ",
-        r3: "ระบบไฟฟ้าทำงานได้ปลอดภัย ค่า Grounding ผ่านมาตรฐานกำหนด",
-        r4: "จัดสายไฟในตู้เป็นระเบียบ ติดป้ายเตือนและวงจรชัดเจนสมบูรณ์",
-        r5: "งานระบบไฟฟ้าประณีตเป็นพิเศษ ตรวจสอบระบบผ่านอย่างสมบูรณ์แบบ"
+        id: 4, 
+        title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group", 
+        weight: 12,
+        r5: "ปฏิบัติตรงกับข้อกำหนดทั้งหมดตลอดระยะเวลา ไม่มีการรายงานตรวจพบ",
+        r4: "ปฏิบัติตรงกับข้อกำหนดทั้งหมด มีการรายงานตรวจพบไม่เกิน 2 ครั้ง แก้ไขตามกำหนด",
+        r3: "ปฏิบัติตรงกับข้อกำหนดบางส่วน มีการรายงานตรวจพบไม่เกิน 2 ครั้ง มีการทวงถาม 1 ครั้ง",
+        r2: "ปฏิบัติตรงกับข้อกำหนดบางส่วน มีการรายงานตรวจพบไม่เกิน 3 ครั้ง มีการทวงถาม 2 ครั้ง",
+        r1: "ปฏิบัติไม่ตรงกับข้อกำหนด มีการรายงานตรวจพบหลายครั้ง ไม่มีการตอบกลับรายงาน"
       },
       {
-        id: 5, title: "5. มาตรฐานความปลอดภัย อาชีวอนามัย (SHE Standards)", weight: 10,
-        r1: "เกิดอุบัติเหตุถึงขั้นหยุดงาน (LTI) หรือละเลย PPE สม่ำเสมอ",
-        r2: "พบข้อบกพร่องด้านความปลอดภัยบ่อยครั้ง ไม่มีถังดับเพลิงหน้างาน",
-        r3: "ปฏิบัติตามกฎความปลอดภัยพื้นฐาน มีการสวมใส่ PPE สม่ำเสมอ",
-        r4: "จัด Safety Talk ทุกเช้า หน้างานสะอาด กั้นเขตอันตรายชัดเจน",
-        r5: "สถิติอุบัติเหตุเป็นศูนย์ (Zero Accident) ถือเป็นแบบอย่างด้าน SHE"
+        id: 5, 
+        title: "5. คุณภาพงานก่อสร้างหลังส่งมอบงาน (Defect)", 
+        weight: 12,
+        r5: "ไม่มี Defect ตรวจพบ",
+        r4: "มี Defect ตรวจพบไม่เกิน 30 รายการ",
+        r3: "มี Defect ตรวจพบ 30-50 รายการ",
+        r2: "มี Defect ตรวจพบ 51-70 รายการ",
+        r1: "มี Defect ตรวจพบมากกว่า 70 รายการ"
       },
       {
-        id: 6, title: "6. การควบคุมและบริหารผู้รับเหมาช่วง (Sub-contractor)", weight: 6,
-        r1: "ปล่อยผู้รับเหมาช่วงทำงานโดยไม่มีวิศวกรควบคุม หน้างานสับสน",
-        r2: "ผู้รับเหมาช่วงขาดทักษะ ต้องคอยสั่งการและแก้ไขงานซ้ำซ้อน",
-        r3: "ควบคุมผู้รับเหมาช่วงได้ตามมาตรฐานงานทั่วไป",
-        r4: "วิศวกรประจำหน้างานคอยกำกับดูแล Sub-contractor อย่างใกล้ชิด",
-        r5: "คัดเลือก Sub-contractor มืออาชีพ ทำงานสอดประสานกันอย่างมีประสิทธิภาพ"
+        id: 6, 
+        title: "6. ความถูกต้องตามข้อกำหนด ใช้วัสดุตรงตามข้อกำหนด", 
+        weight: 12,
+        r5: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG อย่างสม่ำเสมอ ก่อสร้างถูกต้องตามหลักวิศวกรรม",
+        r4: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG แต่ไม่ครบรายการบางรายการ",
+        r3: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG แต่ไม่ครบอย่างสม่ำเสมอ",
+        r2: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด แต่ไม่ส่งใบรับรองวัสดุให้ PTG",
+        r1: "ใช้วัสดุตรงตามข้อกำหนดบางส่วน ไม่ส่งใบรับรองวัสดุ"
       },
       {
-        id: 7, title: "7. คุณภาพและการจัดหาวัสดุก่อสร้าง", weight: 8,
-        r1: "นำวัสดุไม่ผ่านการอนุมัติ (Non-approved List) มาใช้อย่างเจตนา",
-        r2: "วัสดุส่งเข้าหน้างานล่าช้า หรือเอกสาร Mill Certificate ไม่ครบ",
-        r3: "ใช้วัสดุตรงตาม Spec และผ่านการอนุมัติก่อนใช้งาน",
-        r4: "จัดหาวัสดุได้ตรงตามแผน ไม่เกิดปัญหาขาดแคลนหน้างาน",
-        r5: "ใช้วัสดุเกรดพรีเมียม จัดเก็บวัสดุหน้างานเรียบร้อยเป็นหมวดหมู่"
+        id: 7, 
+        title: "7. การตรวจสอบแบบก่อสร้าง ก่อนเริ่มงาน", 
+        weight: 12,
+        r5: "ตรวจสอบแบบก่อสร้างที่ได้รับอนุมัติ ก่อนเริ่มงาน ไม่มี/มีข้อขัดแย้งที่ไม่มี",
+        r4: "ไม่ตรวจสอบก่อนเริ่ม แต่ก่อสร้างตรงตามแบบที่ได้รับอนุมัติ ไม่มีปัญหา",
+        r3: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบบางส่วน พบวัสดุไม่ตรง",
+        r2: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบบางส่วน มีปัญหาในการแก้ไข",
+        r1: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบส่วนใหญ่ ต้องทำใหม่"
       },
       {
-        id: 8, title: "8. ความพร้อม ฝีมือ และวินัยของทีมช่างหน้างาน", weight: 6,
-        r1: "ช่างฝีมือไม่เพียงพอ งานล่าช้า ดื่มสุราหรือฝ่าฝืนกฎในพื้นที่",
-        r2: "ฝีมือช่างยังไม่ได้มาตรฐาน ต้องสั่งแก้ไขงานสีหรืองานปูกระเบื้อง",
-        r3: "ช่างมีความพร้อม ปฏิบัติตามระเบียบของสถานีบริการ",
-        r4: "ช่างมีฝีมือประณีต สุภาพ และมีความรับผิดชอบสูง",
-        r5: "ทีมช่างระดับเชี่ยวชาญพิเศษ งานเสร็จเนี๊ยบ ทัศนคติดีเยี่ยม"
+        id: 8, 
+        title: "8. การจัดส่งรายงานความก้าวหน้าตามกำหนดเวลา", 
+        weight: 12,
+        r5: "จัดส่งรายงานตรงตามเวลากำหนด อย่างสม่ำเสมอและถูกต้องทุกครั้ง",
+        r4: "จัดส่งรายงานตรงตามเวลากำหนดอย่างสม่ำเสมอ แต่อาจมีข้อมูลไม่ครบบ้าง",
+        r3: "จัดส่งรายงานตรงตามเวลากำหนด แต่บ้างครั้งต้องติดตาม",
+        r2: "จัดส่งรายงานตรงตามเวลากำหนด แต่บ่อยครั้งต้องติดตาม",
+        r1: "จัดส่งรายงานตรงตามเวลากำหนด แต่ส่วนใหญ่ต้องติดตาม"
       },
       {
-        id: 9, title: "9. การแก้ไขงาน Defect และงานตามข้อสั่งการ", weight: 8,
-        r1: "เพิกเฉยต่อการแก้ไข Defect หรือแก้ไขไม่ถูกต้องซ้ำซาก",
-        r2: "แก้ไข Defect ล่าช้ากว่ากำหนดที่แจ้งไว้ในรายงานการตรวจ",
-        r3: "แก้ไข Defect ได้ครบถ้วนตามรายการที่ระบุภายในเวลา",
-        r4: "ตอบสนองต่อการสั่งการแก้ไขงานอย่างรวดเร็วภายใน 24-48 ชั่วโมง",
-        r5: "ตรวจสอบและป้องกัน Defect ล่วงหน้า ก่อนที่ QC จะตรวจพบ"
+        id: 9, 
+        title: "9. การส่งมอบงาน เทียบกับระยะเวลาตามสัญญา", 
+        weight: 12,
+        r5: "ส่งมอบงานก่อนเวลา มากกว่า 10% ของระยะเวลาสัญญา",
+        r4: "ส่งมอบงานก่อนเวลา 5-9.99% ของระยะเวลาสัญญา",
+        r3: "ส่งมอบงานก่อนเวลา 0-4.99% ของระยะเวลาสัญญา หรือตรงตามเวลา",
+        r2: "ส่งมอบงานล่าช้า 0.1-4.99% ของระยะเวลาสัญญา",
+        r1: "ส่งมอบงานล่าช้า 5-9.99% ของระยะเวลาสัญญา หรือมากกว่า"
       },
       {
-        id: 10, title: "10. การจัดทำเอกสาร As-built Drawings และใบอนุญาต", weight: 6,
-        r1: "ไม่จัดทำ As-built Drawings หรือเอกสารผิดพลาดไม่ตรงกับหน้างานจริง",
-        r2: "ส่งมอบเอกสาร As-built ล่าช้ากว่ากำหนดกระทบต่อการเปิดสถานี",
-        r3: "จัดทำ As-built Drawings ถูกต้องตามการก่อสร้างจริง",
-        r4: "เอกสารรูปเล่มสมบูรณ์ พร้อมไฟล์ CAD และเอกสารรับรองวิศวกร",
-        r5: "จัดทำเอกสารอย่างเป็นมืออาชีพ รวดเร็ว ครบถ้วนพร้อมใช้งานทันที"
+        id: 10, 
+        title: "10. การส่งแผนงานและเอกสารประกอบหลังรับมอบพื้นที่", 
+        weight: 12,
+        r5: "ส่งแผนงาน KOM เร็วกว่า 4 วัน หลังรับมอบพื้นที่",
+        r4: "ส่งแผนงาน KOM ภายใน 4-7 วัน หลังรับมอบพื้นที่",
+        r3: "ส่งแผนงาน KOM ภายใน 8-10 วัน หลังรับมอบพื้นที่",
+        r2: "ส่งแผนงาน KOM ล่าช้า ภายใน 11-13 วัน หลังรับมอบพื้นที่",
+        r1: "ส่งแผนงาน KOM ล่าช้า ภายใน 14-17 วัน หรือล่าช้ากว่านั้น"
       },
       {
-        id: 11, title: "11. การบริหารผลกระทบและชุมชนสัมพันธ์", weight: 6,
-        r1: "ได้รับการร้องเรียนเรื่องเสียง/ฝุ่นละออง หรือสร้างความเดือดร้อนรุนแรง",
-        r2: "มาตรการลดฝุ่นและเสียงยังไม่ดีพอ ต้องให้เตือนก่อนแก้ไข",
-        r3: "ดูแลความสะอาดรอบพื้นที่ก่อสร้าง มีการฉีดน้ำลดฝุ่นละออง",
-        r4: "ประสานงานกับชุมชนรอบข้างได้ดี ไม่มีข้อร้องเรียนตลอดโครงการ",
-        r5: "ได้รับการชื่นชมจากชุมชนรอบข้าง มีมาตรการ CSR และดูแลสิ่งแวดล้อม"
+        id: 11, 
+        title: "11. การแก้ไข Defect ตามระยะเวลาที่กำหนด", 
+        weight: 12,
+        r5: "แก้ไข Defect เสร็จก่อนสิ้นสุดระยะเวลาสัญญา 15 วัน",
+        r4: "แก้ไข Defect เสร็จก่อนสิ้นสุดระยะเวลาสัญญา 1-14 วัน",
+        r3: "แก้ไข Defect เสร็จพอดีกับสิ้นสุดระยะเวลาสัญญา",
+        r2: "แก้ไข Defect เสร็จหลังสิ้นสุดระยะเวลาสัญญา 1-15 วัน",
+        r1: "แก้ไข Defect เสร็จหลังสิ้นสุดระยะเวลาสัญญา 16 วัน หรือมากกว่า"
       },
       {
-        id: 12, title: "12. การบริหารงบประมาณและการเบิกจ่ายตามงวดงาน", weight: 6,
-        r1: "ส่งเอกสารเบิกงวดงานไม่ถูกต้อง ขอเพิ่มงบประมาณโดยไม่มีเหตุผล",
-        r2: "ปริมาณงานจริงไม่สอดคล้องกับ % ขอเบิกงวดงาน",
-        r3: "เบิกจ่ายตรงตามงวดงาน และเอกสารสอดคล้องกับเนื้องานจริง",
-        r4: "จัดทำบัญชีปริมาณงาน (BOQ) และเอกสารเบิกเงินเรียบร้อยถูกต้อง",
-        r5: "บริหารงบประมาณได้มีประสิทธิภาพสูงสุด ไม่มีปัญหาข้อโต้แย้งงบ"
+        id: 12, 
+        title: "12. ความร่วมมือและการดำเนินการของผู้รับเหมา", 
+        weight: 12,
+        r5: "ให้ความร่วมมือ อยู่ในระดับที่ดีเยี่ยม ร่วมประชุมติดตามความคืบหน้า",
+        r4: "ให้ความร่วมมือ อยู่ในระดับที่ประทับใจ ร่วมประชุมติดตามสม่ำเสมอ",
+        r3: "ให้ความร่วมมือ อยู่ในระดับที่พึงพอใจ ร่วมประชุมติดตามเป็นบางครั้ง",
+        r2: "ให้ความร่วมมือ อยู่ในระดับที่คาดหวัง แต่มีบางรายการควรปรับปรุง",
+        r1: "ไม่ค่อยให้ความร่วมมือ อยู่ในระดับที่ไม่พึงพอใจ ควรปรับปรุง"
       }
     ];
 
-    const deptWeightRatios = { 1: 0.30, 2: 0.30, 3: 0.20, 4: 0.20 };
+    // Department Weights: 65%, 10%, 10%, 15%
+    const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
 
     // Default Master Projects
     let projectsData = [
@@ -799,12 +550,7 @@
         model: "Model A",
         contractor: "บริษัท ไทยคอนสตรัคชั่น เอ็นจิเนียริ่ง จำกัด",
         budget: 4.8,
-        evaluations: {
-          1: { scores: {1:5, 2:4, 3:5, 4:4, 5:4, 6:4, 7:5, 8:4, 9:5, 10:4, 11:4, 12:5}, totalDeptScore: 91.2, evaluatorName: "สมชาย ใจดี", evaluatorEmail: "somchai@company.com" },
-          2: { scores: {1:4, 2:4, 3:4, 4:5, 5:4, 6:4, 7:4, 8:4, 9:4, 10:4, 11:4, 12:4}, totalDeptScore: 82.5, evaluatorName: "สมศักดิ์ ตรวจงาน", evaluatorEmail: "somsak@company.com" },
-          3: { scores: {1:4, 2:5, 3:4, 4:4, 5:5, 6:4, 7:4, 8:4, 9:4, 10:4, 11:5, 12:4}, totalDeptScore: 88.0, evaluatorName: "วิชัย ปลอดภัย", evaluatorEmail: "wichai@company.com" },
-          4: { scores: {1:5, 2:4, 3:4, 4:4, 5:4, 6:4, 7:4, 8:5, 9:4, 10:5, 11:4, 12:4}, totalDeptScore: 86.0, evaluatorName: "อำนาจ บริหาร", evaluatorEmail: "amnat@company.com" }
-        }
+        evaluations: {}
       },
       {
         id: "PRJ-2026-002",
@@ -812,10 +558,7 @@
         model: "Model B",
         contractor: "บริษัท เอสซีจี ดีเวลลอปเมนท์ จำกัด",
         budget: 3.2,
-        evaluations: {
-          1: { scores: {1:3, 2:3, 3:4, 4:3, 5:4, 6:3, 7:3, 8:3, 9:4, 10:3, 11:3, 12:3}, totalDeptScore: 68.0, evaluatorName: "สมชาย ใจดี", evaluatorEmail: "somchai@company.com" },
-          2: { scores: {1:3, 2:3, 3:3, 4:3, 5:3, 6:3, 7:3, 8:3, 9:3, 10:3, 11:3, 12:3}, totalDeptScore: 60.0, evaluatorName: "สมศักดิ์ ตรวจงาน", evaluatorEmail: "somsak@company.com" }
-        }
+        evaluations: {}
       },
       {
         id: "PRJ-2026-003",
@@ -828,19 +571,12 @@
     ];
 
     let currentSelectedRatings = {};
-    let activeReminderProjectId = "";
-    let activeAiSummaryProjectId = "";
 
     window.onload = function() {
-      const savedKey = localStorage.getItem("GEMINI_API_KEY");
-      if (savedKey) document.getElementById("userApiKeyInput").value = savedKey;
-
       const savedSheetId = localStorage.getItem("SHEET_ID") || DEFAULT_SHEET_ID;
-      document.getElementById("sheetIdInput").value = savedSheetId;
-
-      const savedWebAppUrl = localStorage.getItem("SHEET_WEB_APP_URL") || "";
-      if (savedWebAppUrl) document.getElementById("sheetWebAppUrlInput").value = savedWebAppUrl;
-
+      if (savedSheetId) {
+        document.getElementById("sheetIdInput").value = savedSheetId;
+      }
       fetchDataFromGoogleSheet();
     };
 
@@ -848,56 +584,40 @@
       const badge = document.getElementById("dbStatusBadge");
       if (isConnected) {
         badge.className = "badge bg-success px-3 py-2 border text-white";
-        badge.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${text || "Google Sheet Live Data"}`;
+        badge.innerHTML = `<i class="fa-solid fa-database me-1"></i> ${text || "Connected"}`;
       } else {
         badge.className = "badge bg-warning text-dark px-3 py-2 border";
-        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${text || "Local Demo Data"}`;
+        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${text || "Demo Mode"}`;
       }
     }
 
     function saveSheetSettings() {
-      const sheetId = document.getElementById("sheetIdInput").value.trim() || DEFAULT_SHEET_ID;
-      const webAppUrl = document.getElementById("sheetWebAppUrlInput").value.trim();
-
-      localStorage.setItem("SHEET_ID", sheetId);
-      if (webAppUrl) localStorage.setItem("SHEET_WEB_APP_URL", webAppUrl);
-      else localStorage.removeItem("SHEET_WEB_APP_URL");
-
-      showNotification("บันทึกการตั้งค่าแล้ว กำลังโหลดข้อมูล...", "info");
-      fetchDataFromGoogleSheet(true);
-    }
-
-    async function fetchDataFromGoogleSheet(showModalSuccess = false) {
-      const sheetId = localStorage.getItem("SHEET_ID") || DEFAULT_SHEET_ID;
-      const webAppUrl = localStorage.getItem("SHEET_WEB_APP_URL");
-
-      // 1. Try Apps Script Web App first if configured
-      if (webAppUrl) {
-        try {
-          const res = await fetch(webAppUrl, { redirect: 'follow' });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.status === 'success' && Array.isArray(data.projects)) {
-              projectsData = data.projects;
-              updateDbStatusBadge(true, "Google Sheet Web App Connected");
-              renderDashboardTable();
-              populateProjectSelectOptions();
-              renderRubricCards();
-              showNotification(`โหลดข้อมูลสำเร็จ! พบ ${projectsData.length} โครงการ`, "success");
-              if (showModalSuccess) {
-                const modalEl = document.getElementById('sheetApiModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-              }
-              return;
-            }
-          }
-        } catch(err) {
-          console.warn("Apps Script Web App fetch failed, falling back to direct GViz API:", err);
-        }
+      const sheetId = document.getElementById("sheetIdInput").value.trim();
+      if (!sheetId) {
+        showNotification("กรุณาใส่ Sheet ID", "warning");
+        return;
       }
 
-      // 2. Direct GViz Public Sheet Fetching Fallback
+      localStorage.setItem("SHEET_ID", sheetId);
+      showNotification("บันทึกการตั้งค่าแล้ว กำลังโหลดข้อมูล...", "info");
+      fetchDataFromGoogleSheet();
+      
+      const modalEl = document.getElementById('sheetApiModal');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+    }
+
+    async function fetchDataFromGoogleSheet() {
+      const sheetId = localStorage.getItem("SHEET_ID");
+
+      if (!sheetId) {
+        updateDbStatusBadge(false, "Demo Data");
+        renderDashboardTable();
+        populateProjectSelectOptions();
+        renderRubricCards();
+        return;
+      }
+
       try {
         const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&headers=1&sheet=Projects`;
         const response = await fetch(gvizUrl);
@@ -913,105 +633,44 @@
             const fetchedProjects = [];
             rows.forEach((r, idx) => {
               const c = r.c || [];
+              // Columns: 0=ID, 1=BranchName, 2=Model, 3=Contractor, 4=Budget
               const pId = c[0]?.v ? String(c[0].v).trim() : `PRJ-${idx+1}`;
               const branchName = c[1]?.v ? String(c[1].v).trim() : '';
-
-              const lowerId = pId.toLowerCase();
-              const lowerName = branchName.toLowerCase();
-
-              // Filter out column header row if present
-              if (
-                lowerId.includes('project_id') || 
-                lowerId === 'id' || 
-                lowerName.includes('project_name') || 
-                lowerName.includes('ชื่อสถานี') ||
-                lowerName === 'name' ||
-                lowerName === 'branchname'
-              ) {
-                return; // skip header row
-              }
+              const model = c[2]?.v ? String(c[2].v) : 'Model A';
+              const contractor = c[3]?.v ? String(c[3].v).trim() : '';
+              const budget = parseFloat(c[4]?.v) || 0;
 
               if (branchName) {
                 fetchedProjects.push({
                   id: pId,
                   branchName: branchName,
-                  model: c[2]?.v ? String(c[2].v) : 'Model A',
-                  contractor: c[3]?.v ? String(c[3].v) : '',
-                  budget: parseFloat(c[4]?.v) || 0,
+                  model: model,
+                  contractor: contractor,
+                  budget: budget,
                   evaluations: {}
                 });
               }
             });
 
             if (fetchedProjects.length > 0) {
-              // Merge with existing evaluations if any
-              fetchedProjects.forEach(fp => {
-                const existing = projectsData.find(p => p.id === fp.id);
-                if (existing && existing.evaluations) fp.evaluations = existing.evaluations;
-              });
-
               projectsData = fetchedProjects;
-              updateDbStatusBadge(true, "Google Sheet Live Data (GViz)");
+              updateDbStatusBadge(true, "Google Sheet Connected");
               renderDashboardTable();
               populateProjectSelectOptions();
               renderRubricCards();
-
-              showNotification(`โหลดข้อมูลโครงการ ${projectsData.length} รายการจาก Google Sheet สำเร็จ!`, "success");
-              if (showModalSuccess) {
-                const modalEl = document.getElementById('sheetApiModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-              }
+              showNotification(`โหลดข้อมูล ${projectsData.length} โครงการจาก Google Sheet สำเร็จ!`, "success");
               return;
             }
           }
         }
       } catch (err) {
-        console.warn("Direct GViz fetch failed:", err);
+        console.warn("Fetch error:", err);
       }
 
-      // 3. Render Fallback UI if both fail
-      updateDbStatusBadge(false, "Local Demo Data");
+      updateDbStatusBadge(false, "Demo Data");
       renderDashboardTable();
       populateProjectSelectOptions();
       renderRubricCards();
-    }
-
-    function saveApiKey() {
-      const key = document.getElementById("userApiKeyInput").value.trim();
-      localStorage.setItem("GEMINI_API_KEY", key);
-      showNotification("บันทึก Gemini API Key เรียบร้อยแล้ว", "success");
-      const modalEl = document.getElementById('apiKeyModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if(modal) modal.hide();
-    }
-
-    async function callGeminiApi(payload) {
-      const apiKey = localStorage.getItem("GEMINI_API_KEY") || "";
-      if (!apiKey) {
-        throw new Error("กรุณาระบุ Gemini API Key ก่อนใช้งานฟีเจอร์ AI (คลิกปุ่ม 'Gemini API Key' ด้านบน)");
-      }
-
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-      
-      let delay = 1000;
-      for (let attempt = 0; attempt < 3; attempt++) {
-        try {
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          if (response.ok) return await response.json();
-          const errData = await response.json();
-          if (errData.error?.message) throw new Error(errData.error.message);
-        } catch (err) {
-          if (attempt === 2) throw err;
-        }
-        await new Promise(res => setTimeout(res, delay));
-        delay *= 2;
-      }
-      throw new Error("ไม่สามารถเชื่อมต่อกับ Gemini API ได้");
     }
 
     function showNotification(message, type = 'info') {
@@ -1123,16 +782,10 @@
               <button class="btn btn-outline-primary" onclick="openEvalTabForProject('${prj.id}')" title="ทำแบบประเมิน">
                 <i class="fa-solid fa-pen"></i>
               </button>
-              <button class="btn btn-outline-purple text-purple border-ai" style="color: #7c3aed;" onclick="openAiSummaryModal('${prj.id}')" title="วิเคราะห์ด้วย AI">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> AI
-              </button>
               ${scoreInfo.completed ? 
                 `<button class="btn btn-success fw-bold" onclick="printReportForProject('${prj.id}')" title="พิมพ์รายงาน">
                   <i class="fa-solid fa-print"></i>
-                 </button>` : 
-                `<button class="btn btn-outline-warning text-dark" onclick="openEmailReminderModal('${prj.id}')" title="แจ้งเตือนค้างประเมิน">
-                  <i class="fa-solid fa-envelope"></i>
-                 </button>`
+                 </button>` : ''
               }
             </div>
           </td>
@@ -1143,114 +796,6 @@
       document.getElementById("stat-total").innerText = countTotal;
       document.getElementById("stat-completed").innerText = countCompleted;
       document.getElementById("stat-pending").innerText = countPending;
-    }
-
-    function renderContractorReport() {
-      const tbody = document.getElementById("contractorTableBody");
-      tbody.innerHTML = "";
-
-      const contractorMap = {};
-
-      projectsData.forEach(prj => {
-        if (!contractorMap[prj.contractor]) {
-          contractorMap[prj.contractor] = { name: prj.contractor, totalPrj: 0, completedPrj: 0, sumScore: 0 };
-        }
-        
-        contractorMap[prj.contractor].totalPrj++;
-        const scoreInfo = calculateProjectScore(prj);
-        if (scoreInfo.completed) {
-          contractorMap[prj.contractor].completedPrj++;
-          contractorMap[prj.contractor].sumScore += parseFloat(scoreInfo.score);
-        }
-      });
-
-      Object.values(contractorMap).forEach(c => {
-        const avgScore = c.completedPrj > 0 ? (c.sumScore / c.completedPrj).toFixed(2) : null;
-        const gradeObj = avgScore ? getGrade(avgScore) : { label: "-", bg: "bg-secondary" };
-
-        let statusBadge = `<span class="badge bg-secondary">รอสรุปผล</span>`;
-        if (avgScore) {
-          if (parseFloat(avgScore) >= 75) {
-            statusBadge = `<span class="badge bg-success-subtle text-success border border-success"><i class="fa-solid fa-circle-check me-1"></i>ผ่านเกณฑ์ / มีสิทธิ์ประมูล</span>`;
-          } else if (parseFloat(avgScore) >= 65) {
-            statusBadge = `<span class="badge bg-warning-subtle text-dark border border-warning"><i class="fa-solid fa-triangle-exclamation me-1"></i>ภาคทัณฑ์ / ต้องปรับปรุง</span>`;
-          } else {
-            statusBadge = `<span class="badge bg-danger-subtle text-danger border border-danger"><i class="fa-solid fa-ban me-1"></i>งดรับประมูลงานถัดไป</span>`;
-          }
-        }
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="fw-bold">${c.name}</td>
-          <td class="text-center">${c.totalPrj} โครงการ</td>
-          <td class="text-center">${c.completedPrj} โครงการ</td>
-          <td class="text-center fw-bold text-primary">${avgScore ? avgScore + " %" : "-"}</td>
-          <td class="text-center">${avgScore ? `<span class="badge ${gradeObj.bg}">${gradeObj.label}</span>` : "-"}</td>
-          <td class="text-center">${statusBadge}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderGradeReport() {
-      const cardsContainer = document.getElementById("gradeCardsContainer");
-      const tbody = document.getElementById("gradeTableBody");
-
-      const gradesCount = {
-        A: { title: "Grade A (ดีมาก)", score: ">= 85%", count: 0, bg: "bg-success", text: "text-success", projects: [] },
-        B: { title: "Grade B (ดี)", score: "75% - 84.99%", count: 0, bg: "bg-primary", text: "text-primary", projects: [] },
-        C: { title: "Grade C (พอใช้)", score: "65% - 74.99%", count: 0, bg: "bg-warning", text: "text-warning", projects: [] },
-        D: { title: "Grade D (ต้องปรับปรุง)", score: "< 65%", count: 0, bg: "bg-danger", text: "text-danger", projects: [] }
-      };
-
-      let completedCount = 0;
-
-      projectsData.forEach(prj => {
-        const scoreInfo = calculateProjectScore(prj);
-        if (scoreInfo.completed) {
-          completedCount++;
-          const score = parseFloat(scoreInfo.score);
-          if (score >= 85) { gradesCount.A.count++; gradesCount.A.projects.push(prj); }
-          else if (score >= 75) { gradesCount.B.count++; gradesCount.B.projects.push(prj); }
-          else if (score >= 65) { gradesCount.C.count++; gradesCount.C.projects.push(prj); }
-          else { gradesCount.D.count++; gradesCount.D.projects.push(prj); }
-        }
-      });
-
-      cardsContainer.innerHTML = "";
-      Object.keys(gradesCount).forEach(k => {
-        const g = gradesCount[k];
-        const pct = completedCount > 0 ? ((g.count / completedCount) * 100).toFixed(0) : 0;
-
-        cardsContainer.innerHTML += `
-          <div class="col-12 col-md-3">
-            <div class="card card-custom p-3 bg-white border-top border-4 ${g.bg}">
-              <div class="text-muted fs-7 fw-bold">${g.title}</div>
-              <div class="d-flex justify-content-between align-items-baseline mt-2">
-                <div class="fs-2 fw-bold ${g.text}">${g.count} <small class="fs-7 text-muted">สาขา</small></div>
-                <div class="badge bg-light text-dark border">${pct}%</div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      tbody.innerHTML = "";
-      Object.keys(gradesCount).forEach(k => {
-        const g = gradesCount[k];
-        const prjListHtml = g.projects.length > 0 
-          ? g.projects.map(p => `<span class="badge bg-light text-dark border me-1 mb-1"><i class="fa-solid fa-gas-pump text-secondary me-1"></i>${p.branchName} (${calculateProjectScore(p).score}%)</span>`).join(" ")
-          : `<span class="text-muted fs-7">ไม่มีรายการ</span>`;
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="fw-bold"><span class="badge ${g.bg} fs-7">${g.title}</span></td>
-          <td>${g.score}</td>
-          <td class="fw-bold text-center">${g.count}</td>
-          <td>${prjListHtml}</td>
-        `;
-        tbody.appendChild(tr);
-      });
     }
 
     function openEvalTabForProject(projectId) {
@@ -1294,7 +839,7 @@
         card.className = `card card-custom rubric-card p-3 ${selectedVal > 0 ? 'selected' : ''}`;
         
         let optionsHtml = "";
-        for (let lvl = 1; lvl <= 5; lvl++) {
+        for (let lvl = 5; lvl >= 1; lvl--) {
           const rubricText = c[`r${lvl}`];
           const isActive = selectedVal === lvl;
           optionsHtml += `
@@ -1351,18 +896,18 @@
       const comments = document.getElementById("evalComments").value.trim();
 
       if (!prjId) {
-        showNotification("กรุณาเลือกสาขาที่ต้องการประเมินก่อนบันทึก", "warning");
+        showNotification("กรุณาเลือกสาขาที่ต้องการประเมิน", "warning");
         return;
       }
 
       if (!evalName) {
-        showNotification("กรุณาระบุชื่อ-นามสกุล ผู้ประเมิน", "warning");
+        showNotification("กรุณาระบุชื่อผู้ประเมิน", "warning");
         return;
       }
 
       for (let i = 1; i <= 12; i++) {
         if (!currentSelectedRatings[i]) {
-          showNotification(`กรุณาเลือกเกณฑ์การประเมินให้ครบทั้ง 12 หัวข้อ (ยังไม่ได้เลือกหัวข้อที่ ${i})`, "warning");
+          showNotification(`กรุณาเลือกเกณฑ์การประเมินให้ครบทั้ง 12 หัวข้อ`, "warning");
           return;
         }
       }
@@ -1385,233 +930,18 @@
 
       const btnSubmit = document.getElementById("btnSubmitForm");
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></i>กำลังบันทึกข้อมูล...`;
+      btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>กำลังบันทึกข้อมูล...`;
 
-      const webAppUrl = localStorage.getItem("SHEET_WEB_APP_URL");
-      if (webAppUrl) {
-        try {
-          const payload = {
-            projectId: prjId,
-            deptId: parseInt(deptId, 10),
-            evaluatorName: evalName,
-            evaluatorEmail: evalEmail,
-            totalDeptScore: deptScore,
-            comments: comments,
-            scores: currentSelectedRatings
-          };
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-          // Use mode: 'no-cors' to prevent CORS errors when posting to Apps Script
-          await fetch(webAppUrl, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify(payload)
-          });
-          
-          showNotification("ส่งผลการประเมินไปยัง Google Sheet เรียบร้อยแล้ว!", "success");
-        } catch (err) {
-          showNotification("บันทึกแบบ Local สำเร็จแล้ว", "info");
-        }
-      } else {
-        showNotification("บันทึกผลการประเมินสำเร็จ (Local Session)!", "success");
-      }
+      showNotification("บันทึกผลการประเมินสำเร็จ!", "success");
 
       btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมินลง Google Sheet`;
+      btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
 
       renderDashboardTable();
       const tabTrigger = new bootstrap.Tab(document.getElementById('dashboard-tab'));
       tabTrigger.show();
-    }
-
-    function insertSampleNotes() {
-      document.getElementById("aiInspectionNotes").value = "การก่อสร้างสถานีเดินหน้าได้เร็วตามแผน คุณภาพงานโครงสร้างดีและระบบท่อส่งน้ำมันใต้ดินติดตั้งเรียบร้อยผ่าน Pressure test ในรอบแรกโดยไม่มีจุดรั่วซึม ค่า Grounding สายดินผ่านเกณฑ์ ทีมงานใส่ PPE ครบถ้วน Safety Talk ทุกเช้า แต่พบเศษขยะในบริเวณถังดักไขมัน และเอกสาร As-built ส่งมอบได้ครบถ้วน";
-      showNotification("ใส่ข้อความบันทึกตัวอย่างแล้ว", "info");
-    }
-
-    async function runAiAutoScorer() {
-      const notes = document.getElementById("aiInspectionNotes").value.trim();
-      if (!notes) {
-        showNotification("กรุณากรอกหรือวางบันทึกการตรวจหน้างานก่อนให้ AI วิเคราะห์", "warning");
-        return;
-      }
-
-      const btn = document.getElementById("btnRunAiAutoScore");
-      const feedback = document.getElementById("aiAnalysisFeedback");
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></i> กำลังวิเคราะห์...`;
-      feedback.classList.remove("d-none");
-      feedback.innerText = "Gemini AI กำลังประมวลผลข้อความและจับคู่เกณฑ์คะแนน 12 หัวข้อ...";
-
-      const promptText = `วิเคราะห์บันทึกการตรวจหน้างานก่อสร้างสถานีบริการน้ำมันต่อไปนี้ และประเมินระดับคะแนน (1 ถึง 5) สำหรับเกณฑ์ทั้ง 12 หัวข้อ:
-บันทึกหน้างาน: "${notes}"`;
-
-      const payload = {
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "ARRAY",
-            items: {
-              type: "OBJECT",
-              properties: {
-                "id": { "type": "INTEGER" },
-                "score": { "type": "INTEGER" },
-                "reasoning": { "type": "STRING" }
-              },
-              required: ["id", "score", "reasoning"]
-            }
-          }
-        },
-        systemInstruction: {
-          parts: [{ text: "ประเมินคะแนน 1 ถึง 5 ของทั้ง 12 หัวข้อตามข้อเท็จจริง หากไม่มีระบุให้ถือว่าได้มาตรฐานระดับ 3" }]
-        }
-      };
-
-      try {
-        const result = await callGeminiApi(payload);
-        const candidate = result.candidates?.[0];
-        if (candidate && candidate.content?.parts?.[0]?.text) {
-          const parsedRatings = JSON.parse(candidate.content.parts[0].text);
-          parsedRatings.forEach(item => {
-            if (item.id >= 1 && item.id <= 12 && item.score >= 1 && item.score <= 5) {
-              currentSelectedRatings[item.id] = item.score;
-            }
-          });
-          renderRubricCards();
-          feedback.innerHTML = `<i class="fa-solid fa-circle-check text-success me-1"></i> Gemini AI ประเมินและเลือกคะแนน 12 หัวข้อสำเร็จแล้ว!`;
-          showNotification("AI วิเคราะห์คะแนนครบ 12 หัวข้อเรียบร้อยแล้ว", "success");
-        } else {
-          throw new Error("รูปแบบคำตอบไม่ถูกต้อง");
-        }
-      } catch (err) {
-        showNotification("การใช้งาน AI ขัดข้อง: " + err.message, "danger");
-        feedback.classList.add("d-none");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-microchip me-1"></i> ให้ AI วิเคราะห์คะแนน 12 หัวข้อ`;
-      }
-    }
-
-    function openAiSummaryModal(projectId) {
-      activeAiSummaryProjectId = projectId;
-      const modal = new bootstrap.Modal(document.getElementById('aiSummaryModal'));
-      modal.show();
-      generateAiSummaryReport();
-    }
-
-    async function generateAiSummaryReport() {
-      const prj = projectsData.find(p => p.id === activeAiSummaryProjectId);
-      if (!prj) return;
-
-      document.getElementById("aiSummaryBranchTitle").innerText = `${prj.branchName} (${prj.model}) - ${prj.contractor}`;
-      const container = document.getElementById("aiSummaryContent");
-      const spinner = document.getElementById("aiSummarySpinner");
-
-      spinner.classList.remove("d-none");
-      container.innerText = "Gemini AI กำลังรวบรวมข้อมูลคะแนนและสังเคราะห์รายงานสรุปผู้บริหาร...";
-
-      const scoreInfo = calculateProjectScore(prj);
-      const grade = getGrade(scoreInfo.score);
-
-      const promptText = `เขียนรายงานสรุปผู้บริหารสำหรับการประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน:
-โครงการ: ${prj.branchName} (${prj.model})
-ผู้รับเหมา: ${prj.contractor}
-มูลค่า: ${prj.budget} ล้านบาท
-คะแนนรวม: ${scoreInfo.score}% (${grade.label})
-การประเมิน: เสร็จแล้ว ${scoreInfo.count}/4 ฝ่าย
-
-หัวข้อที่ต้องสรุป:
-1. ภาพรวมประสิทธิภาพการทำงาน
-2. จุดแข็งเด่นชัด
-3. จุดความเสี่ยงหรือข้อควรระวัง (Safety & Engineering)
-4. ข้อเสนอแนะสำหรับสิทธิ์ประมูลงานในอนาคต`;
-
-      const payload = {
-        contents: [{ parts: [{ text: promptText }] }],
-        systemInstruction: {
-          parts: [{ text: "สรุปอย่างมืออาชีพ กระชับ เป็นข้อๆ อ่านง่าย" }]
-        }
-      };
-
-      try {
-        const result = await callGeminiApi(payload);
-        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-        container.innerText = text || "ไม่สามารถสร้างรายงานได้";
-      } catch (err) {
-        container.innerText = "เกิดข้อผิดพลาดในการเรียกใช้ AI: " + err.message;
-      } finally {
-        spinner.classList.add("d-none");
-      }
-    }
-
-    function toggleAiChat() {
-      document.getElementById("aiChatDrawer").classList.toggle("collapsed");
-    }
-
-    async function sendChatMessage() {
-      const input = document.getElementById("chatInputText");
-      const text = input.value.trim();
-      if (!text) return;
-
-      const container = document.getElementById("chatMessageContainer");
-
-      const userBubble = document.createElement("div");
-      userBubble.className = "chat-bubble-user fs-7 mb-2";
-      userBubble.innerText = text;
-      container.appendChild(userBubble);
-
-      input.value = "";
-      container.scrollTop = container.scrollHeight;
-
-      const aiBubble = document.createElement("div");
-      aiBubble.className = "chat-bubble-ai fs-7 mb-2";
-      aiBubble.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></i> กำลังคิด...`;
-      container.appendChild(aiBubble);
-      container.scrollTop = container.scrollHeight;
-
-      const payload = {
-        contents: [{ parts: [{ text: text }] }],
-        systemInstruction: {
-          parts: [{ text: "คุณคือผู้เชี่ยวชาญด้านมาตรฐานงานก่อสร้างสถานีบริการน้ำมัน ตอบสั้น กระชับ แม่นยำ" }]
-        }
-      };
-
-      try {
-        const result = await callGeminiApi(payload);
-        aiBubble.innerText = result.candidates?.[0]?.content?.parts?.[0]?.text || "ขออภัย ไม่พบคำตอบ";
-      } catch (err) {
-        aiBubble.innerText = "เกิดข้อผิดพลาดในการใช้ AI: " + err.message;
-      } finally {
-        container.scrollTop = container.scrollHeight;
-      }
-    }
-
-    function openEmailReminderModal(projectId) {
-      activeReminderProjectId = projectId;
-      const prj = projectsData.find(p => p.id === projectId);
-      if (!prj) return;
-
-      document.getElementById("emlBranchTitle").innerText = `${prj.branchName} (${prj.id})`;
-      
-      const deptNames = { 1: "ฝ่ายวิศวกรรม", 2: "ฝ่าย QC", 3: "ฝ่าย SHE", 4: "ฝ่ายบริหารสถานี" };
-      let pendingList = [];
-      for (let d = 1; d <= 4; d++) {
-        if (!prj.evaluations || !prj.evaluations[d]) {
-          pendingList.push(deptNames[d]);
-        }
-      }
-
-      document.getElementById("emlPendingDepts").innerText = pendingList.join(", ");
-      const modal = new bootstrap.Modal(document.getElementById('emailModal'));
-      modal.show();
-    }
-
-    function sendEmailReminderSubmit() {
-      showNotification("ส่ง Email แจ้งเตือนไปยังฝ่ายที่ค้างประเมินเรียบร้อยแล้ว", "success");
-      const modalEl = document.getElementById('emailModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
     }
 
     function printReportForProject(projectId) {
@@ -1620,7 +950,7 @@
 
       const scoreInfo = calculateProjectScore(prj);
       if (!scoreInfo.completed) {
-        showNotification("โครงการนี้ยังประเมินไม่ครบทั้ง 4 ฝ่าย ไม่สามารถออกรายงานได้", "warning");
+        showNotification("โครงการนี้ยังประเมินไม่ครบทั้ง 4 ฝ่าย", "warning");
         return;
       }
 
@@ -1637,10 +967,10 @@
       document.getElementById("prtGrade").innerText = gradeObj.label;
 
       const deptNames = {
-        1: { name: "ฝ่ายที่ 1: วิศวกรรมและบริหารโครงการ", weight: "30%" },
-        2: { name: "ฝ่ายที่ 2: ควบคุมคุณภาพงานก่อสร้าง (QC)", weight: "30%" },
-        3: { name: "ฝ่ายที่ 3: ความปลอดภัยและสิ่งแวดล้อม (SHE)", weight: "20%" },
-        4: { name: "ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ", weight: "20%" }
+        1: { name: "ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย", weight: "65%" },
+        2: { name: "ฝ่ายที่ 2: จัดซื้อจัดจ้าง", weight: "10%" },
+        3: { name: "ฝ่ายที่ 3: ความปลอดภัย Safety", weight: "10%" },
+        4: { name: "ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ", weight: "15%" }
       };
 
       const tbody = document.getElementById("prtDeptTableBody");
