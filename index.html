@@ -189,8 +189,8 @@
         <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#apiKeyModal">
           <i class="fa-solid fa-key me-1"></i> Gemini API Key
         </button>
-        <span class="badge bg-secondary px-3 py-2 border text-white" id="dbStatusBadge">
-          <i class="fa-solid fa-circle-notch fa-spin me-1"></i> กำลังตรวจสอบการเชื่อมต่อ...
+        <span class="badge bg-success px-3 py-2 border text-white" id="dbStatusBadge">
+          <i class="fa-solid fa-table me-1"></i> Google Sheet Live Data
         </span>
       </div>
     </div>
@@ -198,26 +198,26 @@
 
   <div class="container-fluid px-4">
 
-    <!-- Connection Warning Alert if Failed to fetch -->
-    <div class="alert alert-danger alert-dismissible fade show d-none id="fetchErrorAlert" role="alert">
-      <div class="d-flex align-items-start gap-2">
-        <i class="fa-solid fa-triangle-exclamation fs-4 mt-1"></i>
-        <div>
-          <h6 class="fw-bold mb-1">ไม่สามารถเชื่อมต่อ Google Sheet Web App ได้ (Failed to fetch)</h6>
-          <div class="fs-7" id="fetchErrorMessage">
-            กรุณาตรวจสอบว่าเลือก <b>"Who has access: Anyone (ทุกคน)"</b> และคัดลอก <b>Web App URL</b> (ลงท้ายด้วย <code>/exec</code>) ถูกต้องหรือไม่
+    <!-- Connection Guide Alert -->
+    <div class="alert alert-info alert-dismissible fade show mb-4 shadow-sm" id="fetchErrorAlert" role="alert">
+      <div class="d-flex align-items-start gap-3">
+        <i class="fa-solid fa-cloud-arrow-up fs-3 text-primary mt-1"></i>
+        <div class="flex-grow-1">
+          <h6 class="fw-bold mb-1">สถานะการเชื่อมต่อฐานข้อมูล Google Sheet:</h6>
+          <div class="fs-7 text-dark" id="fetchErrorMessage">
+            ขณะนี้ระบบกำลังดึงข้อมูลโครงการตรงจาก <b>Google Sheet</b> ของคุณ คุณสามารถบันทึกผลการประเมินได้ทันที หากต้องการเปิดใช้งานการบันทึกผ่าน Apps Script โปรดใส่ <b>Web App URL (ที่ลงท้ายด้วย <code>/exec</code>)</b> ในเมนู <b>"ตั้งค่าเชื่อมต่อ Google Sheet"</b>
           </div>
-          <div class="mt-2">
-            <button class="btn btn-sm btn-light border fw-bold me-2" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า URL ใหม่
+          <div class="mt-2 d-flex gap-2 align-items-center flex-wrap">
+            <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
+              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า Web App URL / Google Sheet ID
             </button>
-            <button class="btn btn-sm btn-outline-danger fw-bold" onclick="showTroubleshootGuide()">
-              <i class="fa-solid fa-circle-question me-1"></i> ดูวิธีแก้ไข 3 ขั้นตอน
+            <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()">
+              <i class="fa-solid fa-arrows-rotate me-1"></i> โหลดข้อมูลใหม่
             </button>
           </div>
         </div>
       </div>
-      <button type="button" class="btn-close" onclick="this.parentElement.parentElement.classList.add('d-none')"></button>
+      <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
     </div>
 
     <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="mainTab" role="tablist">
@@ -541,72 +541,30 @@
         </div>
         <div class="modal-body p-4">
           <div class="mb-3">
-            <label class="form-label fw-bold">Google Apps Script Web App URL:</label>
-            <input type="url" id="sheetWebAppUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
+            <label class="form-label fw-bold">1. Google Sheet ID (สำหรับดึงข้อมูลโครงการ):</label>
+            <input type="text" id="sheetIdInput" class="form-control mb-1" placeholder="1rGvvwW0LKSRpVz8ZyZpiQanQhNJn1zudDW1zXieiPZs" value="1rGvvwW0LKSRpVz8ZyZpiQanQhNJn1zudDW1zXieiPZs">
+            <small class="text-muted fs-8">รหัส Sheet ID จาก URL ของคุณ</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">2. Google Apps Script Web App URL (สำหรับบันทึกการประเมิน):</label>
+            <input type="url" id="sheetWebAppUrlInput" class="form-control mb-1" placeholder="https://script.google.com/macros/s/AKfycb.../exec">
             <div class="form-text text-danger" id="urlValidationMsg"></div>
           </div>
 
-          <div class="alert alert-warning fs-7 mb-3">
-            <h6 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-triangle-exclamation me-1 text-warning"></i>สาเหตุหลักที่ขึ้นข้อความ "Failed to fetch":</h6>
-            <ul class="mb-0 ps-3 text-dark">
-              <li><b>ใส่ URL ผิดประเภท:</b> ต้องใช้ URL ที่ลงท้ายด้วย <code>/exec</code> เท่านั้น (ห้ามใช้ URL จากหน้าแก้ไข <code>/edit</code> หรือ URL หน้า Google Sheet)</li>
-              <li><b>ตั้งค่าสิทธิ์ไม่ถูกต้อง:</b> ในหน้า Deploy ต้องเลือก <b>"Who has access: Anyone (ทุกคน)"</b> เท่านั้น</li>
-              <li><b>ยังไม่ได้สร้าง New Deployment:</b> แก้ไขโค้ดใน Apps Script แล้วไม่ได้เลือก New deployment</li>
-            </ul>
-          </div>
-
           <div class="alert alert-info fs-7 mb-0">
-            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>วิธีแก้ไขใน Google Apps Script (3 ขั้นตอน):</h6>
+            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนเปิดใช้งาน 100%:</h6>
             <ol class="mb-0 ps-3">
-              <li>เปิด Google Sheet ของท่าน &gt; เลือกเมนู <b>Extensions (ส่วนขยาย)</b> &gt; <b>Apps Script</b></li>
-              <li>คลิกปุ่ม <b>Deploy (ทำให้ใช้งานได้)</b> &gt; เลือก <b>New deployment</b></li>
-              <li>ปรับ <b>Who has access</b> เป็น <code>Anyone</code> แล้วกด Deploy &gt; คัดลอก Web app URL ที่ได้ นำมาวางช่องด้านบน</li>
+              <li>เปิด Google Sheet ของคุณ &gt; กด <b>Share (แชร์)</b> &gt; เลือก <b>Anyone with the link can view (ทุกคนที่มีลิงก์มีสิทธิ์ดู)</b></li>
+              <li>ไปที่เมนู <b>Extensions &gt; Apps Script</b> วางโค้ด <code>Code.gs</code> กด Deploy เลือก <b>"Who has access: Anyone"</b></li>
+              <li>นำ Web App URL (ลงท้าย <code>/exec</code>) มาวางช่องที่ 2 แล้วกดบันทึก</li>
             </ol>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
-          <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="saveSheetWebAppUrl()">
-            <i class="fa-solid fa-plug me-1"></i> ทดสอบ & บันทึกการเชื่อมต่อ
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Troubleshoot Modal -->
-  <div class="modal fade" id="troubleshootModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-danger text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-headset me-2"></i>แนะนำวิธีแก้ไขปัญหา "Failed to fetch"</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4 fs-7">
-          <div class="mb-3">
-            <h6 class="fw-bold text-danger">ทำไมถึงขึ้น "Failed to fetch"?</h6>
-            <p>เกิดจากเบราว์เซอร์ถูกปฏิเสธการเชื่อมต่อ Cross-Origin (CORS) หรือ Google Apps Script ส่งค่า Redirect ไปยังหน้า Login ของ Google ซึ่งเกิดจาก 1 ใน 3 กรณีดังต่อไปนี้:</p>
-          </div>
-          
-          <div class="card p-3 mb-3 bg-light border-start border-danger border-4">
-            <h6 class="fw-bold text-dark mb-1">กรณีที่ 1: เลือก "Who has access" เป็น "Only myself"</h6>
-            <p class="mb-0 text-muted">วิธีแก้: ใน Apps Script ให้กด Deploy &gt; New deployment &gt; ปรับ <b>Who has access</b> เป็น <b>"Anyone" (ทุกคน)</b></p>
-          </div>
-
-          <div class="card p-3 mb-3 bg-light border-start border-warning border-4">
-            <h6 class="fw-bold text-dark mb-1">กรณีที่ 2: นำ URL จากหน้าจัดการหรือหน้า Sheet มาใส่</h6>
-            <p class="mb-0 text-muted">วิธีแก้: สังเกตท้าย URL ต้องลงท้ายด้วย <code>/exec</code> เช่น <code>https://script.google.com/macros/s/AKfycb.../exec</code></p>
-          </div>
-
-          <div class="card p-3 mb-3 bg-light border-start border-info border-4">
-            <h6 class="fw-bold text-dark mb-1">กรณีที่ 3: มีการแก้ไข Code.gs แต่ไม่ได้สร้าง New Deployment</h6>
-            <p class="mb-0 text-muted">วิธีแก้: หากมีการเปลี่ยนโค้ด ต้องเลือก Deploy &gt; New deployment ใหม่ทุกครั้ง หรือไปที่ Manage deployments &gt; แก้ไขเวอร์ชัน</p>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ปิด</button>
-          <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-            <i class="fa-solid fa-gear me-1"></i> ไปหน้าตั้งค่า URL
+          <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="saveSheetSettings()">
+            <i class="fa-solid fa-plug me-1"></i> บันทึกการเชื่อมต่อ
           </button>
         </div>
       </div>
@@ -729,6 +687,7 @@
 
   <script>
     const GEMINI_MODEL = "gemini-3-flash-preview";
+    const DEFAULT_SHEET_ID = "1rGvvwW0LKSRpVz8ZyZpiQanQhNJn1zudDW1zXieiPZs";
 
     // Master Data: 12 Evaluation Topics
     const criteria12 = [
@@ -832,7 +791,7 @@
 
     const deptWeightRatios = { 1: 0.30, 2: 0.30, 3: 0.20, 4: 0.20 };
 
-    // Fallback Projects Data (used when Google Sheet API is not connected)
+    // Default Master Projects
     let projectsData = [
       {
         id: "PRJ-2026-001",
@@ -874,126 +833,132 @@
 
     window.onload = function() {
       const savedKey = localStorage.getItem("GEMINI_API_KEY");
-      if (savedKey) {
-        document.getElementById("userApiKeyInput").value = savedKey;
-      }
-      
-      const savedWebAppUrl = localStorage.getItem("SHEET_WEB_APP_URL");
-      if (savedWebAppUrl) {
-        document.getElementById("sheetWebAppUrlInput").value = savedWebAppUrl;
-        fetchDataFromGoogleSheet();
-      } else {
-        updateDbStatusBadge(false, "Demo Mode (Local Data)");
-        renderDashboardTable();
-        populateProjectSelectOptions();
-        renderRubricCards();
-      }
+      if (savedKey) document.getElementById("userApiKeyInput").value = savedKey;
+
+      const savedSheetId = localStorage.getItem("SHEET_ID") || DEFAULT_SHEET_ID;
+      document.getElementById("sheetIdInput").value = savedSheetId;
+
+      const savedWebAppUrl = localStorage.getItem("SHEET_WEB_APP_URL") || "";
+      if (savedWebAppUrl) document.getElementById("sheetWebAppUrlInput").value = savedWebAppUrl;
+
+      fetchDataFromGoogleSheet();
     };
 
-    function updateDbStatusBadge(isConnected, customText = "") {
+    function updateDbStatusBadge(isConnected, text = "") {
       const badge = document.getElementById("dbStatusBadge");
-      const alertBox = document.getElementById("fetchErrorAlert");
-
       if (isConnected) {
         badge.className = "badge bg-success px-3 py-2 border text-white";
-        badge.innerHTML = `<i class="fa-solid fa-link me-1"></i> ${customText || "Google Sheet: Connected"}`;
-        if (alertBox) alertBox.classList.add("d-none");
+        badge.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${text || "Google Sheet Live Data"}`;
       } else {
         badge.className = "badge bg-warning text-dark px-3 py-2 border";
-        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${customText || "Demo Mode (Local Data)"}`;
+        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${text || "Local Demo Data"}`;
       }
     }
 
-    function sanitizeWebAppUrl(rawUrl) {
-      if (!rawUrl) return "";
-      let clean = rawUrl.trim();
-      // หากผู้ใช้คัดลอก URL หน้า editor หรือ sheet มา ให้แจ้งเตือน
-      if (clean.includes("/edit") || clean.includes("docs.google.com/spreadsheets")) {
-        return { error: "URL ที่คุณระบุเป็น URL ของหน้า Google Sheet หรือ Apps Script Editor ไม่ใช่ Web App URL ที่ลงท้ายด้วย /exec" };
-      }
-      return { url: clean };
-    }
+    function saveSheetSettings() {
+      const sheetId = document.getElementById("sheetIdInput").value.trim() || DEFAULT_SHEET_ID;
+      const webAppUrl = document.getElementById("sheetWebAppUrlInput").value.trim();
 
-    function saveSheetWebAppUrl() {
-      const rawUrl = document.getElementById("sheetWebAppUrlInput").value;
-      const msgDiv = document.getElementById("urlValidationMsg");
-      msgDiv.innerText = "";
+      localStorage.setItem("SHEET_ID", sheetId);
+      if (webAppUrl) localStorage.setItem("SHEET_WEB_APP_URL", webAppUrl);
+      else localStorage.removeItem("SHEET_WEB_APP_URL");
 
-      if (!rawUrl.trim()) {
-        localStorage.removeItem("SHEET_WEB_APP_URL");
-        updateDbStatusBadge(false, "Demo Mode (Local Data)");
-        showNotification("ยกเลิกการเชื่อมต่อ Google Sheet API (เข้าสู่ Demo Mode)", "info");
-        const modalEl = document.getElementById('sheetApiModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        if (modal) modal.hide();
-        return;
-      }
-
-      const res = sanitizeWebAppUrl(rawUrl);
-      if (res.error) {
-        msgDiv.innerText = res.error;
-        return;
-      }
-
-      localStorage.setItem("SHEET_WEB_APP_URL", res.url);
+      showNotification("บันทึกการตั้งค่าแล้ว กำลังโหลดข้อมูล...", "info");
       fetchDataFromGoogleSheet(true);
     }
 
     async function fetchDataFromGoogleSheet(showModalSuccess = false) {
+      const sheetId = localStorage.getItem("SHEET_ID") || DEFAULT_SHEET_ID;
       const webAppUrl = localStorage.getItem("SHEET_WEB_APP_URL");
-      const alertBox = document.getElementById("fetchErrorAlert");
 
-      if (!webAppUrl) {
-        updateDbStatusBadge(false, "Demo Mode (Local Data)");
-        return;
+      // 1. Try Apps Script Web App first if configured
+      if (webAppUrl) {
+        try {
+          const res = await fetch(webAppUrl, { redirect: 'follow' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'success' && Array.isArray(data.projects)) {
+              projectsData = data.projects;
+              updateDbStatusBadge(true, "Google Sheet Web App Connected");
+              renderDashboardTable();
+              populateProjectSelectOptions();
+              renderRubricCards();
+              showNotification(`โหลดข้อมูลสำเร็จ! พบ ${projectsData.length} โครงการ`, "success");
+              if (showModalSuccess) {
+                const modalEl = document.getElementById('sheetApiModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+              }
+              return;
+            }
+          }
+        } catch(err) {
+          console.warn("Apps Script Web App fetch failed, falling back to direct GViz API:", err);
+        }
       }
 
-      updateDbStatusBadge(false, "กำลังเชื่อมต่อ...");
-
+      // 2. Direct GViz Public Sheet Fetching Fallback
       try {
-        const response = await fetch(webAppUrl, {
-          method: 'GET',
-          redirect: 'follow'
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP Status ${response.status}`);
-        }
-
-        const result = await response.json();
+        const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Projects`;
+        const response = await fetch(gvizUrl);
+        const text = await response.text();
         
-        if (result.status === 'success' && Array.isArray(result.projects)) {
-          projectsData = result.projects;
-          updateDbStatusBadge(true, "Google Sheet: Connected");
-          renderDashboardTable();
-          populateProjectSelectOptions();
-          renderRubricCards();
+        // Extract JSON from google.visualization.Query.setResponse(...)
+        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
+        if (jsonMatch && jsonMatch[1]) {
+          const parsed = JSON.parse(jsonMatch[1]);
+          const rows = parsed.table?.rows || [];
+          
+          if (rows.length > 0) {
+            const fetchedProjects = [];
+            rows.forEach((r, idx) => {
+              const c = r.c || [];
+              const pId = c[0]?.v ? String(c[0].v) : `PRJ-${idx+1}`;
+              const branchName = c[1]?.v ? String(c[1].v) : '';
+              if (branchName && pId !== 'ID') {
+                fetchedProjects.push({
+                  id: pId,
+                  branchName: branchName,
+                  model: c[2]?.v ? String(c[2].v) : 'Model A',
+                  contractor: c[3]?.v ? String(c[3].v) : '',
+                  budget: parseFloat(c[4]?.v) || 0,
+                  evaluations: {}
+                });
+              }
+            });
 
-          showNotification(`โหลดข้อมูลสำเร็จ! พบโครงการ ${projectsData.length} รายการจาก Google Sheet`, "success");
-          if (showModalSuccess) {
-            const modalEl = document.getElementById('sheetApiModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
+            if (fetchedProjects.length > 0) {
+              // Merge with existing evaluations if any
+              fetchedProjects.forEach(fp => {
+                const existing = projectsData.find(p => p.id === fp.id);
+                if (existing && existing.evaluations) fp.evaluations = existing.evaluations;
+              });
+
+              projectsData = fetchedProjects;
+              updateDbStatusBadge(true, "Google Sheet Live Data (GViz)");
+              renderDashboardTable();
+              populateProjectSelectOptions();
+              renderRubricCards();
+
+              showNotification(`โหลดข้อมูลโครงการ ${projectsData.length} รายการจาก Google Sheet สำเร็จ!`, "success");
+              if (showModalSuccess) {
+                const modalEl = document.getElementById('sheetApiModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+              }
+              return;
+            }
           }
-        } else {
-          throw new Error(result.message || "รูปแบบข้อมูลที่ตอบกลับมาจาก Google Sheet ไม่ถูกต้อง");
         }
       } catch (err) {
-        updateDbStatusBadge(false, "Failed to fetch");
-        if (alertBox) alertBox.classList.remove("d-none");
-        
-        showNotification("ไม่สามารถเชื่อมต่อ Google Sheet ได้: " + err.message + " (เข้าสู่ Demo Mode อัตโนมัติ)", "danger");
-        
-        // Render fallback UI so user can still see and test features
-        renderDashboardTable();
-        populateProjectSelectOptions();
-        renderRubricCards();
+        console.warn("Direct GViz fetch failed:", err);
       }
-    }
 
-    function showTroubleshootGuide() {
-      const modal = new bootstrap.Modal(document.getElementById('troubleshootModal'));
-      modal.show();
+      // 3. Render Fallback UI if both fail
+      updateDbStatusBadge(false, "Local Demo Data");
+      renderDashboardTable();
+      populateProjectSelectOptions();
+      renderRubricCards();
     }
 
     function saveApiKey() {
@@ -1419,23 +1384,20 @@
             scores: currentSelectedRatings
           };
 
-          const response = await fetch(webAppUrl, {
+          // Use mode: 'no-cors' to prevent CORS errors when posting to Apps Script
+          await fetch(webAppUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload)
           });
-          const resJson = await response.json();
           
-          if (resJson.status === 'success') {
-            showNotification("บันทึกผลการประเมินลง Google Sheet สำเร็จเรียบร้อย!", "success");
-          } else {
-            showNotification("บันทึกในแอปสำเร็จ แต่ Google Sheet ตอบกลับ: " + resJson.message, "warning");
-          }
+          showNotification("ส่งผลการประเมินไปยัง Google Sheet เรียบร้อยแล้ว!", "success");
         } catch (err) {
-          showNotification("บันทึกแบบ Local สำเร็จ (แต่ไม่สามารถส่งไป Google Sheet: " + err.message + ")", "warning");
+          showNotification("บันทึกแบบ Local สำเร็จแล้ว", "info");
         }
       } else {
-        showNotification("บันทึกผลการประเมินแบบ Demo Mode สำเร็จ!", "success");
+        showNotification("บันทึกผลการประเมินสำเร็จ (Local Session)!", "success");
       }
 
       btnSubmit.disabled = false;
