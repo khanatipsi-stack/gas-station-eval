@@ -899,7 +899,7 @@
 
       // 2. Direct GViz Public Sheet Fetching Fallback
       try {
-        const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Projects`;
+        const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&headers=1&sheet=Projects`;
         const response = await fetch(gvizUrl);
         const text = await response.text();
         
@@ -913,9 +913,25 @@
             const fetchedProjects = [];
             rows.forEach((r, idx) => {
               const c = r.c || [];
-              const pId = c[0]?.v ? String(c[0].v) : `PRJ-${idx+1}`;
-              const branchName = c[1]?.v ? String(c[1].v) : '';
-              if (branchName && pId !== 'ID') {
+              const pId = c[0]?.v ? String(c[0].v).trim() : `PRJ-${idx+1}`;
+              const branchName = c[1]?.v ? String(c[1].v).trim() : '';
+
+              const lowerId = pId.toLowerCase();
+              const lowerName = branchName.toLowerCase();
+
+              // Filter out column header row if present
+              if (
+                lowerId.includes('project_id') || 
+                lowerId === 'id' || 
+                lowerName.includes('project_name') || 
+                lowerName.includes('ชื่อสถานี') ||
+                lowerName === 'name' ||
+                lowerName === 'branchname'
+              ) {
+                return; // skip header row
+              }
+
+              if (branchName) {
                 fetchedProjects.push({
                   id: pId,
                   branchName: branchName,
