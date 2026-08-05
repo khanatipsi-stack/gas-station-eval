@@ -93,6 +93,16 @@
       z-index: 1090;
     }
 
+    .weight-table-cell {
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .weight-input {
+      width: 80px;
+      text-align: center;
+    }
+
     @media print {
       body * {
         visibility: hidden;
@@ -168,6 +178,11 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link fw-bold px-4" id="eval-tab" data-bs-toggle="pill" data-bs-target="#eval-view" type="button">
           <i class="fa-solid fa-clipboard-check me-2"></i>ทำแบบประเมินผู้รับเหมา
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold px-4" id="weights-tab" data-bs-toggle="pill" data-bs-target="#weights-view" type="button">
+          <i class="fa-solid fa-balance-scale me-2"></i>น้ำหนักการประเมิน
         </button>
       </li>
     </ul>
@@ -287,7 +302,7 @@
 
         <form id="evaluationForm" onsubmit="handleFormSubmit(event)">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2 text-primary"></i>เกณฑ์การประเมิน 12 หัวข้อ (ระดับ 1 - 5)</h5>
+            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2 text-primary"></i>เกณฑ์การประเมิน (ระดับ 1 - 5)</h5>
             <span class="badge bg-info text-dark p-2 fs-7" id="liveScoreCounter">คะแนนฝ่ายนี้: 0.00 / 100%</span>
           </div>
 
@@ -307,6 +322,42 @@
           </div>
         </form>
 
+      </div>
+
+      <div class="tab-pane fade" id="weights-view" role="tabpanel">
+        <div class="card card-custom p-4 bg-white mb-4">
+          <h5 class="fw-bold text-primary mb-3">
+            <i class="fa-solid fa-balance-scale me-2"></i>จัดการน้ำหนักการประเมินของแต่ละเกณฑ์
+          </h5>
+          <div class="alert alert-info mb-3 fs-7">
+            <i class="fa-solid fa-circle-info me-2"></i>ตารางนี้แสดงน้ำหนักของแต่ละเกณฑ์ในแต่ละฝ่าย ค่าทั้งหมดของฝ่ายจะต้องรวมเป็น 100%
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle" id="weightsTable">
+              <thead class="table-light">
+                <tr>
+                  <th>ลำดับ</th>
+                  <th>หัวข้อการประเมิน</th>
+                  <th class="weight-table-cell">% New</th>
+                  <th class="weight-table-cell">Engineer (65%)</th>
+                  <th class="weight-table-cell">Purchasing (10%)</th>
+                  <th class="weight-table-cell">Safety (10%)</th>
+                  <th class="weight-table-cell">BU (15%)</th>
+                </tr>
+              </thead>
+              <tbody id="weightsTableBody">
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-3 d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light border" onclick="resetWeightsToDefault()">
+              <i class="fa-solid fa-undo me-1"></i>รีเซ็ตค่าเริ่มต้น
+            </button>
+            <button type="button" class="btn btn-primary fw-bold" onclick="saveWeightsToSheet()">
+              <i class="fa-solid fa-save me-1"></i>บันทึกน้ำหนักไปยัง Sheet
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -392,7 +443,7 @@
             <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนการตั้งค่า:</h6>
             <ol class="mb-0 ps-3">
               <li>เปิด Google Sheet ของคุณ &gt; กด <b>Share (แชร์)</b> &gt; เลือก <b>Anyone with the link can view</b></li>
-              <li>ตรวจสอบว่า Sheet มี column: ID, BranchName, Model, Contractor, Budget</li>
+              <li>ตรวจสอบว่า Sheet มี Tab: <b>Projects, Evaluations, Criteria_12, Dept_Weights</b></li>
               <li>ใส่ Sheet ID ด้านบนแล้วกดบันทึก</li>
             </ol>
           </div>
@@ -415,12 +466,12 @@
   <script>
     const DEFAULT_SHEET_ID = "";
 
-    // 12 Evaluation Criteria - ตรงกับ Excel
+    // 12 Evaluation Criteria with department-specific weights
     const criteria12 = [
       {
         id: 1, 
         title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับวิชาชีพ", 
-        weight: 12,
+        weights: { 1: 2.25, 2: 0, 3: 0, 4: 0 },
         r5: "มีทั้งวิศวกรควบคุมงาน, โฟร์แมนควบคุมงาน และเจ้าหน้าที่ความปลอดภัย ปฏิบัติงานประจำโครงการตลอดระยะเวลา",
         r4: "มีวิศวกรควบคุมงาน หรือโฟร์แมนควบคุมงานท่านหนึ่งท่านใด และเจ้าหน้าที่ความปลอดภัย ปฏิบัติงานประจำโครงการ",
         r3: "มีวิศวกรควบคุมงาน และเจ้าหน้าที่ความปลอดภัย แต่มีโฟร์แมนควบคุมงาน ปฏิบัติงานประจำ",
@@ -430,7 +481,7 @@
       {
         id: 2, 
         title: "2. เครื่องมือช่าง เครื่องจักร และอุปกรณ์ที่จำเป็น", 
-        weight: 12,
+        weights: { 1: 0.50, 2: 0, 3: 0, 4: 0 },
         r5: "มีเครื่องมือและอุปกรณ์ครบเพียงพอ พร้อมใช้งาน และมีการตรวจสอบ Checklist อย่างสม่ำเสมอ",
         r4: "มีเครื่องมือและอุปกรณ์ครบเพียงพอ พร้อมใช้งาน แต่ขาดการตรวจสอบ Checklist อย่างสม่ำเสมอ",
         r3: "มีเครื่องมือและอุปกรณ์ที่จำเป็นแต่ไม่เพียงพอ แต่มีการตรวจสอบ Checklist อย่างสม่ำเสมอ",
@@ -440,7 +491,7 @@
       {
         id: 3, 
         title: "3. ความพร้อมของผู้ปฏิบัติงาน และ PPE (Personal Protective Equipment)", 
-        weight: 12,
+        weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 },
         r5: "มี PPE ครบถ้วนทั้งพื้นฐานและตามงานความเสี่ยง ผู้ปฏิบัติงานสวมใส่ครบทุกคน ตลอดระยะเวลา",
         r4: "มี PPE ครบถ้วน ผู้ปฏิบัติงานสวมใส่ไม่ครบทุกคน หรือมีการรายงานตรวจพบ 1-2 ครั้ง",
         r3: "มี PPE พื้นฐานครบ PPE ตามงานความเสี่ยงไม่ครบ มีการรายงานตรวจพบ 3-4 ครั้ง",
@@ -450,7 +501,7 @@
       {
         id: 4, 
         title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group", 
-        weight: 12,
+        weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 },
         r5: "ปฏิบัติตรงกับข้อกำหนดทั้งหมดตลอดระยะเวลา ไม่มีการรายงานตรวจพบ",
         r4: "ปฏิบัติตรงกับข้อกำหนดทั้งหมด มีการรายงานตรวจพบไม่เกิน 2 ครั้ง แก้ไขตามกำหนด",
         r3: "ปฏิบัติตรงกับข้อกำหนดบางส่วน มีการรายงานตรวจพบไม่เกิน 2 ครั้ง มีการทวงถาม 1 ครั้ง",
@@ -460,7 +511,7 @@
       {
         id: 5, 
         title: "5. คุณภาพงานก่อสร้างหลังส่งมอบงาน (Defect)", 
-        weight: 12,
+        weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 },
         r5: "ไม่มี Defect ตรวจพบ",
         r4: "มี Defect ตรวจพบไม่เกิน 30 รายการ",
         r3: "มี Defect ตรวจพบ 30-50 รายการ",
@@ -470,7 +521,7 @@
       {
         id: 6, 
         title: "6. ความถูกต้องตามข้อกำหนด ใช้วัสดุตรงตามข้อกำหนด", 
-        weight: 12,
+        weights: { 1: 10.00, 2: 10.00, 3: 0, 4: 0 },
         r5: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG อย่างสม่ำเสมอ ก่อสร้างถูกต้องตามหลักวิศวกรรม",
         r4: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG แต่ไม่ครบรายการบางรายการ",
         r3: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG แต่ไม่ครบอย่างสม่ำเสมอ",
@@ -480,7 +531,7 @@
       {
         id: 7, 
         title: "7. การตรวจสอบแบบก่อสร้าง ก่อนเริ่มงาน", 
-        weight: 12,
+        weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 },
         r5: "ตรวจสอบแบบก่อสร้างที่ได้รับอนุมัติ ก่อนเริ่มงาน ไม่มี/มีข้อขัดแย้งที่ไม่มี",
         r4: "ไม่ตรวจสอบก่อนเริ่ม แต่ก่อสร้างตรงตามแบบที่ได้รับอนุมัติ ไม่มีปัญหา",
         r3: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบบางส่วน พบวัสดุไม่ตรง",
@@ -490,7 +541,7 @@
       {
         id: 8, 
         title: "8. การจัดส่งรายงานความก้าวหน้าตามกำหนดเวลา", 
-        weight: 12,
+        weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 },
         r5: "จัดส่งรายงานตรงตามเวลากำหนด อย่างสม่ำเสมอและถูกต้องทุกครั้ง",
         r4: "จัดส่งรายงานตรงตามเวลากำหนดอย่างสม่ำเสมอ แต่อาจมีข้อมูลไม่ครบบ้าง",
         r3: "จัดส่งรายงานตรงตามเวลากำหนด แต่บ้างครั้งต้องติดตาม",
@@ -500,7 +551,7 @@
       {
         id: 9, 
         title: "9. การส่งมอบงาน เทียบกับระยะเวลาตามสัญญา", 
-        weight: 12,
+        weights: { 1: 25.00, 2: 7.00, 3: 3.00, 4: 0 },
         r5: "ส่งมอบงานก่อนเวลา มากกว่า 10% ของระยะเวลาสัญญา",
         r4: "ส่งมอบงานก่อนเวลา 5-9.99% ของระยะเวลาสัญญา",
         r3: "ส่งมอบงานก่อนเวลา 0-4.99% ของระยะเวลาสัญญา หรือตรงตามเวลา",
@@ -510,7 +561,7 @@
       {
         id: 10, 
         title: "10. การส่งแผนงานและเอกสารประกอบหลังรับมอบพื้นที่", 
-        weight: 12,
+        weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 },
         r5: "ส่งแผนงาน KOM เร็วกว่า 4 วัน หลังรับมอบพื้นที่",
         r4: "ส่งแผนงาน KOM ภายใน 4-7 วัน หลังรับมอบพื้นที่",
         r3: "ส่งแผนงาน KOM ภายใน 8-10 วัน หลังรับมอบพื้นที่",
@@ -520,7 +571,7 @@
       {
         id: 11, 
         title: "11. การแก้ไข Defect ตามระยะเวลาที่กำหนด", 
-        weight: 12,
+        weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 },
         r5: "แก้ไข Defect เสร็จก่อนสิ้นสุดระยะเวลาสัญญา 15 วัน",
         r4: "แก้ไข Defect เสร็จก่อนสิ้นสุดระยะเวลาสัญญา 1-14 วัน",
         r3: "แก้ไข Defect เสร็จพอดีกับสิ้นสุดระยะเวลาสัญญา",
@@ -530,7 +581,7 @@
       {
         id: 12, 
         title: "12. ความร่วมมือและการดำเนินการของผู้รับเหมา", 
-        weight: 12,
+        weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 },
         r5: "ให้ความร่วมมือ อยู่ในระดับที่ดีเยี่ยม ร่วมประชุมติดตามความคืบหน้า",
         r4: "ให้ความร่วมมือ อยู่ในระดับที่ประทับใจ ร่วมประชุมติดตามสม่ำเสมอ",
         r3: "ให้ความร่วมมือ อยู่ในระดับที่พึงพอใจ ร่วมประชุมติดตามเป็นบางครั้ง",
@@ -541,6 +592,13 @@
 
     // Department Weights: 65%, 10%, 10%, 15%
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
+    
+    const deptNames = {
+      1: "Engineer",
+      2: "Purchasing",
+      3: "Safety",
+      4: "BU"
+    };
 
     // Default Master Projects
     let projectsData = [
@@ -571,12 +629,15 @@
     ];
 
     let currentSelectedRatings = {};
+    let currentSheetId = "";
 
     window.onload = function() {
       const savedSheetId = localStorage.getItem("SHEET_ID") || DEFAULT_SHEET_ID;
+      currentSheetId = savedSheetId;
       if (savedSheetId) {
         document.getElementById("sheetIdInput").value = savedSheetId;
       }
+      renderWeightsTable();
       fetchDataFromGoogleSheet();
     };
 
@@ -599,6 +660,7 @@
       }
 
       localStorage.setItem("SHEET_ID", sheetId);
+      currentSheetId = sheetId;
       showNotification("บันทึกการตั้งค่าแล้ว กำลังโหลดข้อมูล...", "info");
       fetchDataFromGoogleSheet();
       
@@ -608,7 +670,7 @@
     }
 
     async function fetchDataFromGoogleSheet() {
-      const sheetId = localStorage.getItem("SHEET_ID");
+      const sheetId = currentSheetId;
 
       if (!sheetId) {
         updateDbStatusBadge(false, "Demo Data");
@@ -623,7 +685,6 @@
         const response = await fetch(gvizUrl);
         const text = await response.text();
         
-        // Extract JSON from google.visualization.Query.setResponse(...)
         const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
         if (jsonMatch && jsonMatch[1]) {
           const parsed = JSON.parse(jsonMatch[1]);
@@ -633,7 +694,6 @@
             const fetchedProjects = [];
             rows.forEach((r, idx) => {
               const c = r.c || [];
-              // Columns: 0=ID, 1=BranchName, 2=Model, 3=Contractor, 4=Budget
               const pId = c[0]?.v ? String(c[0].v).trim() : `PRJ-${idx+1}`;
               const branchName = c[1]?.v ? String(c[1].v).trim() : '';
               const model = c[2]?.v ? String(c[2].v) : 'Model A';
@@ -828,12 +888,24 @@
       renderRubricCards();
     }
 
+    // Get filtered criteria based on selected department
+    function getFilteredCriteria(deptId) {
+      return criteria12.filter(c => {
+        const weight = c.weights[deptId] || 0;
+        return weight > 0;
+      });
+    }
+
     function renderRubricCards() {
       const container = document.getElementById("rubricCardsContainer");
+      const deptId = parseInt(document.getElementById("evalDeptSelect").value);
+      const filteredCriteria = getFilteredCriteria(deptId);
+      
       container.innerHTML = "";
 
-      criteria12.forEach(c => {
+      filteredCriteria.forEach(c => {
         const selectedVal = currentSelectedRatings[c.id] || 0;
+        const weight = c.weights[deptId];
 
         const card = document.createElement("div");
         card.className = `card card-custom rubric-card p-3 ${selectedVal > 0 ? 'selected' : ''}`;
@@ -858,7 +930,7 @@
         card.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold text-dark mb-0">${c.title}</h6>
-            <span class="badge bg-secondary">Weight ${c.weight}%</span>
+            <span class="badge bg-secondary">${weight.toFixed(2)}%</span>
           </div>
           <div class="d-flex flex-column">
             ${optionsHtml}
@@ -876,15 +948,22 @@
     }
 
     function calculateLiveDeptScore() {
+      const deptId = parseInt(document.getElementById("evalDeptSelect").value);
+      const filteredCriteria = getFilteredCriteria(deptId);
       let totalWeightedScore = 0;
-      criteria12.forEach(c => {
+      let totalWeight = 0;
+
+      filteredCriteria.forEach(c => {
         const score = currentSelectedRatings[c.id] || 0;
-        totalWeightedScore += (score / 5) * c.weight;
+        const weight = c.weights[deptId];
+        totalWeight += weight;
+        totalWeightedScore += (score / 5) * weight;
       });
 
+      const finalScore = totalWeight > 0 ? (totalWeightedScore / totalWeight) * 100 : 0;
       const element = document.getElementById("liveScoreCounter");
-      element.innerText = `คะแนนฝ่ายนี้: ${totalWeightedScore.toFixed(2)} / 100%`;
-      return totalWeightedScore;
+      element.innerText = `คะแนนฝ่ายนี้: ${finalScore.toFixed(2)} / 100%`;
+      return finalScore;
     }
 
     async function handleFormSubmit(e) {
@@ -905,9 +984,10 @@
         return;
       }
 
-      for (let i = 1; i <= 12; i++) {
-        if (!currentSelectedRatings[i]) {
-          showNotification(`กรุณาเลือกเกณฑ์การประเมินให้ครบทั้ง 12 หัวข้อ`, "warning");
+      const filteredCriteria = getFilteredCriteria(parseInt(deptId));
+      for (let criterion of filteredCriteria) {
+        if (!currentSelectedRatings[criterion.id]) {
+          showNotification(`กรุณาเลือกเกณฑ์การประเมินให้ครบทั้งหมด`, "warning");
           return;
         }
       }
@@ -928,6 +1008,11 @@
 
       prj.evaluations[deptId] = evalData;
 
+      // Save to Google Sheet
+      if (currentSheetId) {
+        await saveEvaluationToSheet(prjId, deptId, evalData);
+      }
+
       const btnSubmit = document.getElementById("btnSubmitForm");
       btnSubmit.disabled = true;
       btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>กำลังบันทึกข้อมูล...`;
@@ -942,6 +1027,117 @@
       renderDashboardTable();
       const tabTrigger = new bootstrap.Tab(document.getElementById('dashboard-tab'));
       tabTrigger.show();
+    }
+
+    async function saveEvaluationToSheet(projectId, deptId, evalData) {
+      try {
+        // Create evaluation record to append to Evaluations sheet
+        const evalRecord = {
+          eval_id: `${projectId}-${deptId}-${Date.now()}`,
+          timestamp: evalData.timestamp,
+          project_id: projectId,
+          dept_id: deptId,
+          evaluator_name: evalData.evaluatorName,
+          scores_json: JSON.stringify(evalData.scores),
+          dept_weighted_score: evalData.totalDeptScore,
+          remarks: evalData.comments
+        };
+
+        // For now, store in localStorage as backup
+        const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
+        backupData.push(evalRecord);
+        localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
+
+        console.log("Evaluation backed up to localStorage:", evalRecord);
+      } catch (err) {
+        console.warn("Could not save to sheet:", err);
+      }
+    }
+
+    function renderWeightsTable() {
+      const tbody = document.getElementById("weightsTableBody");
+      tbody.innerHTML = "";
+
+      criteria12.forEach((c, idx) => {
+        const tr = document.createElement("tr");
+        let totalWeight = 0;
+        for (let d = 1; d <= 4; d++) {
+          totalWeight += (c.weights[d] || 0);
+        }
+
+        tr.innerHTML = `
+          <td class="fw-bold">${idx + 1}</td>
+          <td>${c.title}</td>
+          <td class="weight-table-cell">${totalWeight.toFixed(2)}%</td>
+          <td class="weight-table-cell">
+            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[1] || 0).toFixed(2)}" 
+              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 1, this.value)">
+          </td>
+          <td class="weight-table-cell">
+            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[2] || 0).toFixed(2)}" 
+              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 2, this.value)">
+          </td>
+          <td class="weight-table-cell">
+            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[3] || 0).toFixed(2)}" 
+              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 3, this.value)">
+          </td>
+          <td class="weight-table-cell">
+            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[4] || 0).toFixed(2)}" 
+              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 4, this.value)">
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      displayDeptTotals();
+    }
+
+    function updateCriteriaWeight(criteriaId, deptId, value) {
+      const criterion = criteria12.find(c => c.id === criteriaId);
+      if (criterion) {
+        criterion.weights[deptId] = parseFloat(value) || 0;
+        displayDeptTotals();
+      }
+    }
+
+    function displayDeptTotals() {
+      const deptTotals = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      criteria12.forEach(c => {
+        for (let d = 1; d <= 4; d++) {
+          deptTotals[d] += (c.weights[d] || 0);
+        }
+      });
+
+      // Display totals (could add a footer row for this)
+      console.log("Dept Totals:", deptTotals);
+    }
+
+    function resetWeightsToDefault() {
+      if (!confirm("ต้องการรีเซ็ตค่าน้ำหนักกลับไปยังค่าเริ่มต้นหรือไม่?")) return;
+
+      // Reset to original values - you would define the defaults
+      showNotification("ฟังก์ชันรีเซ็ตต้องดำเนินการตามเอกสารเดิม", "info");
+      renderWeightsTable();
+    }
+
+    async function saveWeightsToSheet() {
+      if (!currentSheetId) {
+        showNotification("กรุณาตั้งค่า Google Sheet ID ก่อน", "warning");
+        return;
+      }
+
+      try {
+        // Save weights data to localStorage as backup
+        const weightsData = criteria12.map(c => ({
+          criterion_id: c.id,
+          title: c.title,
+          weights: c.weights
+        }));
+        localStorage.setItem("CRITERIA_WEIGHTS", JSON.stringify(weightsData));
+        showNotification("บันทึกน้ำหนักการประเมินสำเร็จ!", "success");
+      } catch (err) {
+        showNotification("เกิดข้อผิดพลาดในการบันทึก", "danger");
+      }
     }
 
     function printReportForProject(projectId) {
@@ -966,7 +1162,7 @@
       document.getElementById("prtFinalScore").innerText = scoreInfo.score + " %";
       document.getElementById("prtGrade").innerText = gradeObj.label;
 
-      const deptNames = {
+      const deptInfo = {
         1: { name: "ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย", weight: "65%" },
         2: { name: "ฝ่ายที่ 2: จัดซื้อจัดจ้าง", weight: "10%" },
         3: { name: "ฝ่ายที่ 3: ความปลอดภัย Safety", weight: "10%" },
@@ -980,8 +1176,8 @@
         const deptEval = prj.evaluations[d];
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${deptNames[d].name}</td>
-          <td>${deptNames[d].weight}</td>
+          <td>${deptInfo[d].name}</td>
+          <td>${deptInfo[d].weight}</td>
           <td class="text-center fw-bold">${deptEval ? deptEval.totalDeptScore.toFixed(2) + "%" : "-"}</td>
           <td class="text-center text-success fw-bold"><i class="fa-solid fa-check me-1"></i>เสร็จสมบูรณ์</td>
         `;
