@@ -1045,29 +1045,58 @@
         };
 
         // ✅ ส่ง POST request ไปยัง Google Apps Script
-        if (currentSheetId) {
-          // ❗ ต้องแทนที่ URL นี้ด้วย URL ของ Google Apps Script ที่คุณ Deploy
-          const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyK2xDM06jPVokZnoiH9kM69jqZPXXcQiUQlde6Wf50SzYVMOZr3zroSdMdM6ADC_UU/exec';
+        // ⚠️ สำคัญ: แก้ไข SCRIPT_URL ให้ถูกต้อง!
+        // ขั้นตอน: 
+        // 1. Google Sheet → Tools → Apps Script
+        // 2. Deploy → New deployment → Web app
+        // 3. คัดลอก URL: https://script.google.com/macros/d/[SCRIPT_ID]/userweb
+        // 4. แปะลงในบรรทัดด้านล่าง
+        
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyEPQZytl4sT4b7vlsH6yLzLtWKQLGgMnWJ5PDKPqAGt3Jnt8MKOCyVLO4emhsrVTLJ/exec';
+        
+        // ⚠️ ตรวจสอบว่าแก้ไข Script URL แล้ว
+        if (SCRIPT_URL.includes('YOUR_SCRIPT_ID')) {
+          console.error("❌ ERROR: Script URL ยังไม่แก้ไข!");
+          showNotification("⚠️ กรุณาแก้ไข Script URL ใน HTML file ก่อน (บรรทัด ~1056)", "danger");
           
-          try {
-            const response = await fetch(SCRIPT_URL, {
-              method: 'POST',
-              body: JSON.stringify(evalRecord),
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            });
-
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-              console.log("✅ บันทึกลง Google Sheet สำเร็จ:", result);
-            } else {
-              console.error("❌ เกิดข้อผิดพลาด:", result.message);
+          // ยังคงเก็บ backup
+          const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
+          backupData.push(evalRecord);
+          localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
+          
+          return;
+        }
+        
+        try {
+          console.log("🚀 ส่ง POST request ไปยัง:", SCRIPT_URL);
+          
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(evalRecord),
+            headers: {
+              'Content-Type': 'application/json'
             }
-          } catch (fetchErr) {
-            console.warn("⚠️ Network error sending to Google Apps Script:", fetchErr);
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
           }
+
+          const result = await response.json();
+          
+          if (result.status === 'success') {
+            console.log("✅ บันทึกลง Google Sheet สำเร็จ:", result);
+            showNotification("✅ บันทึกลง Google Sheet สำเร็จ!", "success");
+          } else {
+            console.error("❌ เกิดข้อผิดพลาด:", result.message);
+            showNotification(`❌ Error: ${result.message}`, "danger");
+          }
+        } catch (fetchErr) {
+          console.error("❌ Network error ส่งไปยัง Google Apps Script:", fetchErr);
+          console.error("   URL ที่พยายามส่ง:", SCRIPT_URL);
+          console.error("   Error details:", fetchErr.message);
+          
+          // ไม่แสดง notification ซ้ำ (มันจะแสดงจาก submitForm)
         }
 
         // ✅ เก็บ backup ใน localStorage เพิ่มเติม (กรณีส่งไม่สำเร็จ)
@@ -1076,8 +1105,10 @@
         localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
 
         console.log("✅ Evaluation saved and backed up:", evalRecord);
+        console.log("📊 Backup data:", backupData);
       } catch (err) {
-        console.warn("⚠️ Could not save to sheet:", err);
+        console.error("❌ Critical error in saveEvaluationToSheet:", err);
+        
         // ยังคง backup ไว้ในกรณี error
         try {
           const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
