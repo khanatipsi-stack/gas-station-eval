@@ -1031,26 +1031,71 @@
 
     async function saveEvaluationToSheet(projectId, deptId, evalData) {
       try {
-        // Create evaluation record to append to Evaluations sheet
+        // Create evaluation record to send to Google Apps Script
         const evalRecord = {
           eval_id: `${projectId}-${deptId}-${Date.now()}`,
           timestamp: evalData.timestamp,
           project_id: projectId,
           dept_id: deptId,
           evaluator_name: evalData.evaluatorName,
+          evaluator_email: evalData.evaluatorEmail || '',
           scores_json: JSON.stringify(evalData.scores),
           dept_weighted_score: evalData.totalDeptScore,
           remarks: evalData.comments
         };
 
-        // For now, store in localStorage as backup
+        // ✅ ส่ง POST request ไปยัง Google Apps Script
+        if (currentSheetId) {
+          // ❗ ต้องแทนที่ URL นี้ด้วย URL ของ Google Apps Script ที่คุณ Deploy
+          const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxMh0DikgiTlXwk9c1h79yB2W8bUOoiQHJcHDlwphA/dev';
+          
+          try {
+            const response = await fetch(SCRIPT_URL, {
+              method: 'POST',
+              body: JSON.stringify(evalRecord),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+              console.log("✅ บันทึกลง Google Sheet สำเร็จ:", result);
+            } else {
+              console.error("❌ เกิดข้อผิดพลาด:", result.message);
+            }
+          } catch (fetchErr) {
+            console.warn("⚠️ Network error sending to Google Apps Script:", fetchErr);
+          }
+        }
+
+        // ✅ เก็บ backup ใน localStorage เพิ่มเติม (กรณีส่งไม่สำเร็จ)
         const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
         backupData.push(evalRecord);
         localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
 
-        console.log("Evaluation backed up to localStorage:", evalRecord);
+        console.log("✅ Evaluation saved and backed up:", evalRecord);
       } catch (err) {
-        console.warn("Could not save to sheet:", err);
+        console.warn("⚠️ Could not save to sheet:", err);
+        // ยังคง backup ไว้ในกรณี error
+        try {
+          const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
+          backupData.push({
+            eval_id: `${projectId}-${deptId}-${Date.now()}`,
+            timestamp: evalData.timestamp,
+            project_id: projectId,
+            dept_id: deptId,
+            evaluator_name: evalData.evaluatorName,
+            evaluator_email: evalData.evaluatorEmail || '',
+            scores_json: JSON.stringify(evalData.scores),
+            dept_weighted_score: evalData.totalDeptScore,
+            remarks: evalData.comments
+          });
+          localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
+        } catch (backupErr) {
+          console.error("Could not backup to localStorage:", backupErr);
+        }
       }
     }
 
