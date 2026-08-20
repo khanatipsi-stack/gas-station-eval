@@ -1047,103 +1047,71 @@
       btnSubmit.disabled = true;
       btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>กำลังบันทึกข้อมูล...`;
 
-      // Save to Google Sheets API
-      if (currentSheetId && currentApiKey) {
-        await saveEvaluationViaAPI(prjId, parseInt(deptId), evalData);
-      } else {
-        // Save to localStorage as backup
-        const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
-        backupData.push({
-          project_id: prjId,
-          dept_id: parseInt(deptId),
-          evaluator_name: evalName,
-          evaluator_email: evalEmail,
-          scores_json: JSON.stringify(evalData.scores),
-          dept_weighted_score: deptScore,
-          remarks: comments,
-          timestamp: evalData.timestamp
-        });
-        localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
-      }
+      /**
+ * ✅ บันทึกผลการประเมินไปยัง Google Apps Script Web App
+ */
+async function saveEvaluationViaAPI(projectId, deptId, evalData) {
+  try {
+    // ดึง Web App URL ที่ได้จากการ Deploy ใน GAS
+    const webAppUrl = localStorage.getItem("WEB_APP_URL") || currentApiKey; 
 
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      showNotification("✅ บันทึกผลการประเมินสำเร็จ!", "success");
-
-      btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
-
-      renderDashboardTable();
-      const tabTrigger = new bootstrap.Tab(document.getElementById('dashboard-tab'));
-      tabTrigger.show();
+    if (!webAppUrl || !webAppUrl.startsWith("https://script.google.com")) {
+      throw new Error("กรุณาใส่ Web App URL ของ Google Apps Script ให้ถูกต้อง");
     }
 
-    /**
-     * ✅ บันทึกผลการประเมินลง Google Sheets API
-     * ใช้ Sheets API v4 append() method เพื่อเพิ่มแถวใหม่ลง EvalRecords sheet
-     */
-    async function saveEvaluationViaAPI(projectId, deptId, evalData) {
-      try {
-        if (!currentSheetId || !currentApiKey) {
-          throw new Error("Sheet ID หรือ API Key ยังไม่ได้ตั้งค่า");
-        }
+    // จัดโครงสร้าง Payload ให้ตรงกับที่ doPost() ใน GAS รอรับ
+    const payload = {
+      project_id: projectId,
+      dept_id: deptId,
+      evaluator_name: evalData.evaluatorName,
+      evaluator_email: evalData.evaluatorEmail || '',
+      scores_json: JSON.stringify(evalData.scores),
+      dept_weighted_score: evalData.totalDeptScore,
+      remarks: evalData.comments,
+      timestamp: evalData.timestamp
+    };
 
-        // เตรียมข้อมูลตามรูปแบบของ EvalRecords
-        const evalRecord = [
-          `${projectId}-${deptId}-${Date.now()}`,  // eval_id
-          evalData.timestamp,                        // timestamp
-          projectId,                                 // project_id
-          deptId,                                    // dept_id
-          evalData.evaluatorName,                    // evaluator_name
-          evalData.evaluatorEmail || '',             // evaluator_email
-          JSON.stringify(evalData.scores),           // scores_json
-          evalData.totalDeptScore,                   // dept_weighted_score
-          evalData.comments                          // remarks
-        ];
+    console.log("🚀 กำลังส่งข้อมูลไปยัง Google Apps Script...");
 
-        // 📌 ใช้ Google Sheets API v4 append() method
-        const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${currentSheetId}/values/EvalRecords!A:I:append?valueInputOption=USER_ENTERED&key=${currentApiKey}`;
+    // ใช้ text/plain เพื่อป้องกันปัญหา CORS Preflight ใน GAS
+    const response = await fetch(webAppUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(payload)
+    });
 
-        console.log("🚀 ส่ง POST request ไปยัง Google Sheets API...");
-        
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            values: [evalRecord]
-          })
-        });
+    const result = await response.json();
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`API Error ${response.status}: ${errorText}`);
-        }
+    if (result.status === 'success') {
+      console.log("✅ บันทึกลง Google Sheet สำเร็จ:", result);
+      showNotification("✅ บันทึกลง Google Sheet เรียบร้อยแล้ว!", "success");
+    } else {
+      throw new Error(result.message || "เกิดข้อผิดพลาดฝั่ง Server");
+    }
 
-        const result = await response.json();
-        console.log("✅ บันทึก Google Sheets API สำเร็จ:", result);
-        showNotification("✅ บันทึกลง Google Sheets API สำเร็จ!", "success");
+  } catch (err) {
+    console.error("❌ Error ในการบันทึกลง Google Sheet:", err);
+    showNotification(`⚠️ บันทึกไม่สำเร็จ: ${err.message}`, "danger");
 
-        // เก็บ backup ใน localStorage
-        const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
-        backupData.push({
-          project_id: projectId,
-          dept_id: deptId,
-          evaluator_name: evalData.evaluatorName,
-          evaluator_email: evalData.evaluatorEmail,
-          scores_json: JSON.stringify(evalData.scores),
-          dept_weighted_score: evalData.totalDeptScore,
-          remarks: evalData.comments,
-          timestamp: evalData.timestamp,
-          synced: true
-        });
-        localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
-
-      } catch (err) {
-        console.error("❌ Error ในการบันทึกลง Google Sheets API:", err);
-        showNotification(`⚠️ ตรวจสอบการตั้งค่า: ${err.message}`, "warning");
-
+    // เก็บ Backup ลง LocalStorage กรณีส่งไม่ผ่าน
+    const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
+    backupData.push({
+      project_id: projectId,
+      dept_id: deptId,
+      evaluator_name: evalData.evaluatorName,
+      evaluator_email: evalData.evaluatorEmail,
+      scores_json: JSON.stringify(evalData.scores),
+      dept_weighted_score: evalData.totalDeptScore,
+      remarks: evalData.comments,
+      timestamp: evalData.timestamp,
+      synced: false,
+      error: err.message
+    });
+    localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
+  }
+}
         // เก็บ backup ใน localStorage
         const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
         backupData.push({
