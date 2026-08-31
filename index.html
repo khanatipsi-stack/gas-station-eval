@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน (PTG)</title>
   
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome 6 Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-  <!-- Google Font: Sarabun -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -17,126 +14,36 @@
       --primary-color: #0f2b48;
       --secondary-color: #0284c7;
       --accent-color: #f59e0b;
-      --ai-color: #7c3aed;
       --bg-light: #f8fafc;
       --text-dark: #1e293b;
     }
-
-    body {
-      font-family: 'Sarabun', sans-serif;
-      background-color: var(--bg-light);
-      color: var(--text-dark);
-      padding-bottom: 60px;
-    }
-
-    .navbar-brand-custom {
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: 0.5px;
-    }
-
-    .card-custom {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      transition: all 0.2s ease-in-out;
-    }
-
-    .rubric-card {
-      border-left: 5px solid var(--secondary-color);
-      background: #ffffff;
-      border-radius: 8px;
-    }
-
-    .rubric-card.selected {
-      border-left-color: #10b981;
-      background-color: #f0fdf4;
-    }
-
-    .rubric-option {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      background-color: #ffffff;
-    }
-
-    .rubric-option:hover {
-      border-color: var(--secondary-color);
-      background-color: #f0f9ff;
-    }
-
-    .rubric-option.active {
-      border-color: #10b981;
-      background-color: #ecfdf5;
-      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
-    }
-
-    .badge-status-completed {
-      background-color: #dcfce7;
-      color: #166534;
-      border: 1px solid #86efac;
-    }
-
-    .badge-status-pending {
-      background-color: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fde68a;
-    }
-
-    .toast-container-custom {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1090;
-    }
-
-    .weight-table-cell {
-      text-align: center;
-      font-weight: 500;
-    }
-
-    .weight-input {
-      width: 80px;
-      text-align: center;
-    }
-
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #printReportArea, #printReportArea * {
-        visibility: visible;
-      }
-      #printReportArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
-      .no-print {
-        display: none !important;
-      }
-    }
+    body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 60px; }
+    .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .rubric-card { border-left: 5px solid var(--secondary-color); background: #ffffff; border-radius: 8px; }
+    .rubric-card.selected { border-left-color: #10b981; background-color: #f0fdf4; }
+    .rubric-option { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; background-color: #ffffff; }
+    .rubric-option:hover { border-color: var(--secondary-color); background-color: #f0f9ff; }
+    .rubric-option.active { border-color: #10b981; background-color: #ecfdf5; }
+    .badge-status-completed { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .badge-status-pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .dept-score-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
+    .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 1090; }
   </style>
 </head>
 <body>
 
-  <!-- Navigation Bar -->
   <nav class="navbar navbar-dark mb-4 shadow-sm" style="background-color: var(--primary-color) !important;">
     <div class="container-fluid px-4">
-      <a class="navbar-brand navbar-brand-custom d-flex align-items-center" href="#">
+      <a class="navbar-brand fw-bold text-white d-flex align-items-center" href="#">
         <i class="fa-solid fa-gas-pump fs-4 me-3 text-warning"></i>
         <div>
           <span class="fs-5 d-block">ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</span>
           <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐาน</small>
         </div>
       </a>
-      <div class="d-flex align-items-center gap-2 flex-wrap">
+      <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Google Sheet / Web App URL
+          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Apps Script URL
         </button>
         <span class="badge bg-info px-3 py-2 border text-dark" id="dbStatusBadge">
           <i class="fa-solid fa-database me-1"></i> Ready
@@ -146,93 +53,22 @@
   </nav>
 
   <div class="container-fluid px-4">
-
-    <!-- Connection Alert -->
-    <div class="alert alert-info alert-dismissible fade show mb-4 shadow-sm" id="fetchErrorAlert" role="alert">
-      <div class="d-flex align-items-start gap-3">
-        <i class="fa-solid fa-cloud-arrow-up fs-3 text-primary mt-1"></i>
-        <div class="flex-grow-1">
-          <h6 class="fw-bold mb-1">สถานะการเชื่อมต่อฐานข้อมูล Google Sheet:</h6>
-          <div class="fs-7 text-dark" id="fetchErrorMessage">
-            ระบบพร้อมใช้งาน หากต้องการเปลี่ยน Apps Script URL คลิก "ตั้งค่า Google Sheet / Web App URL"
-          </div>
-          <div class="mt-2 d-flex gap-2 align-items-center flex-wrap">
-            <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า Apps Script URL
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()">
-              <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลใหม่
-            </button>
-          </div>
-        </div>
-      </div>
-      <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
-    </div>
-
     <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="mainTab" role="tablist">
-      <li class="nav-item" role="presentation">
+      <li class="nav-item">
         <button class="nav-link active fw-bold px-4" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard-view" type="button">
           <i class="fa-solid fa-chart-pie me-2"></i>สถานะโครงการ & รายงาน
         </button>
       </li>
-      <li class="nav-item" role="presentation">
+      <li class="nav-item">
         <button class="nav-link fw-bold px-4" id="eval-tab" data-bs-toggle="pill" data-bs-target="#eval-view" type="button">
           <i class="fa-solid fa-clipboard-check me-2"></i>ทำแบบประเมินผู้รับเหมา
         </button>
       </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold px-4" id="weights-tab" data-bs-toggle="pill" data-bs-target="#weights-view" type="button">
-          <i class="fa-solid fa-balance-scale me-2"></i>น้ำหนักการประเมิน
-        </button>
-      </li>
     </ul>
 
-    <div class="tab-content" id="mainTabContent">
-
+    <div class="tab-content">
+      <!-- DASHBOARD VIEW -->
       <div class="tab-pane fade show active" id="dashboard-view" role="tabpanel">
-        
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-md-4">
-            <div class="card card-custom p-3 bg-white border-start border-primary border-4">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="text-muted fs-7 fw-bold">โครงการทั้งหมด</div>
-                  <div class="fs-3 fw-bold text-primary" id="stat-total">0</div>
-                </div>
-                <div class="bg-primary-subtle text-primary p-3 rounded-circle fs-4">
-                  <i class="fa-solid fa-list-check"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="card card-custom p-3 bg-white border-start border-success border-4">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="text-muted fs-7 fw-bold">ประเมินเสร็จสิ้น (ครบ 4 ฝ่าย)</div>
-                  <div class="fs-3 fw-bold text-success" id="stat-completed">0</div>
-                </div>
-                <div class="bg-success-subtle text-success p-3 rounded-circle fs-4">
-                  <i class="fa-solid fa-check-double"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="card card-custom p-3 bg-white border-start border-warning border-4">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="text-muted fs-7 fw-bold">ค้างประเมินบางฝ่าย</div>
-                  <div class="fs-3 fw-bold text-warning" id="stat-pending">0</div>
-                </div>
-                <div class="bg-warning-subtle text-warning p-3 rounded-circle fs-4">
-                  <i class="fa-solid fa-clock-rotate-left"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="card card-custom p-4 bg-white mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list me-2 text-primary"></i>รายการสถานีบริการน้ำมันและสถานะการประเมิน</h6>
@@ -247,33 +83,28 @@
                   <th>รหัสสาขา / ชื่อสถานี</th>
                   <th>Model</th>
                   <th>ชื่อผู้รับเหมา</th>
-                  <th>มูลค่า (MB)</th>
-                  <th>สถานะการประเมิน (4 ฝ่าย)</th>
+                  <th class="text-center">วิศวกรรม (65%)</th>
+                  <th class="text-center">จัดซื้อ (10%)</th>
+                  <th class="text-center">Safety (10%)</th>
+                  <th class="text-center">บริหารสถานี (15%)</th>
                   <th class="text-center">คะแนนรวม</th>
                   <th class="text-center">เกรด</th>
                   <th class="text-end">การจัดการ</th>
                 </tr>
               </thead>
-              <tbody id="projectTableBody">
-              </tbody>
+              <tbody id="projectTableBody"></tbody>
             </table>
           </div>
         </div>
       </div>
 
+      <!-- EVALUATION VIEW -->
       <div class="tab-pane fade" id="eval-view" role="tabpanel">
-        
         <div class="card card-custom p-4 bg-white mb-4">
-          <h5 class="fw-bold text-primary mb-3">
-            <i class="fa-solid fa-pen-to-square me-2"></i>ข้อมูลการประเมินโครงการ
-          </h5>
+          <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-pen-to-square me-2"></i>ข้อมูลการประเมินโครงการ</h5>
           <div class="row g-3">
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label fw-bold">1. ค้นหา & เลือกสาขา:</label>
-              <div class="input-group input-group-sm mb-1">
-                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                <input type="text" id="projectSearchInput" class="form-control" placeholder="พิมพ์ชื่อสาขา / ผู้รับเหมา..." oninput="filterProjectDropdown()">
-              </div>
               <select class="form-select" id="evalProjectSelect" onchange="onProjectSelectChange()">
                 <option value="">-- กรุณาเลือกสาขา --</option>
               </select>
@@ -288,172 +119,52 @@
               </select>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
-              <label class="form-label fw-bold">
-                3. ชื่อผู้ประเมิน <small class="text-danger fw-normal">(ไม่ต้องระบุ นาย/นาง/นางสาว)</small>:
-              </label>
-              <input type="text" id="evaluatorName" class="form-control" placeholder="เช่น สมชาย ใจดี">
+              <label class="form-label fw-bold">3. ชื่อผู้ประเมิน:</label>
+              <input type="text" id="evaluatorName" class="form-control" placeholder="เช่น นายทดสอบ ระบบ">
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label fw-bold">4. อีเมลผู้ประเมิน:</label>
-              <input type="email" id="evaluatorEmail" class="form-control" placeholder="user@company.com">
+              <input type="email" id="evaluatorEmail" class="form-control" placeholder="user@pt.co.th">
             </div>
           </div>
         </div>
 
         <form id="evaluationForm" onsubmit="handleFormSubmit(event)">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2 text-primary"></i>เกณฑ์การประเมิน (ระดับ 1 - 5)</h5>
+            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2 text-primary"></i>เกณฑ์การประเมิน</h5>
             <span class="badge bg-info text-dark p-2 fs-7" id="liveScoreCounter">คะแนนฝ่ายนี้: 0.00 / 100%</span>
           </div>
 
-          <div id="rubricCardsContainer" class="d-flex flex-column gap-3 mb-4">
-          </div>
+          <div id="rubricCardsContainer" class="d-flex flex-column gap-3 mb-4"></div>
 
           <div class="card card-custom p-3 bg-white mb-4">
             <label class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติม / Remark:</label>
-            <textarea id="evalComments" class="form-control" rows="2" placeholder="ระบุข้อสังเกต หรือสิ่งที่ควรปรับปรุงแก้ไข..."></textarea>
+            <textarea id="evalComments" class="form-control" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
           </div>
 
           <div class="d-flex justify-content-end gap-2 mb-5">
-            <button type="reset" class="btn btn-light border px-4" onclick="setTimeout(onProjectSelectChange, 50)">ล้างข้อมูล</button>
             <button type="submit" class="btn btn-success fw-bold px-5 py-2" id="btnSubmitForm">
               <i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน
             </button>
           </div>
         </form>
-
-      </div>
-
-      <div class="tab-pane fade" id="weights-view" role="tabpanel">
-        <div class="card card-custom p-4 bg-white mb-4">
-          <h5 class="fw-bold text-primary mb-3">
-            <i class="fa-solid fa-balance-scale me-2"></i>จัดการน้ำหนักการประเมินของแต่ละเกณฑ์
-          </h5>
-          <div class="alert alert-info mb-3 fs-7">
-            <i class="fa-solid fa-circle-info me-2"></i>ตารางนี้แสดงน้ำหนักของแต่ละเกณฑ์ในแต่ละฝ่าย ค่าทั้งหมดของฝ่ายจะต้องรวมเป็น 100%
-          </div>
-          <div class="table-responsive">
-            <table class="table table-bordered align-middle" id="weightsTable">
-              <thead class="table-light">
-                <tr>
-                  <th>ลำดับ</th>
-                  <th>หัวข้อการประเมิน</th>
-                  <th class="weight-table-cell">% New</th>
-                  <th class="weight-table-cell">Engineer (65%)</th>
-                  <th class="weight-table-cell">Purchasing (10%)</th>
-                  <th class="weight-table-cell">Safety (10%)</th>
-                  <th class="weight-table-cell">BU (15%)</th>
-                </tr>
-              </thead>
-              <tbody id="weightsTableBody">
-              </tbody>
-            </table>
-          </div>
-          <div class="mt-3 d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-light border" onclick="resetWeightsToDefault()">
-              <i class="fa-solid fa-undo me-1"></i>รีเซ็ตค่าเริ่มต้น
-            </button>
-            <button type="button" class="btn btn-primary fw-bold" onclick="saveWeightsToSheet()">
-              <i class="fa-solid fa-save me-1"></i>บันทึกน้ำหนักไปยัง Sheet
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 
-  <div id="printReportArea" class="d-none p-5">
-    <div class="text-center mb-4 pb-3 border-bottom border-2">
-      <h3 class="fw-bold mb-1">รายงานสรุปผลการประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</h3>
-      <p class="text-muted mb-0">ใบประเมินมาตรฐาน (4 ฝ่าย)</p>
-    </div>
-
-    <div class="row mb-4 fs-6">
-      <div class="col-6">
-        <div><b>รหัสโครงการ:</b> <span id="prtProjectId">-</span></div>
-        <div><b>ชื่อสถานี/สาขา:</b> <span id="prtBranchName">-</span></div>
-        <div><b>รูปแบบ (Model):</b> <span id="prtModel">-</span></div>
-      </div>
-      <div class="col-6">
-        <div><b>ชื่อผู้รับเหมา:</b> <span id="prtContractor">-</span></div>
-        <div><b>มูลค่าโครงการ:</b> <span id="prtBudget">-</span> ล้านบาท</div>
-        <div><b>วันที่ออกรายงาน:</b> <span id="prtDate">-</span></div>
-      </div>
-    </div>
-
-    <div class="card p-3 mb-4 bg-light border text-center">
-      <div class="row align-items-center">
-        <div class="col-6 border-end">
-          <div class="text-muted fs-7">คะแนนสรุปถ่วงน้ำหนักรวม (Final Weighted Score)</div>
-          <div class="display-5 fw-bold text-primary" id="prtFinalScore">0.00%</div>
-        </div>
-        <div class="col-6">
-          <div class="text-muted fs-7">ผลการประเมิน / Grade</div>
-          <div class="display-5 fw-bold" id="prtGrade">-</div>
-        </div>
-      </div>
-    </div>
-
-    <h6 class="fw-bold mb-2">สรุปคะแนนแยกตามฝ่ายผู้ประเมิน:</h6>
-    <table class="table table-bordered align-middle mb-4">
-      <thead class="table-light">
-        <tr>
-          <th>ฝ่ายผู้ประเมิน</th>
-          <th>น้ำหนักฝ่าย</th>
-          <th class="text-center">คะแนนที่ได้ (%)</th>
-          <th class="text-center">สถานะ</th>
-        </tr>
-      </thead>
-      <tbody id="prtDeptTableBody">
-      </tbody>
-    </table>
-
-    <div class="row mt-5 pt-4 text-center">
-      <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายวิศวกรรมและความปลอดภัย)</small></div>
-      </div>
-      <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายจัดซื้อจัดจ้าง)</small></div>
-      </div>
-      <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่าย Safety)</small></div>
-      </div>
-      <div class="col-3">
-        <div class="border-top pt-2">ลงชื่อ.........................................<br><small>(ฝ่ายบริหารสถานี)</small></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Google Sheet API Modal -->
+  <!-- Modal ตั้งค่า Apps Script URL -->
   <div class="modal fade" id="sheetApiModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-table me-2"></i>ตั้งค่าการเชื่อมต่อ Google Apps Script Web App</h5>
+          <h5 class="modal-title fw-bold">ตั้งค่า Google Apps Script Web App URL</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body p-4">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Google Apps Script Web App URL:</label>
-            <input type="text" id="scriptUrlInput" class="form-control mb-1" placeholder="https://script.google.com/macros/s/.../exec">
-            <small class="text-muted fs-8">ระบุ Web App URL ที่ได้จากการ Deploy Google Apps Script (ต้องลงท้ายด้วย /exec)</small>
-          </div>
-
-          <div class="alert alert-info fs-7 mb-0">
-            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนการตั้งค่า Apps Script:</h6>
-            <ol class="mb-0 ps-3">
-              <li>เปิด Google Apps Script (Extensions > Apps Script ใน Google Sheet)</li>
-              <li>วางโค้ด GAS ล่าสุดแล้วกด <b>Deploy > New deployment</b></li>
-              <li>เลือกประเภท <b>Web app</b>, Execute as: <b>Me</b>, Who has access: <b>Anyone</b></li>
-              <li>ก๊อปปี้ Web App URL มาใส่ในช่องด้านบนแล้วกดบันทึก</li>
-            </ol>
-          </div>
+        <div class="modal-body">
+          <input type="text" id="scriptUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
-          <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="saveSheetSettings()">
-            <i class="fa-solid fa-check me-1"></i> บันทึกการเชื่อมต่อ
-          </button>
+          <button type="button" class="btn btn-primary" onclick="saveSheetSettings()">บันทึก</button>
         </div>
       </div>
     </div>
@@ -461,312 +172,75 @@
 
   <div class="toast-container toast-container-custom" id="toastContainer"></div>
 
-  <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // URL ของ Google Apps Script Web App
-    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKM3pJEIpVXQVnXSrN1tpnygNdMqHInIAkRo0Z0seFl-hhXTGsNKh6MPxJbLqO_D4s/exec";
+    // 📍 บรรทัดใส่ Web App URL
+    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfhEd9_qk0LClTXmK9KGt-3v88_qC-QtE1aXc62nCqqBoDUKGsZ37NSHGyHwU1S1i-/exec";
 
-    // 12 Evaluation Criteria with department-specific weights
-    const criteria12 = [
-      {
-        id: 1, 
-        title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับวิชาชีพ", 
-        weights: { 1: 2.25, 2: 0, 3: 0, 4: 0 },
-        r5: "มีทั้งวิศวกรควบคุมงาน, โฟร์แมนควบคุมงาน และเจ้าหน้าที่ความปลอดภัย ปฏิบัติงานประจำโครงการตลอดระยะเวลา",
-        r4: "มีวิศวกรควบคุมงาน หรือโฟร์แมนควบคุมงานท่านหนึ่งท่านใด และเจ้าหน้าที่ความปลอดภัย ปฏิบัติงานประจำโครงการ",
-        r3: "มีวิศวกรควบคุมงาน และเจ้าหน้าที่ความปลอดภัย แต่มีโฟร์แมนควบคุมงาน ปฏิบัติงานประจำ",
-        r2: "ไม่มีวิศวกรควบคุมงาน และเจ้าหน้าที่ความปลอดภัย มีเพียงโฟร์แมนควบคุมงาน ปฏิบัติงานประจำ",
-        r1: "ไม่มีวิศวกรควบคุมงาน, เจ้าหน้าที่ความปลอดภัย และโฟร์แมนควบคุมงาน"
-      },
-      {
-        id: 2, 
-        title: "2. เครื่องมือช่าง เครื่องจักร และอุปกรณ์ที่จำเป็น", 
-        weights: { 1: 0.50, 2: 0, 3: 0, 4: 0 },
-        r5: "มีเครื่องมือและอุปกรณ์ครบเพียงพอ พร้อมใช้งาน และมีการตรวจสอบ Checklist อย่างสม่ำเสมอ",
-        r4: "มีเครื่องมือและอุปกรณ์ครบเพียงพอ พร้อมใช้งาน แต่ขาดการตรวจสอบ Checklist อย่างสม่ำเสมอ",
-        r3: "มีเครื่องมือและอุปกรณ์ที่จำเป็นแต่ไม่เพียงพอ แต่มีการตรวจสอบ Checklist อย่างสม่ำเสมอ",
-        r2: "มีเครื่องมือและอุปกรณ์ที่จำเป็นแต่ไม่เพียงพอ ขาดการตรวจสอบ Checklist",
-        r1: "ไม่มีเครื่องมือและอุปกรณ์ที่จำเป็น หรือไม่พร้อมใช้งาน"
-      },
-      {
-        id: 3, 
-        title: "3. ความพร้อมของผู้ปฏิบัติงาน และ PPE (Personal Protective Equipment)", 
-        weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 },
-        r5: "มี PPE ครบถ้วนทั้งพื้นฐานและตามงานความเสี่ยง ผู้ปฏิบัติงานสวมใส่ครบทุกคน ตลอดระยะเวลา",
-        r4: "มี PPE ครบถ้วน ผู้ปฏิบัติงานสวมใส่ไม่ครบทุกคน หรือมีการรายงานตรวจพบ 1-2 ครั้ง",
-        r3: "มี PPE พื้นฐานครบ PPE ตามงานความเสี่ยงไม่ครบ มีการรายงานตรวจพบ 3-4 ครั้ง",
-        r2: "มี PPE พื้นฐานครบ PPE ตามงานความเสี่ยงไม่ครบ มีการรายงานตรวจพบ 5-6 ครั้ง",
-        r1: "ไม่มี PPE พื้นฐาน ผู้ปฏิบัติงานไม่สวมใส่ มีการรายงานตรวจพบมากกว่า 8 ครั้ง"
-      },
-      {
-        id: 4, 
-        title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group", 
-        weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 },
-        r5: "ปฏิบัติตรงกับข้อกำหนดทั้งหมดตลอดระยะเวลา ไม่มีการรายงานตรวจพบ",
-        r4: "ปฏิบัติตรงกับข้อกำหนดทั้งหมด มีการรายงานตรวจพบไม่เกิน 2 ครั้ง แก้ไขตามกำหนด",
-        r3: "ปฏิบัติตรงกับข้อกำหนดบางส่วน มีการรายงานตรวจพบไม่เกิน 2 ครั้ง มีการทวงถาม 1 ครั้ง",
-        r2: "ปฏิบัติตรงกับข้อกำหนดบางส่วน มีการรายงานตรวจพบไม่เกิน 3 ครั้ง มีการทวงถาม 2 ครั้ง",
-        r1: "ปฏิบัติไม่ตรงกับข้อกำหนด มีการรายงานตรวจพบหลายครั้ง ไม่มีการตอบกลับรายงาน"
-      },
-      {
-        id: 5, 
-        title: "5. คุณภาพงานก่อสร้างหลังส่งมอบงาน (Defect)", 
-        weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 },
-        r5: "ไม่มี Defect ตรวจพบ",
-        r4: "มี Defect ตรวจพบไม่เกิน 30 รายการ",
-        r3: "มี Defect ตรวจพบ 30-50 รายการ",
-        r2: "มี Defect ตรวจพบ 51-70 รายการ",
-        r1: "มี Defect ตรวจพบมากกว่า 70 รายการ"
-      },
-      {
-        id: 6, 
-        title: "6. ความถูกต้องตามข้อกำหนด ใช้วัสดุตรงตามข้อกำหนด", 
-        weights: { 1: 10.00, 2: 10.00, 3: 0, 4: 0 },
-        r5: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG อย่างสม่ำเสมอ ก่อสร้างถูกต้องตามหลักวิศวกรรม",
-        r4: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG แต่ไม่ครบรายการบางรายการ",
-        r3: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด ส่งใบรับรองวัสดุให้ PTG แต่ไม่ครบอย่างสม่ำเสมอ",
-        r2: "ใช้วัสดุตรงตามข้อกำหนดทั้งหมด แต่ไม่ส่งใบรับรองวัสดุให้ PTG",
-        r1: "ใช้วัสดุตรงตามข้อกำหนดบางส่วน ไม่ส่งใบรับรองวัสดุ"
-      },
-      {
-        id: 7, 
-        title: "7. การตรวจสอบแบบก่อสร้าง ก่อนเริ่มงาน", 
-        weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 },
-        r5: "ตรวจสอบแบบก่อสร้างที่ได้รับอนุมัติ ก่อนเริ่มงาน ไม่มี/มีข้อขัดแย้งที่ไม่มี",
-        r4: "ไม่ตรวจสอบก่อนเริ่ม แต่ก่อสร้างตรงตามแบบที่ได้รับอนุมัติ ไม่มีปัญหา",
-        r3: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบบางส่วน พบวัสดุไม่ตรง",
-        r2: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบบางส่วน มีปัญหาในการแก้ไข",
-        r1: "ไม่ตรวจสอบก่อนเริ่ม ก่อสร้างไม่ตรงตามแบบส่วนใหญ่ ต้องทำใหม่"
-      },
-      {
-        id: 8, 
-        title: "8. การจัดส่งรายงานความก้าวหน้าตามกำหนดเวลา", 
-        weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 },
-        r5: "จัดส่งรายงานตรงตามเวลากำหนด อย่างสม่ำเสมอและถูกต้องทุกครั้ง",
-        r4: "จัดส่งรายงานตรงตามเวลากำหนดอย่างสม่ำเสมอ แต่อาจมีข้อมูลไม่ครบบ้าง",
-        r3: "จัดส่งรายงานตรงตามเวลากำหนด แต่บ้างครั้งต้องติดตาม",
-        r2: "จัดส่งรายงานตรงตามเวลากำหนด แต่บ่อยครั้งต้องติดตาม",
-        r1: "จัดส่งรายงานตรงตามเวลากำหนด แต่ส่วนใหญ่ต้องติดตาม"
-      },
-      {
-        id: 9, 
-        title: "9. การส่งมอบงาน เทียบกับระยะเวลาตามสัญญา", 
-        weights: { 1: 25.00, 2: 7.00, 3: 3.00, 4: 0 },
-        r5: "ส่งมอบงานก่อนเวลา มากกว่า 10% ของระยะเวลาสัญญา",
-        r4: "ส่งมอบงานก่อนเวลา 5-9.99% ของระยะเวลาสัญญา",
-        r3: "ส่งมอบงานก่อนเวลา 0-4.99% ของระยะเวลาสัญญา หรือตรงตามเวลา",
-        r2: "ส่งมอบงานล่าช้า 0.1-4.99% ของระยะเวลาสัญญา",
-        r1: "ส่งมอบงานล่าช้า 5-9.99% ของระยะเวลาสัญญา หรือมากกว่า"
-      },
-      {
-        id: 10, 
-        title: "10. การส่งแผนงานและเอกสารประกอบหลังรับมอบพื้นที่", 
-        weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 },
-        r5: "ส่งแผนงาน KOM เร็วกว่า 4 วัน หลังรับมอบพื้นที่",
-        r4: "ส่งแผนงาน KOM ภายใน 4-7 วัน หลังรับมอบพื้นที่",
-        r3: "ส่งแผนงาน KOM ภายใน 8-10 วัน หลังรับมอบพื้นที่",
-        r2: "ส่งแผนงาน KOM ล่าช้า ภายใน 11-13 วัน หลังรับมอบพื้นที่",
-        r1: "ส่งแผนงาน KOM ล่าช้า ภายใน 14-17 วัน หรือล่าช้ากว่านั้น"
-      },
-      {
-        id: 11, 
-        title: "11. การแก้ไข Defect ตามระยะเวลาที่กำหนด", 
-        weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 },
-        r5: "แก้ไข Defect เสร็จก่อนสิ้นสุดระยะเวลาสัญญา 15 วัน",
-        r4: "แก้ไข Defect เสร็จก่อนสิ้นสุดระยะเวลาสัญญา 1-14 วัน",
-        r3: "แก้ไข Defect เสร็จพอดีกับสิ้นสุดระยะเวลาสัญญา",
-        r2: "แก้ไข Defect เสร็จหลังสิ้นสุดระยะเวลาสัญญา 1-15 วัน",
-        r1: "แก้ไข Defect เสร็จหลังสิ้นสุดระยะเวลาสัญญา 16 วัน หรือมากกว่า"
-      },
-      {
-        id: 12, 
-        title: "12. ความร่วมมือและการดำเนินการของผู้รับเหมา", 
-        weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 },
-        r5: "ให้ความร่วมมือ อยู่ในระดับที่ดีเยี่ยม ร่วมประชุมติดตามความคืบหน้า",
-        r4: "ให้ความร่วมมือ อยู่ในระดับที่ประทับใจ ร่วมประชุมติดตามสม่ำเสมอ",
-        r3: "ให้ความร่วมมือ อยู่ในระดับที่พึงพอใจ ร่วมประชุมติดตามเป็นบางครั้ง",
-        r2: "ให้ความร่วมมือ อยู่ในระดับที่คาดหวัง แต่มีบางรายการควรปรับปรุง",
-        r1: "ไม่ค่อยให้ความร่วมมือ อยู่ในระดับที่ไม่พึงพอใจ ควรปรับปรุง"
-      }
-    ];
-
-    // Department Weights: 65%, 10%, 10%, 15%
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
     
-    const deptNames = {
-      1: "Engineer",
-      2: "Purchasing",
-      3: "Safety",
-      4: "BU"
-    };
-
-    // Default Master Projects
-    let projectsData = [
-      {
-        id: "PRJ-2026-001",
-        branchName: "สาขา บางนา-ตราด กม.18",
-        model: "Model A",
-        contractor: "บริษัท ไทยคอนสตรัคชั่น เอ็นจิเนียริ่ง จำกัด",
-        budget: 4.8,
-        evaluations: {}
-      },
-      {
-        id: "PRJ-2026-002",
-        branchName: "สาขา มิตรภาพ-โคราช",
-        model: "Model B",
-        contractor: "บริษัท เอสซีจี ดีเวลลอปเมนท์ จำกัด",
-        budget: 3.2,
-        evaluations: {}
-      },
-      {
-        id: "PRJ-2026-003",
-        branchName: "สาขา พระราม 2 กม.35",
-        model: "Model A",
-        contractor: "บริษัท พรีเมียร์ บิลเดอร์ส จำกัด",
-        budget: 5.5,
-        evaluations: {}
-      }
+    const criteria12 = [
+      { id: 1, title: "1. วิศวกร/โฟร์แมน/จป.วิชาชีพ", weights: { 1: 2.25, 2: 0, 3: 0, 4: 0 }, r5: "ครบถ้วนประจำโครงการ", r4: "มีวิศวกร/โฟร์แมน", r3: "ขาดบางตำแหน่ง", r2: "มีแค่โฟร์แมน", r1: "ไม่มีบุคลากร" },
+      { id: 2, title: "2. เครื่องมือช่างและอุปกรณ์", weights: { 1: 0.50, 2: 0, 3: 0, 4: 0 }, r5: "ครบถ้วนมี Checklist", r4: "ครบถ้วนไม่มี Checklist", r3: "ไม่เพียงพอมี Checklist", r2: "ไม่เพียงพอไม่มี Checklist", r1: "อุปกรณ์ไม่พร้อม" },
+      { id: 3, title: "3. PPE และความปลอดภัย", weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 }, r5: "สวมใส่ครบทุกคน", r4: "ใส่ไม่ครบ 1-2 ครั้ง", r3: "ใส่ไม่ครบ 3-4 ครั้ง", r2: "ใส่ไม่ครบ 5-6 ครั้ง", r1: "ไม่สวมใส่ PPE" },
+      { id: 4, title: "4. ปฏิบัติตามระเบียบ PTG", weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 }, r5: "ถูกต้องตลอดระยะเวลา", r4: "เตือนไม่เกิน 2 ครั้ง", r3: "ทวงถาม 1 ครั้ง", r2: "ทวงถาม 2 ครั้ง", r1: "ไม่ปฏิบัติตาม" },
+      { id: 5, title: "5. Defect หลังส่งมอบงาน", weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 }, r5: "ไม่มี Defect", r4: "Defect 1-30 รายการ", r3: "Defect 30-50 รายการ", r2: "Defect 51-70 รายการ", r1: "มากกว่า 70 รายการ" },
+      { id: 6, title: "6. ใช้วัสดุตรงตามข้อกำหนด", weights: { 1: 10.00, 2: 10.00, 3: 0, 4: 0 }, r5: "ตรงตามกำหนด 100%", r4: "ตรง ขาดใบรับรองบางตัว", r3: "ตรง ขาดใบรับรองประจำ", r2: "ตรง ไม่ส่งใบรับรอง", r1: "ไม่ตรงตามข้อกำหนด" },
+      { id: 7, title: "7. การตรวจสอบแบบก่อนเริ่มงาน", weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 }, r5: "ตรวจแบบก่อนเริ่มงาน", r4: "ไม่ตรวจ สร้างตรงแบบ", r3: "สร้างไม่ตรงบางส่วน", r2: "สร้างไม่ตรงมีปัญหา", r1: "ต้องรื้อถอนทำใหม่" },
+      { id: 8, title: "8. การจัดส่งรายงานความก้าวหน้า", weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 }, r5: "ตรงเวลา สม่ำเสมอ", r4: "ตรงเวลา ขาดข้อมูลบางส่วน", r3: "ตรงเวลา แต่ต้องติดตาม", r2: "ติดตามบ่อยครั้ง", r1: "ต้องติดตามตลอด" },
+      { id: 9, title: "9. การส่งมอบงานตามสัญญา", weights: { 1: 25.00, 2: 7.00, 3: 3.00, 4: 0 }, r5: "เร็วกว่ากำหนด >10%", r4: "เร็วกว่า 5-9.99%", r3: "ตรงตามเวลา", r2: "ล่าช้า 0.1-4.99%", r1: "ล่าช้า >5%" },
+      { id: 10, title: "10. การส่งแผนงาน KOM", weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 }, r5: "ส่งเร็วกว่า 4 วัน", r4: "ส่งภายใน 4-7 วัน", r3: "ส่งภายใน 8-10 วัน", r2: "ส่งภายใน 11-13 วัน", r1: "ส่งล่าช้า >14 วัน" },
+      { id: 11, title: "11. การแก้ไข Defect ตามกำหนด", weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 }, r5: "เสร็จก่อน 15 วัน", r4: "เสร็จก่อน 1-14 วัน", r3: "เสร็จพอดีสัญญา", r2: "ช้ากว่าสัญญา 1-15 วัน", r1: "ช้ากว่าสัญญา >16 วัน" },
+      { id: 12, title: "12. ความร่วมมือในการทำงาน", weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 }, r5: "ดีเยี่ยม ร่วมมือดี", r4: "ดีมาก ร่วมประชุมดี", r3: "พึงพอใจ ร่วมบางครั้ง", r2: "ควรปรับปรุงบางเรื่อง", r1: "ไม่ค่อยร่วมมือ" }
     ];
 
+    let projectsData = [];
     let currentSelectedRatings = {};
     let currentScriptUrl = "";
 
     window.onload = function() {
-      const savedScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
-      currentScriptUrl = savedScriptUrl;
-      if (savedScriptUrl) {
-        document.getElementById("scriptUrlInput").value = savedScriptUrl;
-      }
-      renderWeightsTable();
+      currentScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
+      document.getElementById("scriptUrlInput").value = currentScriptUrl;
       fetchDataFromGoogleSheet();
     };
 
-    function updateDbStatusBadge(isConnected, text = "") {
-      const badge = document.getElementById("dbStatusBadge");
-      if (isConnected) {
-        badge.className = "badge bg-success px-3 py-2 border text-white";
-        badge.innerHTML = `<i class="fa-solid fa-database me-1"></i> ${text || "Connected"}`;
-      } else {
-        badge.className = "badge bg-warning text-dark px-3 py-2 border";
-        badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1"></i> ${text || "Demo Mode"}`;
-      }
-    }
-
     function saveSheetSettings() {
-      let scriptUrl = document.getElementById("scriptUrlInput").value.trim();
-      if (!scriptUrl) {
-        showNotification("กรุณาใส่ Web App URL", "warning");
-        return;
-      }
-      if (scriptUrl.endsWith('/usercallback')) {
-        scriptUrl = scriptUrl.replace(/\/usercallback$/, '/exec');
-      }
-
-      localStorage.setItem("SCRIPT_URL", scriptUrl);
-      currentScriptUrl = scriptUrl;
-      showNotification("บันทึกการตั้งค่าแล้ว กำลังดึงข้อมูล...", "info");
+      currentScriptUrl = document.getElementById("scriptUrlInput").value.trim();
+      localStorage.setItem("SCRIPT_URL", currentScriptUrl);
       fetchDataFromGoogleSheet();
-      
-      const modalEl = document.getElementById('sheetApiModal');
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      if (modal) modal.hide();
     }
 
     async function fetchDataFromGoogleSheet() {
-      let scriptUrl = currentScriptUrl || DEFAULT_SCRIPT_URL;
-
-      if (!scriptUrl) {
-        updateDbStatusBadge(false, "Demo Data");
-        renderDashboardTable();
-        populateProjectSelectOptions();
-        renderRubricCards();
-        return;
-      }
-
-      if (scriptUrl.endsWith('/usercallback')) {
-        scriptUrl = scriptUrl.replace(/\/usercallback$/, '/exec');
-      }
-
+      if (!currentScriptUrl) return;
       try {
-        console.log("🌐 Calling Apps Script doGet:", scriptUrl);
-        const response = await fetch(scriptUrl, { method: 'GET' });
-        const result = await response.json();
-
-        if (result && result.status === 'success' && Array.isArray(result.projects) && result.projects.length > 0) {
-          projectsData = result.projects;
-          updateDbStatusBadge(true, "Google Sheet Connected");
+        const res = await fetch(currentScriptUrl);
+        const data = await res.json();
+        if (data && data.status === 'success') {
+          projectsData = data.projects;
           renderDashboardTable();
           populateProjectSelectOptions();
-          onProjectSelectChange();
-          showNotification(`โหลดข้อมูล ${projectsData.length} โครงการเรียบร้อยแล้ว`, "success");
-          return;
-        } else {
-          console.warn("GAS return non-success or empty projects:", result);
         }
       } catch (err) {
-        console.warn("Fetch error via Apps Script:", err);
+        console.error("Fetch Error:", err);
       }
-
-      updateDbStatusBadge(false, "Demo Data / Offline");
-      renderDashboardTable();
-      populateProjectSelectOptions();
-      renderRubricCards();
     }
 
-    function showNotification(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toastEl = document.createElement('div');
-      
-      let bgClass = 'bg-primary text-white';
-      let icon = 'fa-circle-info';
-      if (type === 'success') { bgClass = 'bg-success text-white'; icon = 'fa-circle-check'; }
-      else if (type === 'warning') { bgClass = 'bg-warning text-dark'; icon = 'fa-triangle-exclamation'; }
-      else if (type === 'danger') { bgClass = 'bg-danger text-white'; icon = 'fa-circle-xmark'; }
-
-      toastEl.className = `toast align-items-center ${bgClass} border-0 show shadow-lg mb-2`;
-      toastEl.innerHTML = `
-        <div class="d-flex">
-          <div class="toast-body d-flex align-items-center gap-2">
-            <i class="fa-solid ${icon} fs-5"></i>
-            <div>${message}</div>
-          </div>
-          <button type="button" class="btn-close ${type === 'warning' ? '' : 'btn-close-white'} me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
-        </div>
-      `;
-
-      container.appendChild(toastEl);
-      setTimeout(() => { if (toastEl.parentNode) toastEl.remove(); }, 5000);
-    }
-
-    function filterProjectDropdown() {
-      const searchText = document.getElementById("projectSearchInput").value.toLowerCase();
-      populateProjectSelectOptions(searchText);
-    }
-
-    function populateProjectSelectOptions(filterText = "") {
+    function populateProjectSelectOptions() {
       const select = document.getElementById("evalProjectSelect");
-      const currentVal = select.value;
       select.innerHTML = `<option value="">-- กรุณาเลือกสาขา --</option>`;
-
       projectsData.forEach(p => {
-        const fullStr = `${p.branchName} ${p.id} ${p.contractor} ${p.model}`.toLowerCase();
-        if (!filterText || fullStr.includes(filterText)) {
-          const opt = document.createElement("option");
-          opt.value = p.id;
-          opt.innerText = `${p.branchName} (${p.model}) - ${p.contractor}`;
-          if (p.id === currentVal) opt.selected = true;
-          select.appendChild(opt);
-        }
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.innerText = `[${p.id}] ${p.branchName} - ${p.contractor}`;
+        select.appendChild(opt);
       });
     }
 
-    // ✅ FIXED: ปรับปรุงการคำนวณถ่วงน้ำหนักตาม 4 ฝ่ายจริง
+    // 💡 คำนวณคะแนนถ่วงน้ำหนักรวม 4 ฝ่าย
     function calculateProjectScore(prj) {
       let count = 0;
       let totalWeightedScore = 0;
-
       for (let deptId = 1; deptId <= 4; deptId++) {
         if (prj.evaluations && prj.evaluations[deptId]) {
           count++;
@@ -774,140 +248,100 @@
           totalWeightedScore += deptScore * deptWeightRatios[deptId];
         }
       }
-
       return { count: count, completed: count === 4, score: totalWeightedScore.toFixed(2) };
-    }
-
-    function getGrade(score) {
-      const num = parseFloat(score);
-      if (num >= 85) return { label: "A (ดีมาก)", bg: "bg-success" };
-      if (num >= 75) return { label: "B (ดี)", bg: "bg-primary" };
-      if (num >= 65) return { label: "C (พอใช้)", bg: "bg-warning text-dark" };
-      return { label: "D (ต้องปรับปรุง)", bg: "bg-danger" };
     }
 
     function renderDashboardTable() {
       const tbody = document.getElementById("projectTableBody");
       tbody.innerHTML = "";
 
-      let countTotal = projectsData.length;
-      let countCompleted = 0;
-      let countPending = 0;
-
       projectsData.forEach((prj) => {
         const scoreInfo = calculateProjectScore(prj);
-        if (scoreInfo.completed) countCompleted++; else countPending++;
-
-        const gradeObj = scoreInfo.completed ? getGrade(scoreInfo.score) : { label: "-", bg: "bg-secondary" };
-
-        let statusBadgeHtml = scoreInfo.completed 
-          ? `<span class="badge badge-status-completed"><i class="fa-solid fa-check-double me-1"></i>ประเมินครบ 4 ฝ่าย</span>`
-          : `<span class="badge badge-status-pending"><i class="fa-solid fa-clock me-1"></i>ค้างประเมิน (${scoreInfo.count}/4 ฝ่าย)</span>`;
-
         const tr = document.createElement("tr");
+
+        // สร้าง HTML สำหรับ 4 Column แยกฝ่าย
+        let deptScoresHtml = "";
+        const maxWeights = { 1: 65, 2: 10, 3: 10, 4: 15 };
+        
+        for (let d = 1; d <= 4; d++) {
+          if (prj.evaluations && prj.evaluations[d]) {
+            let deptScore = parseFloat(prj.evaluations[d].totalDeptScore) || 0;
+            // คำนวณสัดส่วนคะแนนจริงที่ได้จากน้ำหนักเต็ม เช่น 55.08% / 65%
+            let actualVal = (deptScore * (maxWeights[d] / 100)).toFixed(1);
+            deptScoresHtml += `<td class="text-center"><span class="badge bg-success-subtle text-success border border-success dept-score-badge">${actualVal}% / ${maxWeights[d]}%</span></td>`;
+          } else {
+            deptScoresHtml += `<td class="text-center"><span class="badge bg-light text-muted border dept-score-badge">ยังไม่ประเมิน</span></td>`;
+          }
+        }
+
         tr.innerHTML = `
           <td>
             <div class="fw-bold text-dark">${prj.branchName}</div>
-            <div class="fs-7 text-muted">${prj.id}</div>
+            <div class="fs-7 text-muted">รหัส: ${prj.id}</div>
           </td>
           <td><span class="badge bg-light text-dark border">${prj.model}</span></td>
           <td>${prj.contractor}</td>
-          <td>${(prj.budget || 0).toFixed(1)}</td>
-          <td>${statusBadgeHtml}</td>
-          <td class="text-center fw-bold fs-6 text-primary">
-            ${scoreInfo.count > 0 ? scoreInfo.score + " %" : "-"}
-          </td>
-          <td class="text-center">
-            ${scoreInfo.completed ? `<span class="badge ${gradeObj.bg}">${gradeObj.label}</span>` : `<span class="text-muted fs-7">-</span>`}
-          </td>
+          ${deptScoresHtml}
+          <td class="text-center fw-bold fs-6 text-primary">${scoreInfo.count > 0 ? scoreInfo.score + " %" : "-"}</td>
+          <td class="text-center">${scoreInfo.completed ? `<span class="badge bg-success">ผ่าน</span>` : `<span class="text-muted fs-7">-</span>`}</td>
           <td class="text-end">
-            <div class="btn-group btn-group-sm">
-              <button class="btn btn-outline-primary" onclick="openEvalTabForProject('${prj.id}')" title="ทำแบบประเมิน">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              ${scoreInfo.completed ? 
-                `<button class="btn btn-success fw-bold" onclick="printReportForProject('${prj.id}')" title="พิมพ์รายงาน">
-                  <i class="fa-solid fa-print"></i>
-                 </button>` : ''
-              }
-            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="openEvalTabForProject('${prj.id}')">
+              <i class="fa-solid fa-pen"></i>
+            </button>
           </td>
         `;
         tbody.appendChild(tr);
       });
-
-      document.getElementById("stat-total").innerText = countTotal;
-      document.getElementById("stat-completed").innerText = countCompleted;
-      document.getElementById("stat-pending").innerText = countPending;
     }
 
     function openEvalTabForProject(projectId) {
       document.getElementById("evalProjectSelect").value = projectId;
       onProjectSelectChange();
-      const tabTrigger = new bootstrap.Tab(document.getElementById('eval-tab'));
-      tabTrigger.show();
+      new bootstrap.Tab(document.getElementById('eval-tab')).show();
     }
 
     function onProjectSelectChange() {
       const prjId = document.getElementById("evalProjectSelect").value;
       const deptId = document.getElementById("evalDeptSelect").value;
       currentSelectedRatings = {};
-      document.getElementById("evaluatorName").value = "";
-      document.getElementById("evaluatorEmail").value = "";
-      document.getElementById("evalComments").value = "";
 
       if (prjId) {
-        const prj = projectsData.find(p => p.id === prjId);
+        const prj = projectsData.find(p => String(p.id) === String(prjId));
         if (prj && prj.evaluations && prj.evaluations[deptId]) {
           const deptEval = prj.evaluations[deptId];
           currentSelectedRatings = { ...deptEval.scores };
-          if (deptEval.evaluatorName) {
-            document.getElementById("evaluatorName").value = deptEval.evaluatorName;
-          }
-          if (deptEval.evaluatorEmail) {
-            document.getElementById("evaluatorEmail").value = deptEval.evaluatorEmail;
-          }
-          if (deptEval.comments) {
-            document.getElementById("evalComments").value = deptEval.comments;
-          }
+          document.getElementById("evaluatorName").value = deptEval.evaluatorName || "";
+          document.getElementById("evaluatorEmail").value = deptEval.evaluatorEmail || "";
+          document.getElementById("evalComments").value = deptEval.comments || "";
         }
       }
       renderRubricCards();
     }
 
     function getFilteredCriteria(deptId) {
-      return criteria12.filter(c => {
-        const weight = c.weights[deptId] || 0;
-        return weight > 0;
-      });
+      return criteria12.filter(c => (c.weights[deptId] || 0) > 0);
     }
 
     function renderRubricCards() {
       const container = document.getElementById("rubricCardsContainer");
       const deptId = parseInt(document.getElementById("evalDeptSelect").value);
       const filteredCriteria = getFilteredCriteria(deptId);
-      
       container.innerHTML = "";
 
       filteredCriteria.forEach(c => {
         const selectedVal = currentSelectedRatings[c.id] || 0;
         const weight = c.weights[deptId];
-
         const card = document.createElement("div");
         card.className = `card card-custom rubric-card p-3 ${selectedVal > 0 ? 'selected' : ''}`;
         
         let optionsHtml = "";
         for (let lvl = 5; lvl >= 1; lvl--) {
-          const rubricText = c[`r${lvl}`];
           const isActive = selectedVal === lvl;
           optionsHtml += `
             <div class="rubric-option ${isActive ? 'active' : ''}" onclick="selectRating(${c.id}, ${lvl})">
               <div class="d-flex align-items-start">
                 <input class="form-check-input me-2 mt-1" type="radio" name="topic_${c.id}" value="${lvl}" ${isActive ? 'checked' : ''}>
-                <div>
-                  <span class="fw-bold me-2">ระดับ ${lvl}:</span>
-                  <span class="fs-7">${rubricText}</span>
-                </div>
+                <div><span class="fw-bold me-2">ระดับ ${lvl}:</span><span class="fs-7">${c['r'+lvl]}</span></div>
               </div>
             </div>
           `;
@@ -918,13 +352,10 @@
             <h6 class="fw-bold text-dark mb-0">${c.title}</h6>
             <span class="badge bg-secondary">${weight.toFixed(2)}%</span>
           </div>
-          <div class="d-flex flex-column">
-            ${optionsHtml}
-          </div>
+          <div>${optionsHtml}</div>
         `;
         container.appendChild(card);
       });
-
       calculateLiveDeptScore();
     }
 
@@ -947,8 +378,7 @@
       });
 
       const finalScore = totalWeight > 0 ? (totalWeightedScore / totalWeight) * 100 : 0;
-      const element = document.getElementById("liveScoreCounter");
-      element.innerText = `คะแนนฝ่ายนี้: ${finalScore.toFixed(2)} / 100%`;
+      document.getElementById("liveScoreCounter").innerText = `คะแนนฝ่ายนี้: ${finalScore.toFixed(2)} / 100%`;
       return finalScore;
     }
 
@@ -960,221 +390,54 @@
       const evalEmail = document.getElementById("evaluatorEmail").value.trim();
       const comments = document.getElementById("evalComments").value.trim();
 
-      if (!prjId) {
-        showNotification("กรุณาเลือกสาขาที่ต้องการประเมิน", "warning");
+      if (!prjId || !evalName) {
+        alert("กรุณาเลือกสาขาและใส่ชื่อผู้ประเมิน");
         return;
       }
 
-      if (!evalName) {
-        showNotification("กรุณาระบุชื่อผู้ประเมิน", "warning");
-        return;
-      }
-
-      const filteredCriteria = getFilteredCriteria(parseInt(deptId));
-      for (let criterion of filteredCriteria) {
-        if (!currentSelectedRatings[criterion.id]) {
-          showNotification(`กรุณาเลือกเกณฑ์การประเมินให้ครบทั้งหมด`, "warning");
-          return;
-        }
-      }
-
-      const prj = projectsData.find(p => p.id === prjId);
-      if (!prj) return;
-      if (!prj.evaluations) prj.evaluations = {};
-
+      const prj = projectsData.find(p => String(p.id) === String(prjId));
       const deptScore = calculateLiveDeptScore();
       
-      const evalData = {
-        scores: { ...currentSelectedRatings },
-        totalDeptScore: deptScore,
-        evaluatorName: evalName,
-        evaluatorEmail: evalEmail,
-        comments: comments,
-        timestamp: new Date().toLocaleString("th-TH")
+      const evalRecord = {
+        eval_id: `${prjId}-DEPT-${deptId}`,
+        timestamp: new Date().toLocaleString("th-TH"),
+        project_id: prjId,
+        dept_id: parseInt(deptId),
+        evaluator_name: evalName,
+        evaluator_email: evalEmail,
+        scores_json: JSON.stringify(currentSelectedRatings),
+        dept_weighted_score: deptScore,
+        branch_name: prj ? prj.branchName : "",
+        remarks: comments
       };
 
-      const btnSubmit = document.getElementById("btnSubmitForm");
-      btnSubmit.disabled = true;
-      btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>กำลังบันทึกข้อมูล...`;
-
-      await saveEvaluationToSheet(prjId, deptId, evalData);
-
-      btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
-
-      const tabTrigger = new bootstrap.Tab(document.getElementById('dashboard-tab'));
-      tabTrigger.show();
-    }
-
-    // ✅ FIXED: Optimistic UI Update + การสร้าง eval_id ที่แม่นยำ
-    async function saveEvaluationToSheet(projectId, deptId, evalData) {
-      try {
-        const numericDeptId = parseInt(deptId, 10);
-        const evalRecord = {
-          eval_id: `${projectId}-DEPT-${numericDeptId}`,
-          timestamp: evalData.timestamp,
-          project_id: projectId,
-          dept_id: numericDeptId,
-          evaluator_name: evalData.evaluatorName,
-          evaluator_email: evalData.evaluatorEmail || '',
-          scores_json: JSON.stringify(evalData.scores),
-          dept_weighted_score: evalData.totalDeptScore,
-          remarks: evalData.comments
+      // 1. อัปเดตฝั่ง Browser ทันที
+      if (prj) {
+        if (!prj.evaluations) prj.evaluations = {};
+        prj.evaluations[deptId] = {
+          evaluatorName: evalName,
+          evaluatorEmail: evalEmail,
+          scores: { ...currentSelectedRatings },
+          totalDeptScore: deptScore,
+          comments: comments
         };
-
-        // 1. ปรับปรุงข้อมูลใน Memory หน้าเว็บทันที ข้อมูลจึงจะไม่หายวับไปหลังกดส่ง
-        const prj = projectsData.find(p => p.id === projectId);
-        if (prj) {
-          if (!prj.evaluations) prj.evaluations = {};
-          prj.evaluations[numericDeptId] = evalData;
-        }
-        renderDashboardTable();
-
-        // 2. ส่งข้อมูลลง Google Sheet
-        let scriptUrl = currentScriptUrl || DEFAULT_SCRIPT_URL;
-        if (scriptUrl.endsWith('/usercallback')) {
-          scriptUrl = scriptUrl.replace(/\/usercallback$/, '/exec');
-        }
-
-        if (scriptUrl) {
-          try {
-            await fetch(scriptUrl, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify(evalRecord)
-            });
-
-            showNotification("✅ บันทึกผลการประเมินลง Google Sheet สำเร็จ!", "success");
-            // ดึงข้อมูลจริงจาก Sheet กลับมาอีกครั้งเพื่อความซิงค์เต็ม 100%
-            setTimeout(() => { fetchDataFromGoogleSheet(); }, 2500);
-          } catch (fetchErr) {
-            console.error("❌ Fetch error:", fetchErr);
-            showNotification("⚠️ มีปัญหาในการเชื่อมต่อ แต่บันทึกข้อมูลไว้ในหน้าจอเรียบร้อยแล้ว", "warning");
-          }
-        } else {
-          showNotification("⚠️ ยังไม่ได้ตั้งค่า Web App URL", "warning");
-        }
-
-      } catch (err) {
-        console.error("❌ Error in saveEvaluationToSheet:", err);
-        showNotification("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล", "danger");
       }
-    }
+      renderDashboardTable();
 
-    function renderWeightsTable() {
-      const tbody = document.getElementById("weightsTableBody");
-      tbody.innerHTML = "";
-
-      criteria12.forEach((c, idx) => {
-        const tr = document.createElement("tr");
-        let totalWeight = 0;
-        for (let d = 1; d <= 4; d++) {
-          totalWeight += (c.weights[d] || 0);
-        }
-
-        tr.innerHTML = `
-          <td class="fw-bold">${idx + 1}</td>
-          <td>${c.title}</td>
-          <td class="weight-table-cell">${totalWeight.toFixed(2)}%</td>
-          <td class="weight-table-cell">
-            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[1] || 0).toFixed(2)}" 
-              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 1, this.value)">
-          </td>
-          <td class="weight-table-cell">
-            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[2] || 0).toFixed(2)}" 
-              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 2, this.value)">
-          </td>
-          <td class="weight-table-cell">
-            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[3] || 0).toFixed(2)}" 
-              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 3, this.value)">
-          </td>
-          <td class="weight-table-cell">
-            <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[4] || 0).toFixed(2)}" 
-              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 4, this.value)">
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function updateCriteriaWeight(criteriaId, deptId, value) {
-      const criterion = criteria12.find(c => c.id === criteriaId);
-      if (criterion) {
-        criterion.weights[deptId] = parseFloat(value) || 0;
+      // 2. ส่งข้อมูลลง Google Sheet
+      if (currentScriptUrl) {
+        await fetch(currentScriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(evalRecord)
+        });
+        alert("บันทึกข้อมูลสำเร็จ!");
+        setTimeout(fetchDataFromGoogleSheet, 2000);
       }
-    }
-
-    function resetWeightsToDefault() {
-      if (!confirm("ต้องการรีเซ็ตค่าน้ำหนักกลับไปยังค่าเริ่มต้นหรือไม่?")) return;
-      showNotification("ฟังก์ชันรีเซ็ตต้องดำเนินการตามเอกสารเดิม", "info");
-      renderWeightsTable();
-    }
-
-    async function saveWeightsToSheet() {
-      try {
-        const weightsData = criteria12.map(c => ({
-          criterion_id: c.id,
-          title: c.title,
-          weights: c.weights
-        }));
-        localStorage.setItem("CRITERIA_WEIGHTS", JSON.stringify(weightsData));
-        showNotification("บันทึกน้ำหนักการประเมินในระบบสำเร็จ!", "success");
-      } catch (err) {
-        showNotification("เกิดข้อผิดพลาดในการบันทึก", "danger");
-      }
-    }
-
-    function printReportForProject(projectId) {
-      const prj = projectsData.find(p => p.id === projectId);
-      if (!prj) return;
-
-      const scoreInfo = calculateProjectScore(prj);
-      if (!scoreInfo.completed) {
-        showNotification("โครงการนี้ยังประเมินไม่ครบทั้ง 4 ฝ่าย", "warning");
-        return;
-      }
-
-      const gradeObj = getGrade(scoreInfo.score);
-
-      document.getElementById("prtProjectId").innerText = prj.id;
-      document.getElementById("prtBranchName").innerText = prj.branchName;
-      document.getElementById("prtModel").innerText = prj.model;
-      document.getElementById("prtContractor").innerText = prj.contractor;
-      document.getElementById("prtBudget").innerText = (prj.budget || 0).toFixed(1);
-      document.getElementById("prtDate").innerText = new Date().toLocaleDateString("th-TH");
-
-      document.getElementById("prtFinalScore").innerText = scoreInfo.score + " %";
-      document.getElementById("prtGrade").innerText = gradeObj.label;
-
-      const deptInfo = {
-        1: { name: "ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย", weight: "65%" },
-        2: { name: "ฝ่ายที่ 2: จัดซื้อจัดจ้าง", weight: "10%" },
-        3: { name: "ฝ่ายที่ 3: ความปลอดภัย Safety", weight: "10%" },
-        4: { name: "ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ", weight: "15%" }
-      };
-
-      const tbody = document.getElementById("prtDeptTableBody");
-      tbody.innerHTML = "";
-
-      for (let d = 1; d <= 4; d++) {
-        const deptEval = prj.evaluations[d];
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${deptInfo[d].name}</td>
-          <td>${deptInfo[d].weight}</td>
-          <td class="text-center fw-bold">${deptEval ? parseFloat(deptEval.totalDeptScore).toFixed(2) + "%" : "-"}</td>
-          <td class="text-center text-success fw-bold"><i class="fa-solid fa-check me-1"></i>เสร็จสมบูรณ์</td>
-        `;
-        tbody.appendChild(tr);
-      }
-
-      const printArea = document.getElementById("printReportArea");
-      printArea.classList.remove("d-none");
-      window.print();
-      printArea.classList.add("d-none");
+      
+      new bootstrap.Tab(document.getElementById('dashboard-tab')).show();
     }
   </script>
-
 </body>
 </html>
