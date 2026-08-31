@@ -30,6 +30,21 @@
     .rubric-option:hover { border-color: var(--secondary-color); background-color: #f0f9ff; }
     .rubric-option.active { border-color: #10b981; background-color: #ecfdf5; }
     .dept-score-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
+    
+    /* สไตล์กล่องลายเซ็น */
+    .signature-container {
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      background-color: #fff;
+      touch-action: none;
+      position: relative;
+    }
+    canvas#signaturePad {
+      width: 100%;
+      height: 160px;
+      border-radius: 8px;
+      cursor: crosshair;
+    }
   </style>
 </head>
 <body>
@@ -72,7 +87,6 @@
       <!-- DASHBOARD VIEW -->
       <div class="tab-pane fade show active" id="dashboard-view" role="tabpanel">
         
-        <!-- Summary Cards (3 การ์ดสรุปสถานะการประเมิน) -->
         <div class="row g-3 mb-4">
           <div class="col-12 col-md-4">
             <div class="card card-custom p-3 stat-card c-blue">
@@ -110,7 +124,6 @@
         </div>
 
         <div class="card card-custom p-4 bg-white mb-4">
-          <!-- Section ตัวกรอง Filter BU และ Zone -->
           <div class="row g-3 align-items-center mb-4 pb-3 border-bottom">
             <div class="col-12 col-md-4">
               <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-filter me-1"></i>กรองตาม BU (Column C):</label>
@@ -199,7 +212,19 @@
 
           <div class="card card-custom p-3 bg-white mb-4">
             <label class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติม / Remark:</label>
-            <textarea id="evalComments" class="form-control" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
+            <textarea id="evalComments" class="form-control mb-3" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
+            
+            <!-- ✍️ กล่องรับลายเซ็นออนไลน์ -->
+            <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+              <span><i class="fa-solid fa-signature me-1 text-primary"></i> ลายเซ็นผู้ประเมิน (ลงนามออนไลน์):</span>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSignature()">
+                <i class="fa-solid fa-eraser me-1"></i> ล้างลายเซ็น
+              </button>
+            </label>
+            <div class="signature-container">
+              <canvas id="signaturePad"></canvas>
+            </div>
+            <small class="text-muted mt-1">* ใช้นิ้วมือสัมผัส หรือเมาส์ลากเพื่อเซ็นชื่อลงในกล่องด้านบน</small>
           </div>
 
           <div class="d-flex justify-content-end gap-2 mb-5">
@@ -233,7 +258,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIptaUP8FGBSnment5jDS_hq3MpyUofR9b_eIwjTHZhdtP4Ewbarws6Y50WI8Q7Hjp/exec";
+    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKM3pJEIpVXQVnXSrN1tpnygNdMqHInIAkRo0Z0seFl-hhXTGsNKh6MPxJbLqO_D4s/exec";
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
     
     const criteria12 = [
@@ -254,12 +279,80 @@
     let projectsData = [];
     let currentSelectedRatings = {};
     let currentScriptUrl = "";
+    
+    // Canvas Signature State
+    let canvas, ctx, isDrawing = false, hasSigned = false;
 
     window.onload = function() {
       currentScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
       document.getElementById("scriptUrlInput").value = currentScriptUrl;
+      initCanvas();
       fetchDataFromGoogleSheet();
     };
+
+    // ระบบวาดลายเซ็นออนไลน์
+    function initCanvas() {
+      canvas = document.getElementById("signaturePad");
+      ctx = canvas.getContext("2d");
+      
+      // ปรับขนาด Canvas ให้ตรงความกว้างจริง
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#0f2b48";
+
+      // Touch / Mouse Event Handlers
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDrawing);
+      canvas.addEventListener("mouseleave", stopDrawing);
+
+      canvas.addEventListener("touchstart", (e) => { startDrawing(getTouchPos(e)); e.preventDefault(); });
+      canvas.addEventListener("touchmove", (e) => { draw(getTouchPos(e)); e.preventDefault(); });
+      canvas.addEventListener("touchend", stopDrawing);
+    }
+
+    function getTouchPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      hasSigned = true;
+      ctx.beginPath();
+      const x = e.clientX ? e.clientX - canvas.getBoundingClientRect().left : e.x;
+      const y = e.clientY ? e.clientY - canvas.getBoundingClientRect().top : e.y;
+      ctx.moveTo(x, y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const x = e.clientX ? e.clientX - canvas.getBoundingClientRect().left : e.x;
+      const y = e.clientY ? e.clientY - canvas.getBoundingClientRect().top : e.y;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    function stopDrawing() { isDrawing = false; }
+
+    function clearSignature() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hasSigned = false;
+    }
+
+    function loadSignatureImage(dataUrl) {
+      clearSignature();
+      if (!dataUrl) return;
+      const img = new Image();
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0);
+        hasSigned = true;
+      };
+      img.src = dataUrl;
+    }
 
     function saveSheetSettings() {
       currentScriptUrl = document.getElementById("scriptUrlInput").value.trim();
@@ -278,12 +371,9 @@
           renderDashboardTable();
           populateProjectSelectOptions();
         }
-      } catch (err) {
-        console.error("Fetch Error:", err);
-      }
+      } catch (err) { console.error("Fetch Error:", err); }
     }
 
-    // สร้างตัวเลือกสำหรับ Dropdown Filter (BU และ Zone)
     function setupFilterOptions() {
       const buSet = new Set();
       const zoneSet = new Set();
@@ -326,7 +416,6 @@
       let completedCount = 0;
       let pendingCount = 0;
 
-      // กรองข้อมูลตาม BU และ Zone
       const filteredProjects = projectsData.filter(prj => {
         const matchBU = !selectedBU || prj.bu === selectedBU;
         const matchZone = !selectedZone || prj.zone === selectedZone;
@@ -336,16 +425,9 @@
       filteredProjects.forEach((prj) => {
         const scoreInfo = calculateProjectScore(prj);
 
-        // คำนวณยอดสำหรับ Dashboard Summary Cards
-        if (String(prj.status).trim() === "1 Complete 26") {
-          opened2026Count++;
-        }
-
-        if (scoreInfo.completed) {
-          completedCount++;
-        } else {
-          pendingCount++;
-        }
+        if (String(prj.status).trim() === "1 Complete 26") opened2026Count++;
+        if (scoreInfo.completed) completedCount++;
+        else pendingCount++;
 
         const tr = document.createElement("tr");
         let deptScoresHtml = "";
@@ -384,7 +466,6 @@
         tbody.appendChild(tr);
       });
 
-      // อัปเดตตัวเลขบน Summary Cards
       document.getElementById("cardOpenedCount").innerText = opened2026Count;
       document.getElementById("cardCompletedCount").innerText = completedCount;
       document.getElementById("cardPendingCount").innerText = pendingCount;
@@ -411,6 +492,7 @@
       const prjId = document.getElementById("evalProjectSelect").value;
       const deptId = document.getElementById("evalDeptSelect").value;
       currentSelectedRatings = {};
+      clearSignature();
 
       if (prjId) {
         const prj = projectsData.find(p => String(p.id) === String(prjId));
@@ -420,6 +502,7 @@
           document.getElementById("evaluatorName").value = deptEval.evaluatorName || "";
           document.getElementById("evaluatorEmail").value = deptEval.evaluatorEmail || "";
           document.getElementById("evalComments").value = deptEval.comments || "";
+          if (deptEval.signatureData) loadSignatureImage(deptEval.signatureData);
         }
       }
       renderRubricCards();
@@ -502,6 +585,12 @@
         return;
       }
 
+      if (!hasSigned) {
+        alert("กรุณาลงนามลายเซ็นออนไลน์ก่อนบันทึกข้อมูล");
+        return;
+      }
+
+      const signatureDataUrl = canvas.toDataURL("image/png");
       const prj = projectsData.find(p => String(p.id) === String(prjId));
       const deptScore = calculateLiveDeptScore();
       
@@ -514,6 +603,7 @@
         evaluator_email: evalEmail,
         scores_json: JSON.stringify(currentSelectedRatings),
         dept_weighted_score: deptScore,
+        signature_data: signatureDataUrl, // บันทึกลายเซ็น
         branch_name: prj ? prj.branchName : "",
         remarks: comments
       };
@@ -525,6 +615,7 @@
           evaluatorEmail: evalEmail,
           scores: { ...currentSelectedRatings },
           totalDeptScore: deptScore,
+          signatureData: signatureDataUrl,
           comments: comments
         };
       }
@@ -537,7 +628,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(evalRecord)
         });
-        alert("บันทึกข้อมูลสำเร็จ!");
+        alert("บันทึกข้อมูลและลายเซ็นสำเร็จ!");
         setTimeout(fetchDataFromGoogleSheet, 2000);
       }
       
