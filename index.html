@@ -19,15 +19,17 @@
     }
     body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 60px; }
     .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .stat-card { border-left: 5px solid; border-radius: 12px; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-card.c-blue { border-left-color: #0284c7; background: #f0f9ff; }
+    .stat-card.c-green { border-left-color: #10b981; background: #f0fdf4; }
+    .stat-card.c-amber { border-left-color: #f59e0b; background: #fffbeb; }
     .rubric-card { border-left: 5px solid var(--secondary-color); background: #ffffff; border-radius: 8px; }
     .rubric-card.selected { border-left-color: #10b981; background-color: #f0fdf4; }
     .rubric-option { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; background-color: #ffffff; }
     .rubric-option:hover { border-color: var(--secondary-color); background-color: #f0f9ff; }
     .rubric-option.active { border-color: #10b981; background-color: #ecfdf5; }
-    .badge-status-completed { background-color: #dcfce7; color: #166534; border: 1px solid #86efac; }
-    .badge-status-pending { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
     .dept-score-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
-    .toast-container-custom { position: fixed; top: 20px; right: 20px; z-index: 1090; }
   </style>
 </head>
 <body>
@@ -43,7 +45,7 @@
       </a>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Apps Script URL
+          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Web App URL
         </button>
         <span class="badge bg-info px-3 py-2 border text-dark" id="dbStatusBadge">
           <i class="fa-solid fa-database me-1"></i> Ready
@@ -69,18 +71,76 @@
     <div class="tab-content">
       <!-- DASHBOARD VIEW -->
       <div class="tab-pane fade show active" id="dashboard-view" role="tabpanel">
+        
+        <!-- Summary Cards (3 การ์ดสรุปสถานะการประเมิน) -->
+        <div class="row g-3 mb-4">
+          <div class="col-12 col-md-4">
+            <div class="card card-custom p-3 stat-card c-blue">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="text-muted fw-bold small text-uppercase">เปิดแล้วปี 2026 (1 Complete 26)</div>
+                  <div class="fs-2 fw-bold text-primary" id="cardOpenedCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
+                </div>
+                <div class="fs-1 text-primary opacity-50"><i class="fa-solid fa-store"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card card-custom p-3 stat-card c-green">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="text-muted fw-bold small text-uppercase">ประเมินครบแล้ว (ครบ 4 ฝ่าย)</div>
+                  <div class="fs-2 fw-bold text-success" id="cardCompletedCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
+                </div>
+                <div class="fs-1 text-success opacity-50"><i class="fa-solid fa-circle-check"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card card-custom p-3 stat-card c-amber">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="text-muted fw-bold small text-uppercase">อยู่ระหว่างการประเมิน</div>
+                  <div class="fs-2 fw-bold text-warning" id="cardPendingCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
+                </div>
+                <div class="fs-1 text-warning opacity-50"><i class="fa-solid fa-hourglass-half"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card card-custom p-4 bg-white mb-4">
+          <!-- Section ตัวกรอง Filter BU และ Zone -->
+          <div class="row g-3 align-items-center mb-4 pb-3 border-bottom">
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-filter me-1"></i>กรองตาม BU (Column C):</label>
+              <select class="form-select" id="filterBU" onchange="renderDashboardTable()">
+                <option value="">-- BU ทั้งหมด --</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-map-location-dot me-1"></i>กรองตาม Zone (Column D):</label>
+              <select class="form-select" id="filterZone" onchange="renderDashboardTable()">
+                <option value="">-- Zone ทั้งหมด --</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-4 text-md-end mt-md-4">
+              <button class="btn btn-outline-secondary w-100 w-md-auto" onclick="fetchDataFromGoogleSheet()">
+                <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลใหม่จาก Sheet
+              </button>
+            </div>
+          </div>
+
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list me-2 text-primary"></i>รายการสถานีบริการน้ำมันและสถานะการประเมิน</h6>
-            <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()">
-              <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลจาก Sheet
-            </button>
           </div>
+
           <div class="table-responsive">
             <table class="table table-hover align-middle" id="projectTable">
               <thead class="table-light">
                 <tr>
                   <th>รหัสสาขา / ชื่อสถานี</th>
+                  <th>BU / Zone</th>
                   <th>Model</th>
                   <th>ชื่อผู้รับเหมา</th>
                   <th class="text-center">วิศวกรรม (65%)</th>
@@ -152,7 +212,7 @@
     </div>
   </div>
 
-  <!-- Modal ตั้งค่า Apps Script URL -->
+  <!-- Modal ตั้งค่า Web App URL -->
   <div class="modal fade" id="sheetApiModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -170,14 +230,10 @@
     </div>
   </div>
 
-  <div class="toast-container toast-container-custom" id="toastContainer"></div>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // 📍 บรรทัดใส่ Web App URL
-    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzfhEd9_qk0LClTXmK9KGt-3v88_qC-QtE1aXc62nCqqBoDUKGsZ37NSHGyHwU1S1i-/exec";
-
+    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIptaUP8FGBSnment5jDS_hq3MpyUofR9b_eIwjTHZhdtP4Ewbarws6Y50WI8Q7Hjp/exec";
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
     
     const criteria12 = [
@@ -218,6 +274,7 @@
         const data = await res.json();
         if (data && data.status === 'success') {
           projectsData = data.projects;
+          setupFilterOptions();
           renderDashboardTable();
           populateProjectSelectOptions();
         }
@@ -226,18 +283,26 @@
       }
     }
 
-    function populateProjectSelectOptions() {
-      const select = document.getElementById("evalProjectSelect");
-      select.innerHTML = `<option value="">-- กรุณาเลือกสาขา --</option>`;
+    // สร้างตัวเลือกสำหรับ Dropdown Filter (BU และ Zone)
+    function setupFilterOptions() {
+      const buSet = new Set();
+      const zoneSet = new Set();
+
       projectsData.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.id;
-        opt.innerText = `[${p.id}] ${p.branchName} - ${p.contractor}`;
-        select.appendChild(opt);
+        if (p.bu) buSet.add(p.bu);
+        if (p.zone) zoneSet.add(p.zone);
       });
+
+      const buSelect = document.getElementById("filterBU");
+      const zoneSelect = document.getElementById("filterZone");
+
+      buSelect.innerHTML = `<option value="">-- BU ทั้งหมด --</option>`;
+      buSet.forEach(bu => buSelect.innerHTML += `<option value="${bu}">${bu}</option>`);
+
+      zoneSelect.innerHTML = `<option value="">-- Zone ทั้งหมด --</option>`;
+      zoneSet.forEach(z => zoneSelect.innerHTML += `<option value="${z}">${z}</option>`);
     }
 
-    // 💡 คำนวณคะแนนถ่วงน้ำหนักรวม 4 ฝ่าย
     function calculateProjectScore(prj) {
       let count = 0;
       let totalWeightedScore = 0;
@@ -252,21 +317,43 @@
     }
 
     function renderDashboardTable() {
+      const selectedBU = document.getElementById("filterBU").value;
+      const selectedZone = document.getElementById("filterZone").value;
       const tbody = document.getElementById("projectTableBody");
       tbody.innerHTML = "";
 
-      projectsData.forEach((prj) => {
-        const scoreInfo = calculateProjectScore(prj);
-        const tr = document.createElement("tr");
+      let opened2026Count = 0;
+      let completedCount = 0;
+      let pendingCount = 0;
 
-        // สร้าง HTML สำหรับ 4 Column แยกฝ่าย
+      // กรองข้อมูลตาม BU และ Zone
+      const filteredProjects = projectsData.filter(prj => {
+        const matchBU = !selectedBU || prj.bu === selectedBU;
+        const matchZone = !selectedZone || prj.zone === selectedZone;
+        return matchBU && matchZone;
+      });
+
+      filteredProjects.forEach((prj) => {
+        const scoreInfo = calculateProjectScore(prj);
+
+        // คำนวณยอดสำหรับ Dashboard Summary Cards
+        if (String(prj.status).trim() === "1 Complete 26") {
+          opened2026Count++;
+        }
+
+        if (scoreInfo.completed) {
+          completedCount++;
+        } else {
+          pendingCount++;
+        }
+
+        const tr = document.createElement("tr");
         let deptScoresHtml = "";
         const maxWeights = { 1: 65, 2: 10, 3: 10, 4: 15 };
         
         for (let d = 1; d <= 4; d++) {
           if (prj.evaluations && prj.evaluations[d]) {
             let deptScore = parseFloat(prj.evaluations[d].totalDeptScore) || 0;
-            // คำนวณสัดส่วนคะแนนจริงที่ได้จากน้ำหนักเต็ม เช่น 55.08% / 65%
             let actualVal = (deptScore * (maxWeights[d] / 100)).toFixed(1);
             deptScoresHtml += `<td class="text-center"><span class="badge bg-success-subtle text-success border border-success dept-score-badge">${actualVal}% / ${maxWeights[d]}%</span></td>`;
           } else {
@@ -278,6 +365,10 @@
           <td>
             <div class="fw-bold text-dark">${prj.branchName}</div>
             <div class="fs-7 text-muted">รหัส: ${prj.id}</div>
+          </td>
+          <td>
+            <div class="fs-7 fw-bold text-secondary">${prj.bu || '-'}</div>
+            <div class="fs-7 text-muted">${prj.zone || '-'}</div>
           </td>
           <td><span class="badge bg-light text-dark border">${prj.model}</span></td>
           <td>${prj.contractor}</td>
@@ -291,6 +382,22 @@
           </td>
         `;
         tbody.appendChild(tr);
+      });
+
+      // อัปเดตตัวเลขบน Summary Cards
+      document.getElementById("cardOpenedCount").innerText = opened2026Count;
+      document.getElementById("cardCompletedCount").innerText = completedCount;
+      document.getElementById("cardPendingCount").innerText = pendingCount;
+    }
+
+    function populateProjectSelectOptions() {
+      const select = document.getElementById("evalProjectSelect");
+      select.innerHTML = `<option value="">-- กรุณาเลือกสาขา --</option>`;
+      projectsData.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.innerText = `[${p.id}] ${p.branchName} - ${p.contractor}`;
+        select.appendChild(opt);
       });
     }
 
@@ -411,7 +518,6 @@
         remarks: comments
       };
 
-      // 1. อัปเดตฝั่ง Browser ทันที
       if (prj) {
         if (!prj.evaluations) prj.evaluations = {};
         prj.evaluations[deptId] = {
@@ -424,7 +530,6 @@
       }
       renderDashboardTable();
 
-      // 2. ส่งข้อมูลลง Google Sheet
       if (currentScriptUrl) {
         await fetch(currentScriptUrl, {
           method: 'POST',
