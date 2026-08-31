@@ -136,7 +136,7 @@
       </a>
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Google Sheet
+          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Google Sheet / Web App URL
         </button>
         <span class="badge bg-info px-3 py-2 border text-dark" id="dbStatusBadge">
           <i class="fa-solid fa-database me-1"></i> Ready
@@ -154,11 +154,11 @@
         <div class="flex-grow-1">
           <h6 class="fw-bold mb-1">สถานะการเชื่อมต่อฐานข้อมูล Google Sheet:</h6>
           <div class="fs-7 text-dark" id="fetchErrorMessage">
-            ระบบพร้อมใช้งาน คลิก "ตั้งค่า Google Sheet" เพื่อเชื่อมต่อกับไฟล์ Google Sheet ของคุณ
+            ระบบพร้อมใช้งาน หากต้องการเปลี่ยน Apps Script URL คลิก "ตั้งค่า Google Sheet / Web App URL"
           </div>
           <div class="mt-2 d-flex gap-2 align-items-center flex-wrap">
             <button class="btn btn-sm btn-primary fw-bold" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า Google Sheet ID
+              <i class="fa-solid fa-gear me-1"></i> ตั้งค่า Apps Script URL
             </button>
             <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()">
               <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลใหม่
@@ -280,7 +280,7 @@
             </div>
             <div class="col-12 col-md-6 col-lg-3">
               <label class="form-label fw-bold">2. ฝ่ายผู้ทำการประเมิน:</label>
-              <select class="form-select" id="evalDeptSelect" onchange="renderRubricCards()">
+              <select class="form-select" id="evalDeptSelect" onchange="onProjectSelectChange()">
                 <option value="1">ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย (65%)</option>
                 <option value="2">ฝ่ายที่ 2: จัดซื้อจัดจ้าง (10%)</option>
                 <option value="3">ฝ่ายที่ 3: ความปลอดภัย Safety (10%)</option>
@@ -315,7 +315,7 @@
           </div>
 
           <div class="d-flex justify-content-end gap-2 mb-5">
-            <button type="reset" class="btn btn-light border px-4">ล้างข้อมูล</button>
+            <button type="reset" class="btn btn-light border px-4" onclick="setTimeout(onProjectSelectChange, 50)">ล้างข้อมูล</button>
             <button type="submit" class="btn btn-success fw-bold px-5 py-2" id="btnSubmitForm">
               <i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน
             </button>
@@ -429,22 +429,23 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold"><i class="fa-solid fa-table me-2"></i>ตั้งค่าการเชื่อมต่อ Google Sheet Database</h5>
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-table me-2"></i>ตั้งค่าการเชื่อมต่อ Google Apps Script Web App</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4">
           <div class="mb-3">
-            <label class="form-label fw-bold">Google Sheet ID:</label>
-            <input type="text" id="sheetIdInput" class="form-control mb-1" placeholder="ใส่ Sheet ID ของคุณ">
-            <small class="text-muted fs-8">รหัส Sheet ID จาก URL: https://docs.google.com/spreadsheets/d/[SHEET_ID]/edit</small>
+            <label class="form-label fw-bold">Google Apps Script Web App URL:</label>
+            <input type="text" id="scriptUrlInput" class="form-control mb-1" placeholder="https://script.google.com/macros/s/.../exec">
+            <small class="text-muted fs-8">ระบุ Web App URL ที่ได้จากการ Deploy Google Apps Script (ต้องลงท้ายด้วย /exec)</small>
           </div>
 
           <div class="alert alert-info fs-7 mb-0">
-            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนการตั้งค่า:</h6>
+            <h6 class="fw-bold mb-1"><i class="fa-solid fa-list-check me-1"></i>ขั้นตอนการตั้งค่า Apps Script:</h6>
             <ol class="mb-0 ps-3">
-              <li>เปิด Google Sheet ของคุณ &gt; กด <b>Share (แชร์)</b> &gt; เลือก <b>Anyone with the link can view</b></li>
-              <li>ตรวจสอบว่า Sheet มี Tab: <b>Projects, Evaluations, Criteria_12, Dept_Weights</b></li>
-              <li>ใส่ Sheet ID ด้านบนแล้วกดบันทึก</li>
+              <li>เปิด Google Apps Script (Extensions > Apps Script ใน Google Sheet)</li>
+              <li>วางโค้ด GAS ล่าสุดแล้วกด <b>Deploy > New deployment</b></li>
+              <li>เลือกประเภท <b>Web app</b>, Execute as: <b>Me</b>, Who has access: <b>Anyone</b></li>
+              <li>ก๊อปปี้ Web App URL มาใส่ในช่องด้านบนแล้วกดบันทึก</li>
             </ol>
           </div>
         </div>
@@ -464,7 +465,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const DEFAULT_SHEET_ID = "";
+    // URL ของ Google Apps Script Web App
+    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKM3pJEIpVXQVnXSrN1tpnygNdMqHInIAkRo0Z0seFl-hhXTGsNKh6MPxJbLqO_D4s/exec";
 
     // 12 Evaluation Criteria with department-specific weights
     const criteria12 = [
@@ -629,13 +631,13 @@
     ];
 
     let currentSelectedRatings = {};
-    let currentSheetId = "";
+    let currentScriptUrl = "";
 
     window.onload = function() {
-      const savedSheetId = localStorage.getItem("SHEET_ID") || DEFAULT_SHEET_ID;
-      currentSheetId = savedSheetId;
-      if (savedSheetId) {
-        document.getElementById("sheetIdInput").value = savedSheetId;
+      const savedScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
+      currentScriptUrl = savedScriptUrl;
+      if (savedScriptUrl) {
+        document.getElementById("scriptUrlInput").value = savedScriptUrl;
       }
       renderWeightsTable();
       fetchDataFromGoogleSheet();
@@ -653,15 +655,18 @@
     }
 
     function saveSheetSettings() {
-      const sheetId = document.getElementById("sheetIdInput").value.trim();
-      if (!sheetId) {
-        showNotification("กรุณาใส่ Sheet ID", "warning");
+      let scriptUrl = document.getElementById("scriptUrlInput").value.trim();
+      if (!scriptUrl) {
+        showNotification("กรุณาใส่ Web App URL", "warning");
         return;
       }
+      if (scriptUrl.endsWith('/usercallback')) {
+        scriptUrl = scriptUrl.replace(/\/usercallback$/, '/exec');
+      }
 
-      localStorage.setItem("SHEET_ID", sheetId);
-      currentSheetId = sheetId;
-      showNotification("บันทึกการตั้งค่าแล้ว กำลังโหลดข้อมูล...", "info");
+      localStorage.setItem("SCRIPT_URL", scriptUrl);
+      currentScriptUrl = scriptUrl;
+      showNotification("บันทึกการตั้งค่าแล้ว กำลังดึงข้อมูล...", "info");
       fetchDataFromGoogleSheet();
       
       const modalEl = document.getElementById('sheetApiModal');
@@ -670,9 +675,9 @@
     }
 
     async function fetchDataFromGoogleSheet() {
-      const sheetId = currentSheetId;
+      let scriptUrl = currentScriptUrl || DEFAULT_SCRIPT_URL;
 
-      if (!sheetId) {
+      if (!scriptUrl) {
         updateDbStatusBadge(false, "Demo Data");
         renderDashboardTable();
         populateProjectSelectOptions();
@@ -680,54 +685,31 @@
         return;
       }
 
-      try {
-        const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&headers=1&sheet=Projects`;
-        const response = await fetch(gvizUrl);
-        const text = await response.text();
-        
-        const jsonMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/);
-        if (jsonMatch && jsonMatch[1]) {
-          const parsed = JSON.parse(jsonMatch[1]);
-          const rows = parsed.table?.rows || [];
-          
-          if (rows.length > 0) {
-            const fetchedProjects = [];
-            rows.forEach((r, idx) => {
-              const c = r.c || [];
-              const pId = c[0]?.v ? String(c[0].v).trim() : `PRJ-${idx+1}`;
-              const branchName = c[1]?.v ? String(c[1].v).trim() : '';
-              const model = c[2]?.v ? String(c[2].v) : 'Model A';
-              const contractor = c[3]?.v ? String(c[3].v).trim() : '';
-              const budget = parseFloat(c[4]?.v) || 0;
-
-              if (branchName) {
-                fetchedProjects.push({
-                  id: pId,
-                  branchName: branchName,
-                  model: model,
-                  contractor: contractor,
-                  budget: budget,
-                  evaluations: {}
-                });
-              }
-            });
-
-            if (fetchedProjects.length > 0) {
-              projectsData = fetchedProjects;
-              updateDbStatusBadge(true, "Google Sheet Connected");
-              renderDashboardTable();
-              populateProjectSelectOptions();
-              renderRubricCards();
-              showNotification(`โหลดข้อมูล ${projectsData.length} โครงการจาก Google Sheet สำเร็จ!`, "success");
-              return;
-            }
-          }
-        }
-      } catch (err) {
-        console.warn("Fetch error:", err);
+      if (scriptUrl.endsWith('/usercallback')) {
+        scriptUrl = scriptUrl.replace(/\/usercallback$/, '/exec');
       }
 
-      updateDbStatusBadge(false, "Demo Data");
+      try {
+        console.log("🌐 Calling Apps Script doGet:", scriptUrl);
+        const response = await fetch(scriptUrl, { method: 'GET' });
+        const result = await response.json();
+
+        if (result && result.status === 'success' && Array.isArray(result.projects) && result.projects.length > 0) {
+          projectsData = result.projects;
+          updateDbStatusBadge(true, "Google Sheet Connected");
+          renderDashboardTable();
+          populateProjectSelectOptions();
+          onProjectSelectChange();
+          showNotification(`โหลดข้อมูล ${projectsData.length} โครงการเรียบร้อยแล้ว`, "success");
+          return;
+        } else {
+          console.warn("GAS return non-success or empty projects:", result);
+        }
+      } catch (err) {
+        console.warn("Fetch error via Apps Script:", err);
+      }
+
+      updateDbStatusBadge(false, "Demo Data / Offline");
       renderDashboardTable();
       populateProjectSelectOptions();
       renderRubricCards();
@@ -869,26 +851,29 @@
       const prjId = document.getElementById("evalProjectSelect").value;
       const deptId = document.getElementById("evalDeptSelect").value;
       currentSelectedRatings = {};
+      document.getElementById("evaluatorName").value = "";
+      document.getElementById("evaluatorEmail").value = "";
+      document.getElementById("evalComments").value = "";
 
       if (prjId) {
         const prj = projectsData.find(p => p.id === prjId);
         if (prj && prj.evaluations && prj.evaluations[deptId]) {
-          currentSelectedRatings = { ...prj.evaluations[deptId].scores };
-          if (prj.evaluations[deptId].evaluatorName) {
-            document.getElementById("evaluatorName").value = prj.evaluations[deptId].evaluatorName;
+          const deptEval = prj.evaluations[deptId];
+          currentSelectedRatings = { ...deptEval.scores };
+          if (deptEval.evaluatorName) {
+            document.getElementById("evaluatorName").value = deptEval.evaluatorName;
           }
-          if (prj.evaluations[deptId].evaluatorEmail) {
-            document.getElementById("evaluatorEmail").value = prj.evaluations[deptId].evaluatorEmail;
+          if (deptEval.evaluatorEmail) {
+            document.getElementById("evaluatorEmail").value = deptEval.evaluatorEmail;
           }
-          if (prj.evaluations[deptId].comments) {
-            document.getElementById("evalComments").value = prj.evaluations[deptId].comments;
+          if (deptEval.comments) {
+            document.getElementById("evalComments").value = deptEval.comments;
           }
         }
       }
       renderRubricCards();
     }
 
-    // Get filtered criteria based on selected department
     function getFilteredCriteria(deptId) {
       return criteria12.filter(c => {
         const weight = c.weights[deptId] || 0;
@@ -993,6 +978,7 @@
       }
 
       const prj = projectsData.find(p => p.id === prjId);
+      if (!prj) return;
       if (!prj.evaluations) prj.evaluations = {};
 
       const deptScore = calculateLiveDeptScore();
@@ -1008,18 +994,11 @@
 
       prj.evaluations[deptId] = evalData;
 
-      // Save to Google Sheet
-      if (currentSheetId) {
-        await saveEvaluationToSheet(prjId, deptId, evalData);
-      }
-
       const btnSubmit = document.getElementById("btnSubmitForm");
       btnSubmit.disabled = true;
       btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>กำลังบันทึกข้อมูล...`;
 
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      showNotification("บันทึกผลการประเมินสำเร็จ!", "success");
+      await saveEvaluationToSheet(prjId, deptId, evalData);
 
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
@@ -1031,7 +1010,6 @@
 
     async function saveEvaluationToSheet(projectId, deptId, evalData) {
       try {
-        // Create evaluation record to send to Google Apps Script
         const evalRecord = {
           eval_id: `${projectId}-${deptId}-${Date.now()}`,
           timestamp: evalData.timestamp,
@@ -1044,93 +1022,58 @@
           remarks: evalData.comments
         };
 
-        console.log("📤 Sending evaluation record:", evalRecord);
+        let scriptUrl = currentScriptUrl || DEFAULT_SCRIPT_URL;
 
-        // 🔴 ⚠️ ต้องแทนที่ URL นี้ด้วย URL ของ Google Apps Script ของคุณเอง ⚠️ 🔴
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKM3pJEIpVXQVnXSrN1tpnygNdMqHInIAkRo0Z0seFl-hhXTGsNKh6MPxJbLqO_D4s/usercallback';
-        
-        // ✅ ตรวจสอบว่า URL ถูกแทนที่แล้ว
-        if (SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')) {
-          showNotification("❌ ยังไม่ได้ตั้งค่า Google Apps Script URL ให้ถูกต้อง", "danger");
-          console.error("❌ SCRIPT_URL ยังไม่ได้รับการแทนที่! ต้องใส่ URL ของคุณเอง");
-          return;
+        if (scriptUrl.endsWith('/usercallback')) {
+          scriptUrl = scriptUrl.replace(/\/usercallback$/, '/exec');
         }
 
-        if (currentSheetId) {
+        if (scriptUrl) {
           try {
-            // 📤 ส่ง POST request ไปยัง Google Apps Script
-            console.log("🌐 POST ไปยัง:", SCRIPT_URL);
-            
-            const response = await fetch(SCRIPT_URL, {
+            const response = await fetch(scriptUrl, {
               method: 'POST',
-              body: JSON.stringify(evalRecord),
-              mode: 'no-cors', // 🔑 สำคัญ: เพิ่ม no-cors เพื่อ bypass CORS
               headers: {
-                'Content-Type': 'application/json'
-              }
+                'Content-Type': 'text/plain;charset=utf-8'
+              },
+              body: JSON.stringify(evalRecord)
             });
 
-            console.log("✅ POST Response Status:", response.status);
-            
-            // 🚨 เมื่อใช้ mode: 'no-cors' ไม่สามารถ .json() ได้
-            // เพราะฉะนั้นให้ถือว่าส่งสำเร็จเลย
-            
-            // ✅ แสดงการแจ้งเตือนให้ผู้ใช้
-            showNotification("✅ บันทึกผลการประเมินไปยัง Google Sheet สำเร็จ!", "success");
-            console.log("✅ บันทึกลง Google Sheet สำเร็จ");
+            const result = await response.json();
 
-            // 🔄 Refresh ข้อมูลจาก Google Sheet หลังบันทึกสำเร็จ
-            // รอ 2 วินาที เพื่อให้ Google Sheet อัพเดท
-            setTimeout(() => {
-              console.log("🔄 Refreshing data from Google Sheet...");
-              fetchDataFromGoogleSheet().then(() => {
-                console.log("✅ Data refreshed successfully");
-              });
-            }, 2000);
-
+            if (result && result.status === 'success') {
+              showNotification("✅ บันทึกผลการประเมินลง Google Sheet สำเร็จ!", "success");
+              setTimeout(() => { fetchDataFromGoogleSheet(); }, 1000);
+              return;
+            }
           } catch (fetchErr) {
-            console.error("❌ Network error:", fetchErr);
-            showNotification("⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อ ข้อมูลได้บันทึกใน Local Storage", "warning");
+            try {
+              await fetch(scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(evalRecord)
+              });
+              showNotification("✅ ส่งข้อมูลไปยัง Google Sheet เรียบร้อยแล้ว (no-cors)", "success");
+              setTimeout(() => { fetchDataFromGoogleSheet(); }, 2000);
+              return;
+            } catch (fallbackErr) {
+              console.error("❌ Fallback fetch error:", fallbackErr);
+            }
           }
         } else {
-          showNotification("⚠️ ยังไม่ได้ตั้งค่า Google Sheet ID", "warning");
+          showNotification("⚠️ ยังไม่ได้ตั้งค่า Web App URL", "warning");
         }
 
-        // ✅ เก็บ backup ใน localStorage เพิ่มเติม (กรณีส่งไม่สำเร็จ)
         const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
         backupData.push({
           ...evalRecord,
-          backedUp_at: new Date().toISOString(),
-          synced: false
+          backedUp_at: new Date().toISOString()
         });
         localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
 
-        console.log("💾 Backup saved to localStorage:", evalRecord);
-
       } catch (err) {
         console.error("❌ Error in saveEvaluationToSheet:", err);
-        showNotification("❌ เกิดข้อผิดพลาดในการบันทึก", "danger");
-        
-        // ยังคง backup ไว้ในกรณี error
-        try {
-          const backupData = JSON.parse(localStorage.getItem("EVAL_BACKUP") || "[]");
-          backupData.push({
-            eval_id: `${projectId}-${deptId}-${Date.now()}`,
-            timestamp: evalData.timestamp,
-            project_id: projectId,
-            dept_id: deptId,
-            evaluator_name: evalData.evaluatorName,
-            evaluator_email: evalData.evaluatorEmail || '',
-            scores_json: JSON.stringify(evalData.scores),
-            dept_weighted_score: evalData.totalDeptScore,
-            remarks: evalData.comments,
-            backedUp_at: new Date().toISOString(),
-            synced: false
-          });
-          localStorage.setItem("EVAL_BACKUP", JSON.stringify(backupData));
-        } catch (backupErr) {
-          console.error("Could not backup to localStorage:", backupErr);
-        }
+        showNotification("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล", "danger");
       }
     }
 
@@ -1155,7 +1098,7 @@
           </td>
           <td class="weight-table-cell">
             <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[2] || 0).toFixed(2)}" 
-              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 2, this.value)">
+              step="0.01" min="0" onchange="updateCriteriaWeight(${c.id}, 3, this.value)">
           </td>
           <td class="weight-table-cell">
             <input type="number" class="form-control form-control-sm weight-input" value="${(c.weights[3] || 0).toFixed(2)}" 
@@ -1168,53 +1111,30 @@
         `;
         tbody.appendChild(tr);
       });
-
-      displayDeptTotals();
     }
 
     function updateCriteriaWeight(criteriaId, deptId, value) {
       const criterion = criteria12.find(c => c.id === criteriaId);
       if (criterion) {
         criterion.weights[deptId] = parseFloat(value) || 0;
-        displayDeptTotals();
       }
-    }
-
-    function displayDeptTotals() {
-      const deptTotals = { 1: 0, 2: 0, 3: 0, 4: 0 };
-      criteria12.forEach(c => {
-        for (let d = 1; d <= 4; d++) {
-          deptTotals[d] += (c.weights[d] || 0);
-        }
-      });
-
-      // Display totals (could add a footer row for this)
-      console.log("Dept Totals:", deptTotals);
     }
 
     function resetWeightsToDefault() {
       if (!confirm("ต้องการรีเซ็ตค่าน้ำหนักกลับไปยังค่าเริ่มต้นหรือไม่?")) return;
-
-      // Reset to original values - you would define the defaults
       showNotification("ฟังก์ชันรีเซ็ตต้องดำเนินการตามเอกสารเดิม", "info");
       renderWeightsTable();
     }
 
     async function saveWeightsToSheet() {
-      if (!currentSheetId) {
-        showNotification("กรุณาตั้งค่า Google Sheet ID ก่อน", "warning");
-        return;
-      }
-
       try {
-        // Save weights data to localStorage as backup
         const weightsData = criteria12.map(c => ({
           criterion_id: c.id,
           title: c.title,
           weights: c.weights
         }));
         localStorage.setItem("CRITERIA_WEIGHTS", JSON.stringify(weightsData));
-        showNotification("บันทึกน้ำหนักการประเมินสำเร็จ!", "success");
+        showNotification("บันทึกน้ำหนักการประเมินในระบบสำเร็จ!", "success");
       } catch (err) {
         showNotification("เกิดข้อผิดพลาดในการบันทึก", "danger");
       }
