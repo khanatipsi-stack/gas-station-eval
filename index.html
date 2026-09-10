@@ -31,19 +31,32 @@
     .rubric-option.active { border-color: #10b981; background-color: #ecfdf5; }
     .dept-score-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
     
-    /* สไตล์กล่องลายเซ็น */
+    /* สไตล์กล่องแสดงตาราง Weight */
+    .weight-matrix-table th, .weight-matrix-table td {
+      vertical-align: middle;
+      font-size: 0.85rem;
+    }
+    .bg-cat-safety { background-color: #4382ec; color: #fff; }
+    .bg-cat-quality { background-color: #ff0000; color: #fff; }
+    .bg-cat-spec { background-color: #eab308; color: #fff; }
+    .bg-cat-exec { background-color: #22c55e; color: #fff; }
+
+    /* สไตล์กล่องรับลายเซ็น */
     .signature-container {
       border: 2px dashed #cbd5e1;
       border-radius: 8px;
       background-color: #fff;
       touch-action: none;
       position: relative;
+      width: 100%;
+      height: 180px;
     }
     canvas#signaturePad {
       width: 100%;
-      height: 160px;
+      height: 100%;
       border-radius: 8px;
       cursor: crosshair;
+      display: block;
     }
   </style>
 </head>
@@ -55,7 +68,7 @@
         <i class="fa-solid fa-gas-pump fs-4 me-3 text-warning"></i>
         <div>
           <span class="fs-5 d-block">ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</span>
-          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐาน</small>
+          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐานใหม่</small>
         </div>
       </a>
       <div class="d-flex align-items-center gap-2">
@@ -77,7 +90,7 @@
         </button>
       </li>
       <li class="nav-item">
-        <button class="nav-link fw-bold px-4" id="eval-tab" data-bs-toggle="pill" data-bs-target="#eval-view" type="button">
+        <button class="nav-link fw-bold px-4" id="eval-tab" data-bs-toggle="pill" data-bs-target="#eval-view" type="button" onclick="handleEvalTabOpen()">
           <i class="fa-solid fa-clipboard-check me-2"></i>ทำแบบประเมินผู้รับเหมา
         </button>
       </li>
@@ -118,6 +131,166 @@
                   <div class="fs-2 fw-bold text-warning" id="cardPendingCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
                 </div>
                 <div class="fs-1 text-warning opacity-50"><i class="fa-solid fa-hourglass-half"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsible Weight Distribution Matrix Panel -->
+        <div class="card card-custom bg-white mb-4">
+          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#weightTableCollapse">
+            <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-cells me-2 text-primary"></i>ตารางสัดส่วนน้ำหนักการประเมินผู้รับเหมา (Weight Distribution Reference)</h6>
+            <button class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-chevron-down"></i> แสดง/ซ่อน ตาราง Weight</button>
+          </div>
+          <div class="collapse" id="weightTableCollapse">
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm align-middle mb-0 weight-matrix-table text-center">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 50px;">ข้อ</th>
+                      <th style="width: 150px;">หมวด</th>
+                      <th>หัวข้อการประเมิน</th>
+                      <th style="width: 80px;">% New</th>
+                      <th style="width: 100px;" class="table-primary text-primary">Engineer</th>
+                      <th style="width: 100px;">purchasing</th>
+                      <th style="width: 100px;" class="table-success text-success">Safety</th>
+                      <th style="width: 100px;" class="table-warning text-dark">BU</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td class="bg-cat-safety">ความปลอดภัย</td>
+                      <td class="text-start">วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับหัวหน้างาน - ระดับวิชาชีพ</td>
+                      <td>4.00%</td>
+                      <td class="table-success fw-bold text-dark">2.25%</td>
+                      <td></td>
+                      <td class="table-success fw-bold text-dark">1.75%</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td class="bg-cat-safety">ความปลอดภัย</td>
+                      <td class="text-start">เครื่องมือช่าง ,เครื่องจักร และอุปกรณ์ที่จำเป็น</td>
+                      <td>1.00%</td>
+                      <td>0.50%</td>
+                      <td></td>
+                      <td>0.50%</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <td class="bg-cat-safety">ความปลอดภัย</td>
+                      <td class="text-start">ความพร้อมของผู้ปฏิบัติงาน และ การแต่งกาย และอุปกรณ์ความปลอดภัยส่วนบุคคล</td>
+                      <td>2.00%</td>
+                      <td>1.00%</td>
+                      <td></td>
+                      <td>1.00%</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <td class="bg-cat-safety">ความปลอดภัย</td>
+                      <td class="text-start">การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group</td>
+                      <td>2.00%</td>
+                      <td>1.00%</td>
+                      <td></td>
+                      <td>1.00%</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <td class="bg-cat-quality">คุณภาพงาน</td>
+                      <td class="text-start">คุณภาพงาน</td>
+                      <td>15.00%</td>
+                      <td class="text-primary fw-bold">7.50%</td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-danger fw-bold">7.50%</td>
+                    </tr>
+                    <tr>
+                      <td>6</td>
+                      <td class="bg-cat-spec">ความถูกต้องตามข้อกำหนด</td>
+                      <td class="text-start">การก่อสร้าง หรือ ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด</td>
+                      <td>10.00%</td>
+                      <td>10.00%</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td class="bg-cat-spec">ความถูกต้องตามข้อกำหนด</td>
+                      <td class="text-start">การก่อสร้าง หรือ ซ่อมบำรุง ไม่ตรงตามแบบมาตรฐาน Drawing</td>
+                      <td>5.00%</td>
+                      <td class="text-primary fw-bold">4.00%</td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-danger fw-bold">1.00%</td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
+                      <td class="text-start">การจัดส่งรายงานประจำวัน และ รายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์</td>
+                      <td>5.00%</td>
+                      <td class="text-primary fw-bold">4.00%</td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-danger fw-bold">1.00%</td>
+                    </tr>
+                    <tr>
+                      <td>9</td>
+                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
+                      <td class="text-start">การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง</td>
+                      <td>35.00%</td>
+                      <td class="text-primary fw-bold">25.00%</td>
+                      <td>7.00%</td>
+                      <td></td>
+                      <td class="text-danger fw-bold">3.00%</td>
+                    </tr>
+                    <tr>
+                      <td>10</td>
+                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
+                      <td class="text-start">การจัดส่งแผนงาน ,เอกสารประกอบ KOM 10 วัน ,งานเพิ่ม-ลด ตามระยะเวลาที่กำหนด</td>
+                      <td>5.50%</td>
+                      <td>2.75%</td>
+                      <td></td>
+                      <td>2.75%</td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td>11</td>
+                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
+                      <td class="text-start">การแก้ไขข้อบกพร่องของงาน (Defect work)</td>
+                      <td>5.00%</td>
+                      <td class="text-primary fw-bold">2.50%</td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-danger fw-bold">2.50%</td>
+                    </tr>
+                    <tr>
+                      <td>12</td>
+                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
+                      <td class="text-start">การให้ความร่วมมือในระหว่างดำเนินการโครงการกับทาง PTG</td>
+                      <td>10.50%</td>
+                      <td>4.50%</td>
+                      <td>3.00%</td>
+                      <td>3.00%</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                  <tfoot class="table-secondary fw-bold">
+                    <tr>
+                      <td colspan="3" class="text-end">Total</td>
+                      <td>100.00%</td>
+                      <td class="text-primary">65.00%</td>
+                      <td>10.00%</td>
+                      <td class="text-success">10.00%</td>
+                      <td class="text-danger">15.00%</td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
           </div>
@@ -186,9 +359,9 @@
               <label class="form-label fw-bold">2. ฝ่ายผู้ทำการประเมิน:</label>
               <select class="form-select" id="evalDeptSelect" onchange="onProjectSelectChange()">
                 <option value="1">ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย (65%)</option>
-                <option value="2">ฝ่ายที่ 2: จัดซื้อจัดจ้าง (10%)</option>
-                <option value="3">ฝ่ายที่ 3: ความปลอดภัย Safety (10%)</option>
-                <option value="4">ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ (15%)</option>
+                <option value="2">ฝ่ายที่ 2: จัดซื้อจัดจ้าง (10%) [2 ข้อ]</option>
+                <option value="3">ฝ่ายที่ 3: ความปลอดภัย Safety (10%) [6 ข้อ]</option>
+                <option value="4">ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ BU (15%) [5 ข้อ]</option>
               </select>
             </div>
             <div class="col-12 col-md-6 col-lg-3">
@@ -214,7 +387,7 @@
             <label class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติม / Remark:</label>
             <textarea id="evalComments" class="form-control mb-3" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
             
-            <!-- ✍️ กล่องรับลายเซ็นออนไลน์ -->
+            <!-- ✍️ กล่องรับลายเซ็นออนไลน์ (รองรับ Desktop & Mobile) -->
             <label class="form-label fw-bold d-flex justify-content-between align-items-center">
               <span><i class="fa-solid fa-signature me-1 text-primary"></i> ลายเซ็นผู้ประเมิน (ลงนามออนไลน์):</span>
               <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSignature()">
@@ -224,7 +397,7 @@
             <div class="signature-container">
               <canvas id="signaturePad"></canvas>
             </div>
-            <small class="text-muted mt-1">* ใช้นิ้วมือสัมผัส หรือเมาส์ลากเพื่อเซ็นชื่อลงในกล่องด้านบน</small>
+            <small class="text-muted mt-1">* ใช้นิ้วมือสัมผัสบนหน้าจอมือถือ หรือใช้นวดเมาส์ลากเพื่อเซ็นชื่อลงในกล่องด้านบน</small>
           </div>
 
           <div class="d-flex justify-content-end gap-2 mb-5">
@@ -262,18 +435,18 @@
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
     
     const criteria12 = [
-      { id: 1, title: "1. วิศวกร/โฟร์แมน/จป.วิชาชีพ", weights: { 1: 2.25, 2: 0, 3: 0, 4: 0 }, r5: "ครบถ้วนประจำโครงการ", r4: "มีวิศวกร/โฟร์แมน", r3: "ขาดบางตำแหน่ง", r2: "มีแค่โฟร์แมน", r1: "ไม่มีบุคลากร" },
-      { id: 2, title: "2. เครื่องมือช่างและอุปกรณ์", weights: { 1: 0.50, 2: 0, 3: 0, 4: 0 }, r5: "ครบถ้วนมี Checklist", r4: "ครบถ้วนไม่มี Checklist", r3: "ไม่เพียงพอมี Checklist", r2: "ไม่เพียงพอไม่มี Checklist", r1: "อุปกรณ์ไม่พร้อม" },
-      { id: 3, title: "3. PPE และความปลอดภัย", weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 }, r5: "สวมใส่ครบทุกคน", r4: "ใส่ไม่ครบ 1-2 ครั้ง", r3: "ใส่ไม่ครบ 3-4 ครั้ง", r2: "ใส่ไม่ครบ 5-6 ครั้ง", r1: "ไม่สวมใส่ PPE" },
-      { id: 4, title: "4. ปฏิบัติตามระเบียบ PTG", weights: { 1: 1.00, 2: 0, 3: 0, 4: 0 }, r5: "ถูกต้องตลอดระยะเวลา", r4: "เตือนไม่เกิน 2 ครั้ง", r3: "ทวงถาม 1 ครั้ง", r2: "ทวงถาม 2 ครั้ง", r1: "ไม่ปฏิบัติตาม" },
-      { id: 5, title: "5. Defect หลังส่งมอบงาน", weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 }, r5: "ไม่มี Defect", r4: "Defect 1-30 รายการ", r3: "Defect 30-50 รายการ", r2: "Defect 51-70 รายการ", r1: "มากกว่า 70 รายการ" },
-      { id: 6, title: "6. ใช้วัสดุตรงตามข้อกำหนด", weights: { 1: 10.00, 2: 10.00, 3: 0, 4: 0 }, r5: "ตรงตามกำหนด 100%", r4: "ตรง ขาดใบรับรองบางตัว", r3: "ตรง ขาดใบรับรองประจำ", r2: "ตรง ไม่ส่งใบรับรอง", r1: "ไม่ตรงตามข้อกำหนด" },
-      { id: 7, title: "7. การตรวจสอบแบบก่อนเริ่มงาน", weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 }, r5: "ตรวจแบบก่อนเริ่มงาน", r4: "ไม่ตรวจ สร้างตรงแบบ", r3: "สร้างไม่ตรงบางส่วน", r2: "สร้างไม่ตรงมีปัญหา", r1: "ต้องรื้อถอนทำใหม่" },
-      { id: 8, title: "8. การจัดส่งรายงานความก้าวหน้า", weights: { 1: 4.00, 2: 0, 3: 1.00, 4: 0 }, r5: "ตรงเวลา สม่ำเสมอ", r4: "ตรงเวลา ขาดข้อมูลบางส่วน", r3: "ตรงเวลา แต่ต้องติดตาม", r2: "ติดตามบ่อยครั้ง", r1: "ต้องติดตามตลอด" },
-      { id: 9, title: "9. การส่งมอบงานตามสัญญา", weights: { 1: 25.00, 2: 7.00, 3: 3.00, 4: 0 }, r5: "เร็วกว่ากำหนด >10%", r4: "เร็วกว่า 5-9.99%", r3: "ตรงตามเวลา", r2: "ล่าช้า 0.1-4.99%", r1: "ล่าช้า >5%" },
-      { id: 10, title: "10. การส่งแผนงาน KOM", weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 }, r5: "ส่งเร็วกว่า 4 วัน", r4: "ส่งภายใน 4-7 วัน", r3: "ส่งภายใน 8-10 วัน", r2: "ส่งภายใน 11-13 วัน", r1: "ส่งล่าช้า >14 วัน" },
-      { id: 11, title: "11. การแก้ไข Defect ตามกำหนด", weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 }, r5: "เสร็จก่อน 15 วัน", r4: "เสร็จก่อน 1-14 วัน", r3: "เสร็จพอดีสัญญา", r2: "ช้ากว่าสัญญา 1-15 วัน", r1: "ช้ากว่าสัญญา >16 วัน" },
-      { id: 12, title: "12. ความร่วมมือในการทำงาน", weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 }, r5: "ดีเยี่ยม ร่วมมือดี", r4: "ดีมาก ร่วมประชุมดี", r3: "พึงพอใจ ร่วมบางครั้ง", r2: "ควรปรับปรุงบางเรื่อง", r1: "ไม่ค่อยร่วมมือ" }
+      { id: 1, title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับหัวหน้างาน - ระดับวิชาชีพ", weights: { 1: 2.25, 2: 0, 3: 1.75, 4: 0 }, r5: "ครบถ้วนประจำโครงการ", r4: "มีวิศวกร/โฟร์แมน", r3: "ขาดบางตำแหน่ง", r2: "มีแค่โฟร์แมน", r1: "ไม่มีบุคลากร" },
+      { id: 2, title: "2. เครื่องมือช่าง ,เครื่องจักร และอุปกรณ์ที่จำเป็น", weights: { 1: 0.50, 2: 0, 3: 0.50, 4: 0 }, r5: "ครบถ้วนมี Checklist", r4: "ครบถ้วนไม่มี Checklist", r3: "ไม่เพียงพอมี Checklist", r2: "ไม่เพียงพอไม่มี Checklist", r1: "อุปกรณ์ไม่พร้อม" },
+      { id: 3, title: "3. ความพร้อมของผู้ปฏิบัติงาน และ การแต่งกาย และอุปกรณ์ความปลอดภัยส่วนบุคคล", weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 }, r5: "สวมใส่ครบทุกคน", r4: "ใส่ไม่ครบ 1-2 ครั้ง", r3: "ใส่ไม่ครบ 3-4 ครั้ง", r2: "ใส่ไม่ครบ 5-6 ครั้ง", r1: "ไม่สวมใส่ PPE" },
+      { id: 4, title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group", weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 }, r5: "ถูกต้องตลอดระยะเวลา", r4: "เตือนไม่เกิน 2 ครั้ง", r3: "ทวงถาม 1 ครั้ง", r2: "ทวงถาม 2 ครั้ง", r1: "ไม่ปฏิบัติตาม" },
+      { id: 5, title: "5. คุณภาพงาน", weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 }, r5: "ไม่มี Defect", r4: "Defect 1-30 รายการ", r3: "Defect 30-50 รายการ", r2: "Defect 51-70 รายการ", r1: "มากกว่า 70 รายการ" },
+      { id: 6, title: "6. การก่อสร้าง หรือ ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด", weights: { 1: 10.00, 2: 0, 3: 0, 4: 0 }, r5: "ตรงตามกำหนด 100%", r4: "ตรง ขาดใบรับรองบางตัว", r3: "ตรง ขาดใบรับรองประจำ", r2: "ตรง ไม่ส่งใบรับรอง", r1: "ไม่ตรงตามข้อกำหนด" },
+      { id: 7, title: "7. การก่อสร้าง หรือ ซ่อมบำรุง ไม่ตรงตามแบบมาตรฐาน Drawing", weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 }, r5: "ตรวจแบบก่อนเริ่มงาน", r4: "ไม่ตรวจ สร้างตรงแบบ", r3: "สร้างไม่ตรงบางส่วน", r2: "สร้างไม่ตรงมีปัญหา", r1: "ต้องรื้อถอนทำใหม่" },
+      { id: 8, title: "8. การจัดส่งรายงานประจำวัน และ รายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์", weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 }, r5: "ตรงเวลา สม่ำเสมอ", r4: "ตรงเวลา ขาดข้อมูลบางส่วน", r3: "ตรงเวลา แต่ต้องติดตาม", r2: "ติดตามบ่อยครั้ง", r1: "ต้องติดตามตลอด" },
+      { id: 9, title: "9. การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง", weights: { 1: 25.00, 2: 7.00, 3: 0, 4: 3.00 }, r5: "เร็วกว่ากำหนด >10%", r4: "เร็วกว่า 5-9.99%", r3: "ตรงตามเวลา", r2: "ล่าช้า 0.1-4.99%", r1: "ล่าช้า >5%" },
+      { id: 10, title: "10. การจัดส่งแผนงาน ,เอกสารประกอบ KOM 10 วัน ,งานเพิ่ม-ลด ตามระยะเวลาที่กำหนด", weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 }, r5: "ส่งเร็วกว่า 4 วัน", r4: "ส่งภายใน 4-7 วัน", r3: "ส่งภายใน 8-10 วัน", r2: "ส่งภายใน 11-13 วัน", r1: "ส่งล่าช้า >14 วัน" },
+      { id: 11, title: "11. การแก้ไขข้อบกพร่องของงาน (Defect work)", weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 }, r5: "เสร็จก่อน 15 วัน", r4: "เสร็จก่อน 1-14 วัน", r3: "เสร็จพอดีสัญญา", r2: "ช้ากว่าสัญญา 1-15 วัน", r1: "ช้ากว่าสัญญา >16 วัน" },
+      { id: 12, title: "12. การให้ความร่วมมือในระหว่างดำเนินการโครงการกับทาง PTG", weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 }, r5: "ดีเยี่ยม ร่วมมือดี", r4: "ดีมาก ร่วมประชุมดี", r3: "พึงพอใจ ร่วมบางครั้ง", r2: "ควรปรับปรุงบางเรื่อง", r1: "ไม่ค่อยร่วมมือ" }
     ];
 
     let projectsData = [];
@@ -288,55 +461,101 @@
       document.getElementById("scriptUrlInput").value = currentScriptUrl;
       initCanvas();
       fetchDataFromGoogleSheet();
+      window.addEventListener('resize', resizeCanvas);
     };
 
-    // ระบบวาดลายเซ็นออนไลน์
+    function handleEvalTabOpen() {
+      setTimeout(resizeCanvas, 150);
+    }
+
+    // ระบบวาดลายเซ็นแบบพิกัดยืดหยุ่น ( Responsive Signature Pad )
     function initCanvas() {
       canvas = document.getElementById("signaturePad");
       ctx = canvas.getContext("2d");
-      
-      // ปรับขนาด Canvas ให้ตรงความกว้างจริง
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#0f2b48";
+      resizeCanvas();
 
-      // Touch / Mouse Event Handlers
+      // Mouse Events (PC)
       canvas.addEventListener("mousedown", startDrawing);
       canvas.addEventListener("mousemove", draw);
       canvas.addEventListener("mouseup", stopDrawing);
       canvas.addEventListener("mouseleave", stopDrawing);
 
-      canvas.addEventListener("touchstart", (e) => { startDrawing(getTouchPos(e)); e.preventDefault(); });
-      canvas.addEventListener("touchmove", (e) => { draw(getTouchPos(e)); e.preventDefault(); });
+      // Touch Events (Mobile/Tablet)
+      canvas.addEventListener("touchstart", (e) => { 
+        startDrawing(getTouchPos(e)); 
+        e.preventDefault(); 
+      }, { passive: false });
+
+      canvas.addEventListener("touchmove", (e) => { 
+        draw(getTouchPos(e)); 
+        e.preventDefault(); 
+      }, { passive: false });
+
       canvas.addEventListener("touchend", stopDrawing);
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      
+      // บันทึกภาพเดิมไว้ก่อนปรับขนาด (ถ้ามี)
+      let tempImg = null;
+      if (hasSigned) {
+        tempImg = canvas.toDataURL();
+      }
+
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#0f2b48";
+
+      if (tempImg) {
+        loadSignatureImage(tempImg);
+      }
+    }
+
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
     }
 
     function getTouchPos(e) {
       const rect = canvas.getBoundingClientRect();
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+      const touch = e.touches[0];
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
     }
 
-    function startDrawing(e) {
+    function startDrawing(pos) {
       isDrawing = true;
       hasSigned = true;
       ctx.beginPath();
-      const x = e.clientX ? e.clientX - canvas.getBoundingClientRect().left : e.x;
-      const y = e.clientY ? e.clientY - canvas.getBoundingClientRect().top : e.y;
-      ctx.moveTo(x, y);
+      const coords = pos.clientX ? getMousePos(pos) : pos;
+      ctx.moveTo(coords.x, coords.y);
     }
 
-    function draw(e) {
+    function draw(pos) {
       if (!isDrawing) return;
-      const x = e.clientX ? e.clientX - canvas.getBoundingClientRect().left : e.x;
-      const y = e.clientY ? e.clientY - canvas.getBoundingClientRect().top : e.y;
-      ctx.lineTo(x, y);
+      const coords = pos.clientX ? getMousePos(pos) : pos;
+      ctx.lineTo(coords.x, coords.y);
       ctx.stroke();
     }
 
-    function stopDrawing() { isDrawing = false; }
+    function stopDrawing() { 
+      if (isDrawing) {
+        ctx.closePath();
+        isDrawing = false; 
+      }
+    }
 
     function clearSignature() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -348,7 +567,7 @@
       if (!dataUrl) return;
       const img = new Image();
       img.onload = function() {
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         hasSigned = true;
       };
       img.src = dataUrl;
@@ -486,6 +705,7 @@
       document.getElementById("evalProjectSelect").value = projectId;
       onProjectSelectChange();
       new bootstrap.Tab(document.getElementById('eval-tab')).show();
+      setTimeout(resizeCanvas, 150);
     }
 
     function onProjectSelectChange() {
@@ -590,6 +810,7 @@
         return;
       }
 
+      // แปลงลายเซ็นเป็น Base64 Data String เพื่อส่งเข้า Column signature_data
       const signatureDataUrl = canvas.toDataURL("image/png");
       const prj = projectsData.find(p => String(p.id) === String(prjId));
       const deptScore = calculateLiveDeptScore();
@@ -603,7 +824,7 @@
         evaluator_email: evalEmail,
         scores_json: JSON.stringify(currentSelectedRatings),
         dept_weighted_score: deptScore,
-        signature_data: signatureDataUrl, // บันทึกลายเซ็น
+        signature_data: signatureDataUrl, // << ส่งค่าลายเซ็นเข้า Google Sheet Column 'signature_data'
         branch_name: prj ? prj.branchName : "",
         remarks: comments
       };
