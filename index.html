@@ -34,10 +34,10 @@
     .rubric-option.active { border-color: #10b981; background-color: #ecfdf5; }
     .dept-score-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
     
-    /* สไตล์กล่องแสดงตาราง Weight */
+    /* สไตล์กล่องแสดงตาราง Weight Matrix */
     .weight-matrix-table th, .weight-matrix-table td {
       vertical-align: middle;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
     .bg-cat-safety { background-color: #4382ec; color: #fff; }
     .bg-cat-quality { background-color: #ff0000; color: #fff; }
@@ -82,7 +82,7 @@
         <i class="fa-solid fa-gas-pump fs-4 me-3 text-warning"></i>
         <div>
           <span class="fs-5 d-block">ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</span>
-          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐานใหม่</small>
+          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐานใหม่ 100%</small>
         </div>
       </a>
       <div class="d-flex align-items-center gap-2">
@@ -148,7 +148,6 @@
               </div>
             </div>
           </div>
-          <!-- ข้อ 4: การ์ดภาพรวมการประเมินผู้รับเหมาเกรดดีที่สุด -->
           <div class="col-12 col-md-3">
             <div class="card card-custom p-3 stat-card c-purple">
               <div class="d-flex justify-content-between align-items-center">
@@ -163,7 +162,6 @@
           </div>
         </div>
 
-        <!-- ข้อ 3: ส่วนการกรองรายผู้รับเหมา และแสดงกราฟวิเคราะห์ -->
         <div class="card card-custom p-4 bg-white mb-4">
           <div class="row g-3 align-items-center">
             <div class="col-12 col-md-4">
@@ -265,10 +263,10 @@
       <!-- EVALUATION VIEW -->
       <div class="tab-pane fade" id="eval-view" role="tabpanel">
         
-        <!-- ข้อ 1: ตาราง Weight Distribution Reference ย้ายมาอยู่แถบก่อนทำแบบประเมิน -->
+        <!-- ตาราง Weight Distribution Reference -->
         <div class="card card-custom bg-white mb-4">
           <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#weightTableCollapse">
-            <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-cells me-2 text-primary"></i>ตารางสัดส่วนน้ำหนักการประเมินผู้รับเหมา (Weight Distribution Reference)</h6>
+            <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-cells me-2 text-primary"></i>ตารางสัดส่วนน้ำหนักและตัวชี้วัดการประเมินผู้รับเหมา (Weight Distribution Reference)</h6>
             <button class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-chevron-down"></i> แสดง/ซ่อน ตาราง Weight</button>
           </div>
           <div class="collapse show" id="weightTableCollapse">
@@ -277,21 +275,23 @@
                 <table class="table table-bordered table-sm align-middle mb-0 weight-matrix-table text-center">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 50px;">ข้อ</th>
-                      <th style="width: 150px;">หมวด</th>
-                      <th>หัวข้อการประเมิน</th>
-                      <th style="width: 80px;">% New</th>
-                      <th style="width: 100px;" class="table-primary text-primary">Engineer</th>
-                      <th style="width: 100px;">purchasing</th>
-                      <th style="width: 100px;" class="table-success text-success">Safety</th>
-                      <th style="width: 100px;" class="table-warning text-dark">BU</th>
+                      <th style="width: 40px;">ข้อ</th>
+                      <th style="width: 180px;">หัวข้อพิจารณา (Topic)</th>
+                      <th>ตัวชี้วัด / เครื่องมือวัดผล (Indicator)</th>
+                      <th style="width: 180px;">เอกสาร / หลักฐานประกอบ</th>
+                      <th style="width: 60px;">% New</th>
+                      <th style="width: 70px;" class="table-primary text-primary">Engineer</th>
+                      <th style="width: 70px;">Purchasing</th>
+                      <th style="width: 70px;" class="table-success text-success">Safety</th>
+                      <th style="width: 70px;" class="table-warning text-dark">BU</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td>1</td>
-                      <td class="bg-cat-safety">ความปลอดภัย</td>
-                      <td class="text-start">วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับหัวหน้างาน - ระดับวิชาชีพ</td>
+                      <td class="text-start fw-bold">1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัยระดับวิชาชีพ</td>
+                      <td class="text-start">การมีอยู่และการปฏิบัติงานประจำหน้างานของบุคลากร<br><small class="text-muted">(หน่วย: ความครบถ้วนของตำแหน่งและเวลาสุ่มตรวจ)</small></td>
+                      <td class="text-start small">ใบตารางรายงาน Manpower ประจำโครงการก่อสร้าง</td>
                       <td>4.00%</td>
                       <td class="table-success fw-bold text-dark">2.25%</td>
                       <td></td>
@@ -300,8 +300,9 @@
                     </tr>
                     <tr>
                       <td>2</td>
-                      <td class="bg-cat-safety">ความปลอดภัย</td>
-                      <td class="text-start">เครื่องมือช่าง ,เครื่องจักร และอุปกรณ์ที่จำเป็น</td>
+                      <td class="text-start fw-bold">2. เครื่องมือช่าง, เครื่องจักร และอุปกรณ์ที่จำเป็น</td>
+                      <td class="text-start">ความเพียงพอ ความพร้อมใช้งาน และการตรวจสอบ<br><small class="text-muted">(หน่วย: สภาพความพร้อม + สัดส่วนการทำ Checklist & Tagging)</small></td>
+                      <td class="text-start small">ใบตารางรายงาน เครื่องมือ เครื่องจักร และอุปกรณ์ประจำโครงการ</td>
                       <td>1.00%</td>
                       <td>0.50%</td>
                       <td></td>
@@ -310,8 +311,9 @@
                     </tr>
                     <tr>
                       <td>3</td>
-                      <td class="bg-cat-safety">ความปลอดภัย</td>
-                      <td class="text-start">ความพร้อมของผู้ปฏิบัติงาน และ การแต่งกาย และอุปกรณ์ความปลอดภัยส่วนบุคคล</td>
+                      <td class="text-start fw-bold">3. ความพร้อมของผู้ปฏิบัติงาน พร้อมอุปกรณ์ PPE</td>
+                      <td class="text-start">การสวมใส่ PPE และจำนวนครั้งที่ตรวจพบการละเลย<br><small class="text-muted">(หน่วย: จำนวนครั้งที่ตรวจพบไม่สวมใส่ PPE)</small></td>
+                      <td class="text-start small">ใบตารางรายงานด้านความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนอุบัติเหตุ</td>
                       <td>2.00%</td>
                       <td>1.00%</td>
                       <td></td>
@@ -320,8 +322,9 @@
                     </tr>
                     <tr>
                       <td>4</td>
-                      <td class="bg-cat-safety">ความปลอดภัย</td>
-                      <td class="text-start">การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group</td>
+                      <td class="text-start fw-bold">4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group</td>
+                      <td class="text-start">การปฏิบัติตามระเบียบ และการตอบกลับรายงาน<br><small class="text-muted">(หน่วย: จำนวนครั้งที่พบการฝ่าฝืน + จำนวนครั้งการทวงถาม)</small></td>
+                      <td class="text-start small">ใบ Check List รายงานความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนฝ่าฝืนระเบียบ</td>
                       <td>2.00%</td>
                       <td>1.00%</td>
                       <td></td>
@@ -330,8 +333,9 @@
                     </tr>
                     <tr>
                       <td>5</td>
-                      <td class="bg-cat-quality">คุณภาพงาน</td>
-                      <td class="text-start">คุณภาพงาน</td>
+                      <td class="text-start fw-bold">5. คุณภาพงานก่อสร้างหลังส่งมอบงาน ก่อนปิดโครงการ</td>
+                      <td class="text-start">จำนวนรายการข้อบกพร่อง (Defect)<br><small class="text-muted">(หน่วย: จำนวนรายการ Defect ที่ตรวจพบ)</small></td>
+                      <td class="text-start small">ใบตรวจสอบออกรายการแก้ไข Defect หลังส่งมอบงาน ก่อนปิดโครงการ</td>
                       <td>15.00%</td>
                       <td class="text-primary fw-bold">7.50%</td>
                       <td></td>
@@ -340,8 +344,9 @@
                     </tr>
                     <tr>
                       <td>6</td>
-                      <td class="bg-cat-spec">ความถูกต้องตามข้อกำหนด</td>
-                      <td class="text-start">การก่อสร้าง หรือ ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด</td>
+                      <td class="text-start fw-bold">6. การก่อสร้าง/ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด</td>
+                      <td class="text-start">การใช้วัสดุ การส่งใบรับรอง และจำนวนใบขอเปลี่ยนวัสดุ<br><small class="text-muted">(หน่วย: จำนวนเอกสาร SR Form + การส่งใบรับรอง)</small></td>
+                      <td class="text-start small">เอกสารขออนุมัติใช้วัสดุ / ใบรับรองวัสดุ / ใบขอเปลี่ยนแปลงวัสดุ (SR Form)</td>
                       <td>10.00%</td>
                       <td>10.00%</td>
                       <td></td>
@@ -350,8 +355,9 @@
                     </tr>
                     <tr>
                       <td>7</td>
-                      <td class="bg-cat-spec">ความถูกต้องตามข้อกำหนด</td>
-                      <td class="text-start">การก่อสร้าง หรือ ซ่อมบำรุง ไม่ตรงตามแบบมาตรฐาน Drawing</td>
+                      <td class="text-start fw-bold">7. การก่อสร้างตรงตามแบบมาตรฐาน (Drawing)</td>
+                      <td class="text-start">การตรวจสอบแบบก่อนเริ่มงาน และระดับผลกระทบกรณีไม่ตรงแบบ<br><small class="text-muted">(หน่วย: การตอบกลับ E-mail KOM 10 วัน + ความรุนแรงของผลกระทบ)</small></td>
+                      <td class="text-start small">E-mail ตอบกลับการตรวจสอบแบบก่อสร้าง (ภายใน/หลัง KOM 10 วัน)</td>
                       <td>5.00%</td>
                       <td class="text-primary fw-bold">4.00%</td>
                       <td></td>
@@ -360,8 +366,9 @@
                     </tr>
                     <tr>
                       <td>8</td>
-                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
-                      <td class="text-start">การจัดส่งรายงานประจำวัน และ รายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์</td>
+                      <td class="text-start fw-bold">8. การจัดส่งรายงานประจำวัน และรายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์</td>
+                      <td class="text-start">สัดส่วนจำนวนวันที่จัดส่งรายงานตรงเวลา<br><small class="text-muted">(หน่วย: ร้อยละ (%) ของจำนวนวันตามสัญญา)</small></td>
+                      <td class="text-start small">เอกสารการจัดส่งรายงานประจำวันของโครงการก่อสร้าง</td>
                       <td>5.00%</td>
                       <td class="text-primary fw-bold">4.00%</td>
                       <td></td>
@@ -370,8 +377,9 @@
                     </tr>
                     <tr>
                       <td>9</td>
-                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
-                      <td class="text-start">การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง</td>
+                      <td class="text-start fw-bold">9. การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง</td>
+                      <td class="text-start">ระยะเวลาส่งมอบงานเทียบกับสัญญาก่อสร้าง<br><small class="text-muted">(หน่วย: ร้อยละ (%) ของระยะเวลาตามสัญญา)</small></td>
+                      <td class="text-start small">เอกสารบันทึกระยะเวลาสัญญาก่อสร้าง และการรับมอบงาน</td>
                       <td>35.00%</td>
                       <td class="text-primary fw-bold">25.00%</td>
                       <td>7.00%</td>
@@ -380,8 +388,9 @@
                     </tr>
                     <tr>
                       <td>10</td>
-                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
-                      <td class="text-start">การจัดส่งแผนงาน ,เอกสารประกอบ KOM 10 วัน ,งานเพิ่ม-ลด ตามระยะเวลาที่กำหนด</td>
+                      <td class="text-start fw-bold">10. การจัดส่งแผนงาน, เอกสารประกอบ KOM 10 วัน และงานเพิ่ม-ลด</td>
+                      <td class="text-start">จำนวนวันที่จัดส่งเอกสารหลังรับมอบพื้นที่<br><small class="text-muted">(หน่วย: จำนวนวันหลังวันรับมอบพื้นที่หน้างาน)</small></td>
+                      <td class="text-start small">E-mail การจัดส่งเอกสาร KOM 10 วัน หลังวันรับมอบพื้นที่หน้างาน</td>
                       <td>5.50%</td>
                       <td>2.75%</td>
                       <td></td>
@@ -390,8 +399,9 @@
                     </tr>
                     <tr>
                       <td>11</td>
-                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
-                      <td class="text-start">การแก้ไขข้อบกพร่องของงาน (Defect work)</td>
+                      <td class="text-start fw-bold">11. การแก้ไขข้อบกพร่องของงาน (Defect Work)</td>
+                      <td class="text-start">ระยะเวลาการแก้ไข Defect แล้วเสร็จเทียบกับสัญญา<br><small class="text-muted">(หน่วย: จำนวนวันเทียบกับวันสิ้นสุดสัญญา)</small></td>
+                      <td class="text-start small">ใบตรวจสอบรายการ Defect และวันที่ดำเนินการแล้วเสร็จ</td>
                       <td>5.00%</td>
                       <td class="text-primary fw-bold">2.50%</td>
                       <td></td>
@@ -400,8 +410,9 @@
                     </tr>
                     <tr>
                       <td>12</td>
-                      <td class="bg-cat-exec">การดำเนินงานและการส่งมอบงาน</td>
-                      <td class="text-start">การให้ความร่วมมือในระหว่างดำเนินการโครงการกับทาง PTG</td>
+                      <td class="text-start fw-bold">12. การให้ความร่วมมือ ในระหว่างดำเนินการโครงการกับ PTG</td>
+                      <td class="text-start">สัดส่วนการเข้าร่วมประชุมติดตามความคืบหน้า<br><small class="text-muted">(หน่วย: ร้อยละ (%) ของจำนวนครั้งที่นัดหมายประชุม)</small></td>
+                      <td class="text-start small">E-mail นัดหมายประชุมติดตามงาน / รายงานวาระการประชุม</td>
                       <td>10.50%</td>
                       <td>4.50%</td>
                       <td>3.00%</td>
@@ -411,7 +422,7 @@
                   </tbody>
                   <tfoot class="table-secondary fw-bold">
                     <tr>
-                      <td colspan="3" class="text-end">Total</td>
+                      <td colspan="4" class="text-end">Total</td>
                       <td>100.00%</td>
                       <td class="text-primary">65.00%</td>
                       <td>10.00%</td>
@@ -512,19 +523,164 @@
     let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIptaUP8FGBSnment5jDS_hq3MpyUofR9b_eIwjTHZhdtP4Ewbarws6Y50WI8Q7Hjp/exec";
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
     
+    // อัปเดตข้อมูลเกณฑ์การประเมิน 12 ข้อ ตามข้อกำหนดใหม่ 100%
     const criteria12 = [
-      { id: 1, title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัย ระดับหัวหน้างาน - ระดับวิชาชีพ", weights: { 1: 2.25, 2: 0, 3: 1.75, 4: 0 }, r5: "ครบถ้วนประจำโครงการ", r4: "มีวิศวกร/โฟร์แมน", r3: "ขาดบางตำแหน่ง", r2: "มีแค่โฟร์แมน", r1: "ไม่มีบุคลากร" },
-      { id: 2, title: "2. เครื่องมือช่าง ,เครื่องจักร และอุปกรณ์ที่จำเป็น", weights: { 1: 0.50, 2: 0, 3: 0.50, 4: 0 }, r5: "ครบถ้วนมี Checklist", r4: "ครบถ้วนไม่มี Checklist", r3: "ไม่เพียงพอมี Checklist", r2: "ไม่เพียงพอไม่มี Checklist", r1: "อุปกรณ์ไม่พร้อม" },
-      { id: 3, title: "3. ความพร้อมของผู้ปฏิบัติงาน และ การแต่งกาย และอุปกรณ์ความปลอดภัยส่วนบุคคล", weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 }, r5: "สวมใส่ครบทุกคน", r4: "ใส่ไม่ครบ 1-2 ครั้ง", r3: "ใส่ไม่ครบ 3-4 ครั้ง", r2: "ใส่ไม่ครบ 5-6 ครั้ง", r1: "ไม่สวมใส่ PPE" },
-      { id: 4, title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group", weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 }, r5: "ถูกต้องตลอดระยะเวลา", r4: "เตือนไม่เกิน 2 ครั้ง", r3: "ทวงถาม 1 ครั้ง", r2: "ทวงถาม 2 ครั้ง", r1: "ไม่ปฏิบัติตาม" },
-      { id: 5, title: "5. คุณภาพงาน", weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 }, r5: "ไม่มี Defect", r4: "Defect 1-30 รายการ", r3: "Defect 30-50 รายการ", r2: "Defect 51-70 รายการ", r1: "มากกว่า 70 รายการ" },
-      { id: 6, title: "6. การก่อสร้าง หรือ ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด", weights: { 1: 10.00, 2: 0, 3: 0, 4: 0 }, r5: "ตรงตามกำหนด 100%", r4: "ตรง ขาดใบรับรองบางตัว", r3: "ตรง ขาดใบรับรองประจำ", r2: "ตรง ไม่ส่งใบรับรอง", r1: "ไม่ตรงตามข้อกำหนด" },
-      { id: 7, title: "7. การก่อสร้าง หรือ ซ่อมบำรุง ไม่ตรงตามแบบมาตรฐาน Drawing", weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 }, r5: "ตรวจแบบก่อนเริ่มงาน", r4: "ไม่ตรวจ สร้างตรงแบบ", r3: "สร้างไม่ตรงบางส่วน", r2: "สร้างไม่ตรงมีปัญหา", r1: "ต้องรื้อถอนทำใหม่" },
-      { id: 8, title: "8. การจัดส่งรายงานประจำวัน และ รายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์", weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 }, r5: "ตรงเวลา สม่ำเสมอ", r4: "ตรงเวลา ขาดข้อมูลบางส่วน", r3: "ตรงเวลา แต่ต้องติดตาม", r2: "ติดตามบ่อยครั้ง", r1: "ต้องติดตามตลอด" },
-      { id: 9, title: "9. การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง", weights: { 1: 25.00, 2: 7.00, 3: 0, 4: 3.00 }, r5: "เร็วกว่ากำหนด >10%", r4: "เร็วกว่า 5-9.99%", r3: "ตรงตามเวลา", r2: "ล่าช้า 0.1-4.99%", r1: "ล่าช้า >5%" },
-      { id: 10, title: "10. การจัดส่งแผนงาน ,เอกสารประกอบ KOM 10 วัน ,งานเพิ่ม-ลด ตามระยะเวลาที่กำหนด", weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 }, r5: "ส่งเร็วกว่า 4 วัน", r4: "ส่งภายใน 4-7 วัน", r3: "ส่งภายใน 8-10 วัน", r2: "ส่งภายใน 11-13 วัน", r1: "ส่งล่าช้า >14 วัน" },
-      { id: 11, title: "11. การแก้ไขข้อบกพร่องของงาน (Defect work)", weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 }, r5: "เสร็จก่อน 15 วัน", r4: "เสร็จก่อน 1-14 วัน", r3: "เสร็จพอดีสัญญา", r2: "ช้ากว่าสัญญา 1-15 วัน", r1: "ช้ากว่าสัญญา >16 วัน" },
-      { id: 12, title: "12. การให้ความร่วมมือในระหว่างดำเนินการโครงการกับทาง PTG", weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 }, r5: "ดีเยี่ยม ร่วมมือดี", r4: "ดีมาก ร่วมประชุมดี", r3: "พึงพอใจ ร่วมบางครั้ง", r2: "ควรปรับปรุงบางเรื่อง", r1: "ไม่ค่อยร่วมมือ" }
+      {
+        id: 1,
+        title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัยระดับวิชาชีพ",
+        indicator: "การมีอยู่และการปฏิบัติงานประจำหน้างานของบุคลากร (หน่วย: ความครบถ้วนของตำแหน่งและเวลาสุ่มตรวจ)",
+        evidence: "ใบตารางรายงาน Manpower ประจำโครงการก่อสร้าง",
+        weights: { 1: 2.25, 2: 0, 3: 1.75, 4: 0 },
+        r5: "มีทั้ง Engineer, Foreman และ จป.วิชาชีพ ปฏิบัติงานประจำตลอดโครงการ",
+        r4: "มี Engineer หรือ Foreman ท่านใดท่านหนึ่ง + จป.วิชาชีพ ประจำตลอดโครงการ",
+        r3: "มี Engineer + จป.วิชาชีพ (ไม่ประจำ) แต่มี Foreman ประจำตลอดโครงการ",
+        r2: "มีเพียง Foreman ประจำโครงการ (ไม่มี Engineer และ จป.)",
+        r1: "มีเพียง Foreman แต่ไม่ได้อยู่ประจำโครงการ",
+        r0: "ไม่มีทั้ง Engineer, Foreman และ จป. อยู่ประจำโครงการ"
+      },
+      {
+        id: 2,
+        title: "2. เครื่องมือช่าง, เครื่องจักร และอุปกรณ์ที่จำเป็น",
+        indicator: "ความเพียงพอ ความพร้อมใช้งาน และการตรวจสอบ (หน่วย: สภาพความพร้อม + สัดส่วนการทำ Checklist & Tagging)",
+        evidence: "ใบตารางรายงาน เครื่องมือ เครื่องจักร และอุปกรณ์ประจำโครงการ",
+        weights: { 1: 0.50, 2: 0, 3: 0.50, 4: 0 },
+        r5: "มีครบถ้วน พร้อมใช้งานตลอด และตรวจเช็ก (Checklist + Tag) สม่ำเสมอ",
+        r4: "มีครบถ้วน พร้อมใช้งานตลอด แต่ขาดการตรวจเช็กสม่ำเสมอ",
+        r3: "จำเป็น/พร้อมใช้งานแต่ไม่เพียงพอ แต่มีการตรวจเช็กสม่ำเสมอ",
+        r2: "จำเป็น/พร้อมใช้งานแต่ไม่เพียงพอ และขาดการตรวจเช็กสม่ำเสมอ",
+        r1: "มีอุปกรณ์จำเป็น แต่ไม่เพียงพอและพร้อมใช้เพียงบางส่วน",
+        r0: "ไม่มีอุปกรณ์ที่จำเป็น และไม่พร้อมใช้งาน"
+      },
+      {
+        id: 3,
+        title: "3. ความพร้อมของผู้ปฏิบัติงาน พร้อมอุปกรณ์ PPE",
+        indicator: "การสวมใส่ PPE และจำนวนครั้งที่ตรวจพบการละเลย (หน่วย: จำนวนครั้งที่ตรวจพบไม่สวมใส่ PPE)",
+        evidence: "ใบตารางรายงานด้านความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนอุบัติเหตุ",
+        weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 },
+        r5: "PPE ครบถ้วน สวมใส่ทุกคน / ไม่พบรายงานการไม่สวมใส่ (0 ครั้ง)",
+        r4: "PPE ครบ / ตรวจพบไม่สวมใส่ ≤ 2 ครั้ง ตลอดโครงการ",
+        r3: "PPE พื้นฐานครบ แต่ PPE งานเสี่ยงไม่ครบ / ตรวจพบ 3 - 4 ครั้ง",
+        r2: "PPE พื้นฐานครบ แต่ PPE งานเสี่ยงไม่ครบ / ตรวจพบ 5 - 6 ครั้ง",
+        r1: "PPE ไม่ครบทั้งพื้นฐานและงานเสี่ยง / ตรวจพบ 7 - 8 ครั้ง",
+        r0: "ไม่สวมใส่ทุกคน / ตรวจพบ > 8 ครั้ง"
+      },
+      {
+        id: 4,
+        title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group",
+        indicator: "การปฏิบัติตามระเบียบ และการตอบกลับรายงาน (หน่วย: จำนวนครั้งที่พบการฝ่าฝืน + จำนวนครั้งการทวงถาม)",
+        evidence: "ใบ Check List รายงานความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนฝ่าฝืนระเบียบ",
+        weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 },
+        r5: "ปฏิบัติตามข้อกำหนดตลอดระยะเวลา / ไม่พบข้อบกพร่อง (0 ครั้ง)",
+        r4: "ตรวจพบ ≤ 2 ครั้ง แก้ไขได้ตามกำหนด และตอบกลับตามเวลา",
+        r3: "ตรวจพบ ≤ 2 ครั้ง แก้ไขได้ตามกำหนด มีการทวงถาม 1 ครั้ง",
+        r2: "ตรวจพบ ≤ 3 ครั้ง แก้ไขได้ตามกำหนด มีการทวงถาม 2 ครั้ง",
+        r1: "ตรวจพบ ≤ 3 ครั้ง ไม่แก้ไขตามกำหนด / ไม่ตอบกลับรายงาน",
+        r0: "ไม่ปฏิบัติตามระเบียบตลอดโครงการ / ตรวจพบตลอดและไม่ตอบกลับ"
+      },
+      {
+        id: 5,
+        title: "5. คุณภาพงานก่อสร้างหลังส่งมอบงาน ก่อนปิดโครงการ",
+        indicator: "จำนวนรายการข้อบกพร่อง (Defect) (หน่วย: จำนวนรายการ Defect ที่ตรวจพบ)",
+        evidence: "ใบตรวจสอบออกรายการแก้ไข Defect หลังส่งมอบงาน ก่อนปิดโครงการ",
+        weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 },
+        r5: "ไม่พบรายการ Defect (0 รายการ)",
+        r4: "ตรวจพบ Defect ≤ 30 รายการ",
+        r3: "ตรวจพบ Defect 30 - 50 รายการ",
+        r2: "ตรวจพบ Defect 51 - 70 รายการ",
+        r1: "ตรวจพบ Defect 71 - 80 รายการ",
+        r0: "ตรวจพบ Defect > 80 รายการ"
+      },
+      {
+        id: 6,
+        title: "6. การก่อสร้าง/ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด",
+        indicator: "การใช้วัสดุ การส่งใบรับรอง และจำนวนใบขอเปลี่ยนวัสดุ (หน่วย: จำนวนเอกสาร SR Form + การส่งใบรับรอง)",
+        evidence: "เอกสารขออนุมัติใช้วัสดุ / ใบรับรองวัสดุ / ใบขอเปลี่ยนแปลงวัสดุ (SR Form)",
+        weights: { 1: 10.00, 2: 0, 3: 0, 4: 0 },
+        r5: "วัสดุตรงตามข้อกำหนด มีใบรับรอง ถูกต้องตามหลักวิศวกรรม",
+        r4: "ตรงข้อกำหนด มีใบรับรอง ปรับปรุงตามหลักวิศวกรรม/มี SR Form ≤ 5 รายการ",
+        r3: "ตรงข้อกำหนด มีใบรับรอง ปรับปรุงตามหลักวิศวกรรม/มี SR Form 5 - 10 รายการ",
+        r2: "ตรงข้อกำหนด แต่ไม่ส่งใบรับรอง/มี SR Form > 3 รายการ โดยไม่ส่งอนุมัติ",
+        r1: "ตรงบางส่วน (ไม่ขออนุมัติ) แต่ไม่กระทบมาตรฐาน/ไม่มีเอกสารขอเปลี่ยน",
+        r0: "ไม่ตรงตามข้อกำหนด (ไม่ขออนุมัติ) ส่งผลกระทบต่อคุณภาพ/ไม่มีเอกสาร"
+      },
+      {
+        id: 7,
+        title: "7. การก่อสร้างตรงตามแบบมาตรฐาน (Drawing)",
+        indicator: "การตรวจสอบแบบก่อนเริ่มงาน และระดับผลกระทบกรณีไม่ตรงแบบ (หน่วย: การตอบกลับ E-mail KOM 10 วัน + ความรุนแรงของผลกระทบ)",
+        evidence: "E-mail ตอบกลับการตรวจสอบแบบก่อสร้าง (ภายใน/หลัง KOM 10 วัน)",
+        weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 },
+        r5: "ตรวจสอบแบบก่อนเริ่มงาน ไม่พบ/แจ้งข้อขัดแย้งล่วงหน้า ก่อสร้างตรงตามแบบ",
+        r4: "ไม่ได้ตรวจแบบก่อนเริ่มงาน แต่ก่อสร้างตรงตามแบบที่อนุมัติ",
+        r3: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบบางส่วน (ผลกระทบไม่รุนแรง)",
+        r2: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบบางส่วน (ผลกระทบส่งผลรุนแรง)",
+        r1: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบส่วนใหญ่ (ผลกระทบไม่รุนแรง)",
+        r0: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบส่วนใหญ่ (ผลกระทบส่งผลรุนแรง)"
+      },
+      {
+        id: 8,
+        title: "8. การจัดส่งรายงานประจำวัน และรายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์",
+        indicator: "สัดส่วนจำนวนวันที่จัดส่งรายงานตรงเวลา (หน่วย: ร้อยละ (%) ของจำนวนวันตามสัญญา)",
+        evidence: "เอกสารการจัดส่งรายงานประจำวันของโครงการก่อสร้าง",
+        weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 },
+        r5: "ส่งตรงเวลาสม่ำเสมอ ถูกต้อง > 90% ของจำนวนวันตามสัญญา",
+        r4: "ส่งตรงเวลาสม่ำเสมอ มีผิดพลาดบางครั้ง 80% - 89%",
+        r3: "ส่งตรงเวลา แต่ต้องติดตามเป็นบางครั้ง 60% - 79%",
+        r2: "ส่งตรงเวลา แต่ต้องติดตามเป็นบางครั้ง 40% - 59%",
+        r1: "ส่งตรงเวลา แต่ต้องติดตามเป็นบางครั้ง 20% - 39%",
+        r0: "ไม่ส่งตามกำหนด ไม่ตอบสนองการติดตาม 0% - 19%"
+      },
+      {
+        id: 9,
+        title: "9. การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง",
+        indicator: "ระยะเวลาส่งมอบงานเทียบกับสัญญาก่อสร้าง (หน่วย: ร้อยละ (%) ของระยะเวลาตามสัญญา)",
+        evidence: "เอกสารบันทึกระยะเวลาสัญญาก่อสร้าง และการรับมอบงาน",
+        weights: { 1: 25.00, 2: 7.00, 3: 0, 4: 3.00 },
+        r5: "ส่งมอบงานก่อนเวลา > 10% ของระยะเวลาตามสัญญา",
+        r4: "ส่งมอบงานก่อนเวลา 5% - 9.99%",
+        r3: "ส่งมอบงานก่อนเวลา 0% - 4.99%",
+        r2: "ส่งมอบงานล่าช้ากว่าเวลา 0.1% - 4.99%",
+        r1: "ส่งมอบงานล่าช้ากว่าเวลา 5% - 9.99%",
+        r0: "ส่งมอบงานล่าช้ากว่าเวลา > 10%"
+      },
+      {
+        id: 10,
+        title: "10. การจัดส่งแผนงาน, เอกสารประกอบ KOM 10 วัน และงานเพิ่ม-ลด",
+        indicator: "จำนวนวันที่จัดส่งเอกสารหลังรับมอบพื้นที่ (หน่วย: จำนวนวันหลังวันรับมอบพื้นที่หน้างาน)",
+        evidence: "E-mail การจัดส่งเอกสาร KOM 10 วัน หลังวันรับมอบพื้นที่หน้างาน",
+        weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 },
+        r5: "ส่งแผนงานและเอกสาร KOM เร็วกว่า 4 วัน หลังรับมอบพื้นที่",
+        r4: "ส่งแผนงานและเอกสาร KOM ภายใน 4 - 7 วัน",
+        r3: "ส่งแผนงานและเอกสาร KOM ภายใน 8 - 10 วัน",
+        r2: "ส่งแผนงานและเอกสาร KOM ล่าช้า ภายใน 11 - 13 วัน",
+        r1: "ส่งแผนงานและเอกสาร KOM ล่าช้า ภายใน 14 - 17 วัน",
+        r0: "ส่งแผนงานและเอกสาร KOM ล่าช้า มากกว่า 18 วันขึ้นไป"
+      },
+      {
+        id: 11,
+        title: "11. การแก้ไขข้อบกพร่องของงาน (Defect Work)",
+        indicator: "ระยะเวลาการแก้ไข Defect แล้วเสร็จเทียบกับสัญญา (หน่วย: จำนวนวันเทียบกับวันสิ้นสุดสัญญา)",
+        evidence: "ใบตรวจสอบรายการ Defect และวันที่ดำเนินการแล้วเสร็จ",
+        weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 },
+        r5: "แก้ไข Defect แล้วเสร็จ ก่อนสิ้นสุดสัญญา ≥ 15 วัน",
+        r4: "แก้ไข Defect แล้วเสร็จ ก่อนสิ้นสุดสัญญา 1 - 15 วัน",
+        r3: "แก้ไข Defect แล้วเสร็จ เท่ากับวันสิ้นสุดสัญญาพอดี",
+        r2: "แก้ไข Defect แล้วเสร็จ หลังสิ้นสุดสัญญา 1 - 15 วัน",
+        r1: "แก้ไข Defect แล้วเสร็จ หลังสิ้นสุดสัญญา 16 - 30 วัน",
+        r0: "แก้ไข Defect แล้วเสร็จ หลังสิ้นสุดสัญญา > 30 วันขึ้นไป"
+      },
+      {
+        id: 12,
+        title: "12. การให้ความร่วมมือ ในระหว่างดำเนินการโครงการกับ PTG",
+        indicator: "สัดส่วนการเข้าร่วมประชุมติดตามความคืบหน้า (หน่วย: ร้อยละ (%) ของจำนวนครั้งที่นัดหมายประชุม)",
+        evidence: "E-mail นัดหมายประชุมติดตามงาน / รายงานวาระการประชุม",
+        weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 },
+        r5: "ร่วมประชุมติดตามความคืบหน้า > 90% ของจำนวนครั้งที่นัดหมาย",
+        r4: "ร่วมประชุมติดตามความคืบหน้า 80% - 89%",
+        r3: "ร่วมประชุมติดตามความคืบหน้า 60% - 79%",
+        r2: "ร่วมประชุมติดตามความคืบหน้า 40% - 59%",
+        r1: "ร่วมประชุมติดตามความคืบหน้า 20% - 39%",
+        r0: "ร่วมประชุมติดตามความคืบหน้า 0% - 19% (ควรพิจารณาการจ่ายงาน)"
+      }
     ];
 
     let projectsData = [];
@@ -547,7 +703,6 @@
       setTimeout(resizeCanvas, 150);
     }
 
-    // ข้อ 2: ฟังก์ชันสำหรับประเมินเกรดตามเงื่อนไขใหม่
     function getGradeInfo(scoreNum) {
       if (scoreNum >= 80) {
         return { grade: 'A', class: 'grade-A' };
@@ -763,7 +918,6 @@
           }
         }
 
-        // ข้อ 2: แสดงเกรดอ้างอิงเงื่อนไขใหม่
         let gradeHtml = "-";
         if (scoreInfo.count > 0) {
           const gInfo = getGradeInfo(scoreInfo.rawScore);
@@ -797,11 +951,9 @@
       document.getElementById("cardCompletedCount").innerText = completedCount;
       document.getElementById("cardPendingCount").innerText = pendingCount;
 
-      // ข้อ 4: ประมวลผลหาผู้รับเหมาเกรด/คะแนนดีที่สุด
       calculateBestContractor();
     }
 
-    // ข้อ 3 & 4: สร้างระบบวิเคราะห์ และวาดกราฟรายผู้รับเหมา
     function renderContractorChart() {
       const selectedContractor = document.getElementById("filterContractor").value;
       const contractorStats = {};
@@ -884,7 +1036,6 @@
       });
     }
 
-    // ข้อ 4: คำนวณภาพรวมหาผู้รับเหมาเกรดดีที่สุด
     function calculateBestContractor() {
       const contractorScores = {};
 
@@ -970,30 +1121,34 @@
       container.innerHTML = "";
 
       filteredCriteria.forEach(c => {
-        const selectedVal = currentSelectedRatings[c.id] || 0;
+        const selectedVal = currentSelectedRatings[c.id] !== undefined ? currentSelectedRatings[c.id] : -1;
         const weight = c.weights[deptId];
         const card = document.createElement("div");
-        card.className = `card card-custom rubric-card p-3 ${selectedVal > 0 ? 'selected' : ''}`;
+        card.className = `card card-custom rubric-card p-3 ${selectedVal >= 0 ? 'selected' : ''}`;
         
         let optionsHtml = "";
-        for (let lvl = 5; lvl >= 1; lvl--) {
+        for (let lvl = 5; lvl >= 0; lvl--) {
           const isActive = selectedVal === lvl;
           optionsHtml += `
             <div class="rubric-option ${isActive ? 'active' : ''}" onclick="selectRating(${c.id}, ${lvl})">
               <div class="d-flex align-items-start">
                 <input class="form-check-input me-2 mt-1" type="radio" name="topic_${c.id}" value="${lvl}" ${isActive ? 'checked' : ''}>
-                <div><span class="fw-bold me-2">ระดับ ${lvl}:</span><span class="fs-7">${c['r'+lvl]}</span></div>
+                <div><span class="fw-bold me-2">${lvl} คะแนน:</span><span class="fs-7">${c['r'+lvl]}</span></div>
               </div>
             </div>
           `;
         }
 
         card.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="fw-bold text-dark mb-0">${c.title}</h6>
-            <span class="badge bg-secondary">${weight.toFixed(2)}%</span>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h6 class="fw-bold text-dark mb-1">${c.title}</h6>
+              <div class="text-primary small mb-1"><i class="fa-solid fa-bullseye me-1"></i><b>ตัวชี้วัด:</b> ${c.indicator}</div>
+              <div class="text-muted small"><i class="fa-solid fa-file-lines me-1"></i><b>เอกสารประกอบ:</b> ${c.evidence}</div>
+            </div>
+            <span class="badge bg-secondary ms-2">${weight.toFixed(2)}%</span>
           </div>
-          <div>${optionsHtml}</div>
+          <div class="mt-2">${optionsHtml}</div>
         `;
         container.appendChild(card);
       });
@@ -1012,7 +1167,7 @@
       let totalWeight = 0;
 
       filteredCriteria.forEach(c => {
-        const score = currentSelectedRatings[c.id] || 0;
+        const score = currentSelectedRatings[c.id] !== undefined ? currentSelectedRatings[c.id] : 0;
         const weight = c.weights[deptId];
         totalWeight += weight;
         totalWeightedScore += (score / 5) * weight;
