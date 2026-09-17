@@ -98,6 +98,7 @@
     .nav-pills .nav-link { color: var(--text-muted); font-weight: 600; border-radius: 8px; padding: 8px 18px; }
     .nav-pills .nav-link.active { background-color: var(--primary-navy); color: #ffffff; }
 
+    /* SIGNATURE CANVAS STYLES (ปรับความสูงกระชับขึ้นสำหรับพิมพ์รายงาน) */
     .signature-container {
       border: 2px dashed #cbd5e1;
       border-radius: 8px;
@@ -105,9 +106,12 @@
       touch-action: none;
       position: relative;
       width: 100%;
-      height: 180px;
+      max-width: 400px; /* จำกัดขนาดให้พอดีการพิมพ์ */
+      height: 110px;     /* ปรับความสูงพอดีลายเซ็น */
+      margin: 0 auto;
     }
     canvas#signaturePad { width: 100%; height: 100%; border-radius: 8px; cursor: crosshair; display: block; }
+    
     .rubric-card { border-left: 4px solid var(--primary-navy); }
     .rubric-card.selected { border-left-color: var(--color-green); background-color: #f0fdf4; }
     
@@ -134,7 +138,7 @@
       flex-direction: column;
       justify-content: space-between;
     }
-    .sig-img-preview { max-height: 65px; object-fit: contain; margin: 6px auto; }
+    .sig-img-preview { max-height: 60px; object-fit: contain; margin: 4px auto; }
 
     #loadingOverlay {
       position: fixed;
@@ -485,7 +489,7 @@
               </div>
               <div class="col-12 col-md-6 col-lg-3">
                 <label class="form-label fw-bold">3. ชื่อผู้ประเมิน:</label>
-                <input type="text" id="evaluatorName" class="form-control" placeholder="นายทดสอบ ระบบ">
+                <input type="text" id="evaluatorName" class="form-control" placeholder="นายทดสอบ ระบบ" oninput="updateSignatureNameDisplay()">
               </div>
               <div class="col-12 col-md-6 col-lg-3">
                 <label class="form-label fw-bold">4. อีเมลผู้ประเมิน:</label>
@@ -506,14 +510,24 @@
               <label class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติม / Remark:</label>
               <textarea id="evalComments" class="form-control mb-3" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
               
-              <label class="form-label fw-bold d-flex justify-content-between align-items-center">
-                <span><i class="fa-solid fa-signature me-1 text-primary"></i> ลายเซ็นผู้ประเมิน (ลงนามออนไลน์):</span>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSignature()">
-                  <i class="fa-solid fa-eraser me-1"></i> ล้างลายเซ็น
-                </button>
-              </label>
-              <div class="signature-container">
-                <canvas id="signaturePad"></canvas>
+              <!-- ปรับปรุงส่วนลายเซ็น: กรอบขนาดพอดี + แสดงชื่อผู้ประเมินใต้ลายเซ็น -->
+              <div class="text-center mx-auto" style="max-width: 420px;">
+                <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-1">
+                  <span><i class="fa-solid fa-signature me-1 text-primary"></i> ลายเซ็นผู้ประเมิน (ลงนามออนไลน์):</span>
+                  <button type="button" class="btn btn-sm btn-outline-danger py-0" onclick="clearSignature()">
+                    <i class="fa-solid fa-eraser me-1"></i> ล้าง
+                  </button>
+                </label>
+
+                <div class="signature-container">
+                  <canvas id="signaturePad"></canvas>
+                </div>
+
+                <!-- แสดงชื่อผู้ประเมินใต้ลายเซ็น -->
+                <div class="mt-2 text-center">
+                  <span class="fs-7 fw-bold text-dark" id="liveSignatureNameDisplay">( ............................................................ )</span>
+                  <small class="text-muted d-block fs-8">ชื่อผู้ลงนามรับรอง</small>
+                </div>
               </div>
             </div>
 
@@ -651,6 +665,7 @@
       // Auto-fill evaluator fields in form
       document.getElementById("evaluatorName").value = currentUser.name || "";
       document.getElementById("evaluatorEmail").value = currentUser.email || "";
+      updateSignatureNameDisplay();
 
       currentScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
       document.getElementById("scriptUrlInput").value = currentScriptUrl;
@@ -1073,6 +1088,7 @@
 
     function closeReportPrintView() { document.getElementById("printReportSection").classList.add("d-none"); }
 
+    // --- ข้อ 1: ปรับปรุงการแสดงผลสาขาใน Select (แสดงเฉพาะสาขาที่ยังไม่ได้ประเมิน) ---
     function populateProjectSelectOptions() {
       const deptId = document.getElementById("evalDeptSelect").value;
       const select = document.getElementById("evalProjectSelect");
@@ -1083,23 +1099,46 @@
 
       projectsData.forEach(p => {
         const isEvaluatedByDept = getDeptEval(p, deptId) !== null;
-        if (!isEvaluatedByDept) pendingCount++;
         
-        const opt = document.createElement("option");
-        opt.value = p.project_id;
-        opt.innerText = `[${p.project_id}] ${p.branchName} (${p.contractor}) ${isEvaluatedByDept ? '✓ (ประเมินแล้ว)' : ''}`;
-        select.appendChild(opt);
+        // กรองแสดงเฉพาะสาขาที่ยังไม่ได้ประเมินเท่านั้น
+        if (!isEvaluatedByDept) {
+          pendingCount++;
+          const opt = document.createElement("option");
+          opt.value = p.project_id;
+          opt.innerText = `[${p.project_id}] ${p.branchName} (${p.contractor})`;
+          select.appendChild(opt);
+        }
       });
 
       const alertLabel = document.getElementById("pendingBranchCountText");
       if (alertLabel) {
         const deptNames = { "1": "ฝ่ายวิศวกรรม", "2": "ฝ่ายจัดซื้อ", "3": "ฝ่าย Safety", "4": "ฝ่ายบริหารสถานี BU" };
-        alertLabel.innerHTML = `<b>${deptNames[deptId]}</b> มีสาขาที่ยังไม่ได้ประเมินคงเหลือ <b>${pendingCount}</b> สาขา`;
+        if (pendingCount > 0) {
+          alertLabel.innerHTML = `<b>${deptNames[deptId]}</b> มีสาขาที่ยังไม่ได้ประเมินคงเหลือ <b>${pendingCount}</b> สาขา`;
+        } else {
+          alertLabel.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i><b>${deptNames[deptId]}</b> ได้ทำการประเมินครบทุกสาขาแล้ว!</span>`;
+        }
       }
     }
 
-    function onDeptSelectChange() { populateProjectSelectOptions(); onProjectSelectChange(); }
-    function handleEvalTabOpen() { populateProjectSelectOptions(); setTimeout(resizeCanvas, 150); }
+    // --- ข้อ 2: อัปเดตแสดงชื่อผู้ประเมินใต้กรอบลายเซ็นแบบ Real-time ---
+    function updateSignatureNameDisplay() {
+      const nameVal = document.getElementById("evaluatorName").value.trim();
+      const displayEl = document.getElementById("liveSignatureNameDisplay");
+      if (displayEl) {
+        displayEl.innerText = nameVal ? `( ${nameVal} )` : "( ............................................................ )";
+      }
+    }
+
+    function onDeptSelectChange() { 
+      populateProjectSelectOptions(); 
+      onProjectSelectChange(); 
+    }
+    
+    function handleEvalTabOpen() { 
+      populateProjectSelectOptions(); 
+      setTimeout(resizeCanvas, 150); 
+    }
 
     function initCanvas() {
       canvas = document.getElementById("signaturePad");
@@ -1123,7 +1162,9 @@
       if (rect.width === 0 || rect.height === 0) return;
       canvas.width = rect.width;
       canvas.height = rect.height;
-      ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#0f2b48";
+      ctx.lineWidth = 2.5; 
+      ctx.lineCap = "round"; 
+      ctx.strokeStyle = "#0f2b48";
     }
 
     function getMousePos(e) {
@@ -1189,6 +1230,7 @@
         document.getElementById("evaluatorEmail").value = currentUser ? currentUser.email : "";
         document.getElementById("evalComments").value = "";
       }
+      updateSignatureNameDisplay();
       renderRubricCards();
     }
 
@@ -1325,6 +1367,7 @@
       }
 
       refreshDashboardViews();
+      populateProjectSelectOptions(); // อัปเดตรีเฟรชดรอปดาวน์ทันทีเพื่อตัดสาขาที่เพิ่งประเมินออก
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
       alert("บันทึกผลการประเมินเรียบร้อยแล้ว!");
