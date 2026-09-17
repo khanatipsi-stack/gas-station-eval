@@ -1,1246 +1,273 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน (PTG)</title>
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประเมินผู้รับเหมา (Vendor Evaluation System)</title>
+    <!-- Google Identity Services SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --primary: #00875a;
+            --primary-hover: #006644;
+            --bg: #f4f5f7;
+            --card-bg: #ffffff;
+            --text: #172b4d;
+            --border: #dfe1e6;
+        }
 
-  <style>
-    :root {
-      --primary-color: #0f2b48;
-      --secondary-color: #0284c7;
-      --accent-color: #f59e0b;
-      --bg-light: #f8fafc;
-      --text-dark: #1e293b;
-    }
-    body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-light); color: var(--text-dark); padding-bottom: 60px; }
-    .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .stat-card { border-left: 5px solid; border-radius: 12px; transition: transform 0.2s; }
-    .stat-card:hover { transform: translateY(-2px); }
-    .stat-card.c-blue { border-left-color: #0284c7; background: #f0f9ff; }
-    .stat-card.c-green { border-left-color: #10b981; background: #f0fdf4; }
-    .stat-card.c-amber { border-left-color: #f59e0b; background: #fffbeb; }
-    .stat-card.c-purple { border-left-color: #8b5cf6; background: #f5f3ff; }
-    .rubric-card { border-left: 5px solid var(--secondary-color); background: #ffffff; border-radius: 8px; }
-    .rubric-card.selected { border-left-color: #10b981; background-color: #f0fdf4; }
-    .rubric-option { border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; background-color: #ffffff; }
-    .rubric-option:hover { border-color: var(--secondary-color); background-color: #f0f9ff; }
-    .rubric-option.active { border-color: #10b981; background-color: #ecfdf5; }
-    .dept-score-badge { font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
-    
-    /* สไตล์กล่องแสดงตาราง Weight Matrix */
-    .weight-matrix-table th, .weight-matrix-table td {
-      vertical-align: middle;
-      font-size: 0.8rem;
-    }
-    .bg-cat-safety { background-color: #4382ec; color: #fff; }
-    .bg-cat-quality { background-color: #ff0000; color: #fff; }
-    .bg-cat-spec { background-color: #eab308; color: #fff; }
-    .bg-cat-exec { background-color: #22c55e; color: #fff; }
+        body {
+            font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
 
-    /* สไตล์กล่องรับลายเซ็น */
-    .signature-container {
-      border: 2px dashed #cbd5e1;
-      border-radius: 8px;
-      background-color: #fff;
-      touch-action: none;
-      position: relative;
-      width: 100%;
-      height: 180px;
-    }
-    canvas#signaturePad {
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-      cursor: crosshair;
-      display: block;
-    }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
 
-    .grade-badge {
-      font-weight: bold;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-    .grade-A { background-color: #d1fae5; color: #047857; }
-    .grade-B { background-color: #dbeafe; color: #1d4ed8; }
-    .grade-C { background-color: #fef3c7; color: #b45309; }
-    .grade-D { background-color: #ffedd5; color: #c2410c; }
-    .grade-F { background-color: #fee2e2; color: #b91c1c; }
-  </style>
+        /* Screen States */
+        .hidden { display: none !important; }
+
+        /* Login Screen */
+        .login-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .login-box h2 { color: var(--primary); margin-bottom: 10px; }
+        .login-box p { color: #5e6c84; margin-bottom: 30px; }
+        .google-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Profile Header */
+        .user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e3fcef;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            border: 1px solid #abf5d1;
+        }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; }
+        .logout-btn {
+            background: #ff5630;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .logout-btn:hover { background: #de350b; }
+
+        /* Form Styles */
+        h1 { color: var(--primary); margin-top: 0; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 6px; }
+        input[type="text"], input[type="email"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[readonly] { background-color: #f4f5f7; cursor: not-allowed; }
+
+        .weight-badge {
+            background: #deebff;
+            color: #0747a6;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: normal;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .submit-btn:hover { background: var(--primary-hover); }
+    </style>
 </head>
 <body>
 
-  <nav class="navbar navbar-dark mb-4 shadow-sm" style="background-color: var(--primary-color) !important;">
-    <div class="container-fluid px-4">
-      <a class="navbar-brand fw-bold text-white d-flex align-items-center" href="#">
-        <i class="fa-solid fa-gas-pump fs-4 me-3 text-warning"></i>
-        <div>
-          <span class="fs-5 d-block">ระบบประเมินผู้รับเหมาก่อสร้างสถานีบริการน้ำมัน</span>
-          <small class="fw-normal text-white-50" style="font-size: 0.75rem;">PTG Energy - ปรับปรุงตามเกณฑ์มาตรฐานใหม่ 100%</small>
+<div class="container">
+    <!-- หน้าเข้าสู่ระบบ (LOGIN SCREEN) -->
+    <div id="loginScreen" class="login-box">
+        <h2>ระบบประเมินผู้รับเหมา</h2>
+        <p>กรุณาล็อกอินด้วย Google Account ของบริษัทเพื่อเริ่มทำการประเมิน</p>
+        <div class="google-btn-container">
+            <div id="g_id_onload"
+                data-client_id="422862728427-nvp3gq9athb91se9on4a3qs0rgb09fvf.apps.googleusercontent.com"
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                data-type="standard"
+                data-size="large"
+                data-theme="outline"
+                data-text="sign_in_with"
+                data-shape="rectangular"
+                data-logo_alignment="left">
+            </div>
         </div>
-      </a>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#sheetApiModal">
-          <i class="fa-solid fa-plug me-1"></i> ตั้งค่า Web App URL
-        </button>
-        <span class="badge bg-info px-3 py-2 border text-dark" id="dbStatusBadge">
-          <i class="fa-solid fa-database me-1"></i> Ready
-        </span>
-      </div>
     </div>
-  </nav>
 
-  <div class="container-fluid px-4">
-    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="mainTab" role="tablist">
-      <li class="nav-item">
-        <button class="nav-link active fw-bold px-4" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard-view" type="button">
-          <i class="fa-solid fa-chart-pie me-2"></i>สถานะโครงการ & รายงาน
-        </button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link fw-bold px-4" id="eval-tab" data-bs-toggle="pill" data-bs-target="#eval-view" type="button" onclick="handleEvalTabOpen()">
-          <i class="fa-solid fa-clipboard-check me-2"></i>ทำแบบประเมินผู้รับเหมา
-        </button>
-      </li>
-    </ul>
-
-    <div class="tab-content">
-      <!-- DASHBOARD VIEW -->
-      <div class="tab-pane fade show active" id="dashboard-view" role="tabpanel">
-        
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-md-3">
-            <div class="card card-custom p-3 stat-card c-blue">
-              <div class="d-flex justify-content-between align-items-center">
+    <!-- หน้าแบบฟอร์มประเมิน (EVALUATION FORM SCREEN) -->
+    <div id="appScreen" class="hidden">
+        <div class="user-bar">
+            <div class="user-info">
+                <img id="userImg" class="user-avatar" src="" alt="Profile">
                 <div>
-                  <div class="text-muted fw-bold small text-uppercase">เปิดแล้วปี 2026 (1 Complete 26)</div>
-                  <div class="fs-2 fw-bold text-primary" id="cardOpenedCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
+                    <strong id="userName"></strong> 
+                    <span id="userEmail" style="font-size: 0.85rem; color: #5e6c84;"></span>
                 </div>
-                <div class="fs-1 text-primary opacity-50"><i class="fa-solid fa-store"></i></div>
-              </div>
             </div>
-          </div>
-          <div class="col-12 col-md-3">
-            <div class="card card-custom p-3 stat-card c-green">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="text-muted fw-bold small text-uppercase">ประเมินครบแล้ว (ครบ 4 ฝ่าย)</div>
-                  <div class="fs-2 fw-bold text-success" id="cardCompletedCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
-                </div>
-                <div class="fs-1 text-success opacity-50"><i class="fa-solid fa-circle-check"></i></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-3">
-            <div class="card card-custom p-3 stat-card c-amber">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="text-muted fw-bold small text-uppercase">อยู่ระหว่างการประเมิน</div>
-                  <div class="fs-2 fw-bold text-warning" id="cardPendingCount">0 <span class="fs-6 text-muted font-normal">สาขา</span></div>
-                </div>
-                <div class="fs-1 text-warning opacity-50"><i class="fa-solid fa-hourglass-half"></i></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-3">
-            <div class="card card-custom p-3 stat-card c-purple">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="text-muted fw-bold small text-uppercase">ผู้รับเหมาดีที่สุด (Top Perform)</div>
-                  <div class="fs-5 fw-bold text-purple text-truncate" style="max-width: 170px;" id="cardBestContractor">-</div>
-                  <small class="text-muted" id="cardBestContractorScore">เกรด: - (-%)</small>
-                </div>
-                <div class="fs-1 text-purple opacity-50" style="color: #8b5cf6;"><i class="fa-solid fa-trophy"></i></div>
-              </div>
-            </div>
-          </div>
+            <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
         </div>
 
-        <div class="card card-custom p-4 bg-white mb-4">
-          <div class="row g-3 align-items-center">
-            <div class="col-12 col-md-4">
-              <label class="form-label fw-bold text-primary"><i class="fa-solid fa-user-gear me-1"></i>กรองตามรายผู้รับเหมา:</label>
-              <select class="form-select border-primary" id="filterContractor" onchange="renderDashboardTable(); renderContractorChart();">
-                <option value="">-- แสดงผู้รับเหมาทั้งหมด --</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-8">
-              <div id="contractorSummaryBadge" class="p-2 bg-light rounded text-muted small d-none d-md-block">
-                * เลือกผู้รับเหมาเพื่อดูสถิติจำนวนสาขา คะแนนเฉลี่ย และเกรดเฉลี่ยสะสมของรายนั้นๆ
-              </div>
-            </div>
-          </div>
+        <h1>แบบฟอร์มประเมินผลการทำงานผู้รับเหมา</h1>
 
-          <!-- Chart Area -->
-          <div class="row mt-4" id="chartSection">
-            <div class="col-12 col-lg-7">
-              <div class="card p-3 border">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-column me-2 text-primary"></i>กราฟสรุปจำนวนสาขาและเกรดเฉลี่ยรายผู้รับเหมา</h6>
-                <div style="height: 250px; position: relative;">
-                  <canvas id="contractorChart"></canvas>
-                </div>
-              </div>
+        <form id="evalForm" onsubmit="submitForm(event)">
+            <!-- ข้อมูลผู้ประเมิน (ดึงอัตโนมัติจาก Google) -->
+            <div class="form-group">
+                <label>ผู้ทำการประเมิน</label>
+                <input type="text" id="evaluatorName" readonly>
             </div>
-            <div class="col-12 col-lg-5 mt-3 mt-lg-0">
-              <div class="card p-3 border h-100 bg-light">
-                <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-circle-info me-2 text-info"></i>เกณฑ์การให้เกรด (Grade Criteria)</h6>
-                <ul class="list-group list-group-flush fs-7 bg-transparent">
-                  <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
-                    <span>ระดับ A (ดีเยี่ยม)</span> <span class="badge grade-A">≥ 80%</span>
-                  </li>
-                  <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
-                    <span>ระดับ B (ดี)</span> <span class="badge grade-B">70% - 79%</span>
-                  </li>
-                  <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
-                    <span>ระดับ C (ปานกลาง)</span> <span class="badge grade-C">60% - 69%</span>
-                  </li>
-                  <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
-                    <span>ระดับ D (พอใช้)</span> <span class="badge grade-D">50% - 59%</span>
-                  </li>
-                  <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center">
-                    <span>ระดับ F (ควรปรับปรุง)</span> <span class="badge grade-F">&lt; 50%</span>
-                  </li>
-                </ul>
-              </div>
+            <div class="form-group">
+                <label>อีเมลผู้ประเมิน</label>
+                <input type="email" id="evaluatorEmail" readonly>
             </div>
-          </div>
-        </div>
 
-        <div class="card card-custom p-4 bg-white mb-4">
-          <div class="row g-3 align-items-center mb-4 pb-3 border-bottom">
-            <div class="col-12 col-md-4">
-              <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-filter me-1"></i>กรองตาม BU (Column C):</label>
-              <select class="form-select" id="filterBU" onchange="renderDashboardTable()">
-                <option value="">-- BU ทั้งหมด --</option>
-              </select>
+            <!-- ข้อมูลงาน -->
+            <div class="form-group">
+                <label for="department">ฝ่ายผู้ประเมิน</label>
+                <select id="department" required>
+                    <option value="">-- เลือกฝ่าย --</option>
+                    <option value="วิศวกรรม">วิศวกรรม (65%)</option>
+                    <option value="จัดซื้อจัดจ้าง">จัดซื้อจัดจ้าง (10%)</option>
+                    <option value="Safety">Safety (10%)</option>
+                    <option value="BU">บริหารสถานีและปฏิบัติการ BU (15%)</option>
+                </select>
             </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-map-location-dot me-1"></i>กรองตาม Zone (Column D):</label>
-              <select class="form-select" id="filterZone" onchange="renderDashboardTable()">
-                <option value="">-- Zone ทั้งหมด --</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-4 text-md-end mt-md-4">
-              <button class="btn btn-outline-secondary w-100 w-md-auto" onclick="fetchDataFromGoogleSheet()">
-                <i class="fa-solid fa-arrows-rotate me-1"></i> ดึงข้อมูลใหม่จาก Sheet
-              </button>
-            </div>
-          </div>
 
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list me-2 text-primary"></i>รายการสถานีบริการน้ำมันและสถานะการประเมิน</h6>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover align-middle" id="projectTable">
-              <thead class="table-light">
-                <tr>
-                  <th>รหัสสาขา / ชื่อสถานี</th>
-                  <th>BU / Zone</th>
-                  <th>Model</th>
-                  <th>ชื่อผู้รับเหมา</th>
-                  <th class="text-center">วิศวกรรม (65%)</th>
-                  <th class="text-center">จัดซื้อ (10%)</th>
-                  <th class="text-center">Safety (10%)</th>
-                  <th class="text-center">บริหารสถานี (15%)</th>
-                  <th class="text-center">คะแนนรวม</th>
-                  <th class="text-center">เกรด</th>
-                  <th class="text-end">การจัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="projectTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- EVALUATION VIEW -->
-      <div class="tab-pane fade" id="eval-view" role="tabpanel">
-        
-        <!-- ตาราง Weight Distribution Reference -->
-        <div class="card card-custom bg-white mb-4">
-          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#weightTableCollapse">
-            <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-cells me-2 text-primary"></i>ตารางสัดส่วนน้ำหนักและตัวชี้วัดการประเมินผู้รับเหมา (Weight Distribution Reference)</h6>
-            <button class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-chevron-down"></i> แสดง/ซ่อน ตาราง Weight</button>
-          </div>
-          <div class="collapse show" id="weightTableCollapse">
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-bordered table-sm align-middle mb-0 weight-matrix-table text-center">
-                  <thead class="table-light">
-                    <tr>
-                      <th style="width: 40px;">ข้อ</th>
-                      <th style="width: 180px;">หัวข้อพิจารณา (Topic)</th>
-                      <th>ตัวชี้วัด / เครื่องมือวัดผล (Indicator)</th>
-                      <th style="width: 180px;">เอกสาร / หลักฐานประกอบ</th>
-                      <th style="width: 60px;">% New</th>
-                      <th style="width: 70px;" class="table-primary text-primary">Engineer</th>
-                      <th style="width: 70px;">Purchasing</th>
-                      <th style="width: 70px;" class="table-success text-success">Safety</th>
-                      <th style="width: 70px;" class="table-warning text-dark">BU</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1</td>
-                      <td class="text-start fw-bold">1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัยระดับวิชาชีพ</td>
-                      <td class="text-start">การมีอยู่และการปฏิบัติงานประจำหน้างานของบุคลากร<br><small class="text-muted">(หน่วย: ความครบถ้วนของตำแหน่งและเวลาสุ่มตรวจ)</small></td>
-                      <td class="text-start small">ใบตารางรายงาน Manpower ประจำโครงการก่อสร้าง</td>
-                      <td>4.00%</td>
-                      <td class="table-success fw-bold text-dark">2.25%</td>
-                      <td></td>
-                      <td class="table-success fw-bold text-dark">1.75%</td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td class="text-start fw-bold">2. เครื่องมือช่าง, เครื่องจักร และอุปกรณ์ที่จำเป็น</td>
-                      <td class="text-start">ความเพียงพอ ความพร้อมใช้งาน และการตรวจสอบ<br><small class="text-muted">(หน่วย: สภาพความพร้อม + สัดส่วนการทำ Checklist & Tagging)</small></td>
-                      <td class="text-start small">ใบตารางรายงาน เครื่องมือ เครื่องจักร และอุปกรณ์ประจำโครงการ</td>
-                      <td>1.00%</td>
-                      <td>0.50%</td>
-                      <td></td>
-                      <td>0.50%</td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>3</td>
-                      <td class="text-start fw-bold">3. ความพร้อมของผู้ปฏิบัติงาน พร้อมอุปกรณ์ PPE</td>
-                      <td class="text-start">การสวมใส่ PPE และจำนวนครั้งที่ตรวจพบการละเลย<br><small class="text-muted">(หน่วย: จำนวนครั้งที่ตรวจพบไม่สวมใส่ PPE)</small></td>
-                      <td class="text-start small">ใบตารางรายงานด้านความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนอุบัติเหตุ</td>
-                      <td>2.00%</td>
-                      <td>1.00%</td>
-                      <td></td>
-                      <td>1.00%</td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>4</td>
-                      <td class="text-start fw-bold">4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group</td>
-                      <td class="text-start">การปฏิบัติตามระเบียบ และการตอบกลับรายงาน<br><small class="text-muted">(หน่วย: จำนวนครั้งที่พบการฝ่าฝืน + จำนวนครั้งการทวงถาม)</small></td>
-                      <td class="text-start small">ใบ Check List รายงานความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนฝ่าฝืนระเบียบ</td>
-                      <td>2.00%</td>
-                      <td>1.00%</td>
-                      <td></td>
-                      <td>1.00%</td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>5</td>
-                      <td class="text-start fw-bold">5. คุณภาพงานก่อสร้างหลังส่งมอบงาน ก่อนปิดโครงการ</td>
-                      <td class="text-start">จำนวนรายการข้อบกพร่อง (Defect)<br><small class="text-muted">(หน่วย: จำนวนรายการ Defect ที่ตรวจพบ)</small></td>
-                      <td class="text-start small">ใบตรวจสอบออกรายการแก้ไข Defect หลังส่งมอบงาน ก่อนปิดโครงการ</td>
-                      <td>15.00%</td>
-                      <td class="text-primary fw-bold">7.50%</td>
-                      <td></td>
-                      <td></td>
-                      <td class="text-danger fw-bold">7.50%</td>
-                    </tr>
-                    <tr>
-                      <td>6</td>
-                      <td class="text-start fw-bold">6. การก่อสร้าง/ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด</td>
-                      <td class="text-start">การใช้วัสดุ การส่งใบรับรอง และจำนวนใบขอเปลี่ยนวัสดุ<br><small class="text-muted">(หน่วย: จำนวนเอกสาร SR Form + การส่งใบรับรอง)</small></td>
-                      <td class="text-start small">เอกสารขออนุมัติใช้วัสดุ / ใบรับรองวัสดุ / ใบขอเปลี่ยนแปลงวัสดุ (SR Form)</td>
-                      <td>10.00%</td>
-                      <td>10.00%</td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>7</td>
-                      <td class="text-start fw-bold">7. การก่อสร้างตรงตามแบบมาตรฐาน (Drawing)</td>
-                      <td class="text-start">การตรวจสอบแบบก่อนเริ่มงาน และระดับผลกระทบกรณีไม่ตรงแบบ<br><small class="text-muted">(หน่วย: การตอบกลับ E-mail KOM 10 วัน + ความรุนแรงของผลกระทบ)</small></td>
-                      <td class="text-start small">E-mail ตอบกลับการตรวจสอบแบบก่อสร้าง (ภายใน/หลัง KOM 10 วัน)</td>
-                      <td>5.00%</td>
-                      <td class="text-primary fw-bold">4.00%</td>
-                      <td></td>
-                      <td></td>
-                      <td class="text-danger fw-bold">1.00%</td>
-                    </tr>
-                    <tr>
-                      <td>8</td>
-                      <td class="text-start fw-bold">8. การจัดส่งรายงานประจำวัน และรายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์</td>
-                      <td class="text-start">สัดส่วนจำนวนวันที่จัดส่งรายงานตรงเวลา<br><small class="text-muted">(หน่วย: ร้อยละ (%) ของจำนวนวันตามสัญญา)</small></td>
-                      <td class="text-start small">เอกสารการจัดส่งรายงานประจำวันของโครงการก่อสร้าง</td>
-                      <td>5.00%</td>
-                      <td class="text-primary fw-bold">4.00%</td>
-                      <td></td>
-                      <td></td>
-                      <td class="text-danger fw-bold">1.00%</td>
-                    </tr>
-                    <tr>
-                      <td>9</td>
-                      <td class="text-start fw-bold">9. การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง</td>
-                      <td class="text-start">ระยะเวลาส่งมอบงานเทียบกับสัญญาก่อสร้าง<br><small class="text-muted">(หน่วย: ร้อยละ (%) ของระยะเวลาตามสัญญา)</small></td>
-                      <td class="text-start small">เอกสารบันทึกระยะเวลาสัญญาก่อสร้าง และการรับมอบงาน</td>
-                      <td>35.00%</td>
-                      <td class="text-primary fw-bold">25.00%</td>
-                      <td>7.00%</td>
-                      <td></td>
-                      <td class="text-danger fw-bold">3.00%</td>
-                    </tr>
-                    <tr>
-                      <td>10</td>
-                      <td class="text-start fw-bold">10. การจัดส่งแผนงาน, เอกสารประกอบ KOM 10 วัน และงานเพิ่ม-ลด</td>
-                      <td class="text-start">จำนวนวันที่จัดส่งเอกสารหลังรับมอบพื้นที่<br><small class="text-muted">(หน่วย: จำนวนวันหลังวันรับมอบพื้นที่หน้างาน)</small></td>
-                      <td class="text-start small">E-mail การจัดส่งเอกสาร KOM 10 วัน หลังวันรับมอบพื้นที่หน้างาน</td>
-                      <td>5.50%</td>
-                      <td>2.75%</td>
-                      <td></td>
-                      <td>2.75%</td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td>11</td>
-                      <td class="text-start fw-bold">11. การแก้ไขข้อบกพร่องของงาน (Defect Work)</td>
-                      <td class="text-start">ระยะเวลาการแก้ไข Defect แล้วเสร็จเทียบกับสัญญา<br><small class="text-muted">(หน่วย: จำนวนวันเทียบกับวันสิ้นสุดสัญญา)</small></td>
-                      <td class="text-start small">ใบตรวจสอบรายการ Defect และวันที่ดำเนินการแล้วเสร็จ</td>
-                      <td>5.00%</td>
-                      <td class="text-primary fw-bold">2.50%</td>
-                      <td></td>
-                      <td></td>
-                      <td class="text-danger fw-bold">2.50%</td>
-                    </tr>
-                    <tr>
-                      <td>12</td>
-                      <td class="text-start fw-bold">12. การให้ความร่วมมือ ในระหว่างดำเนินการโครงการกับ PTG</td>
-                      <td class="text-start">สัดส่วนการเข้าร่วมประชุมติดตามความคืบหน้า<br><small class="text-muted">(หน่วย: ร้อยละ (%) ของจำนวนครั้งที่นัดหมายประชุม)</small></td>
-                      <td class="text-start small">E-mail นัดหมายประชุมติดตามงาน / รายงานวาระการประชุม</td>
-                      <td>10.50%</td>
-                      <td>4.50%</td>
-                      <td>3.00%</td>
-                      <td>3.00%</td>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                  <tfoot class="table-secondary fw-bold">
-                    <tr>
-                      <td colspan="4" class="text-end">Total</td>
-                      <td>100.00%</td>
-                      <td class="text-primary">65.00%</td>
-                      <td>10.00%</td>
-                      <td class="text-success">10.00%</td>
-                      <td class="text-danger">15.00%</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+            <div class="form-group">
+                <label for="vendorName">ชื่อผู้รับเหมา / บริษัท</label>
+                <input type="text" id="vendorName" placeholder="ระบุชื่อผู้รับเหมา" required>
             </div>
-          </div>
-        </div>
 
-        <div class="card card-custom p-4 bg-white mb-4">
-          <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-pen-to-square me-2"></i>ข้อมูลการประเมินโครงการ</h5>
-          <div class="row g-3">
-            <div class="col-12 col-md-6 col-lg-3">
-              <label class="form-label fw-bold">1. ค้นหา & เลือกสาขา:</label>
-              <select class="form-select" id="evalProjectSelect" onchange="onProjectSelectChange()">
-                <option value="">-- กรุณาเลือกสาขา --</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-6 col-lg-3">
-              <label class="form-label fw-bold">2. ฝ่ายผู้ทำการประเมิน:</label>
-              <select class="form-select" id="evalDeptSelect" onchange="onProjectSelectChange()">
-                <option value="1">ฝ่ายที่ 1: วิศวกรรมและความปลอดภัย (65%)</option>
-                <option value="2">ฝ่ายที่ 2: จัดซื้อจัดจ้าง (10%) [2 ข้อ]</option>
-                <option value="3">ฝ่ายที่ 3: ความปลอดภัย Safety (10%) [6 ข้อ]</option>
-                <option value="4">ฝ่ายที่ 4: บริหารสถานีและปฏิบัติการ BU (15%) [5 ข้อ]</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-6 col-lg-3">
-              <label class="form-label fw-bold">3. ชื่อผู้ประเมิน:</label>
-              <input type="text" id="evaluatorName" class="form-control" placeholder="เช่น นายทดสอบ ระบบ">
-            </div>
-            <div class="col-12 col-md-6 col-lg-3">
-              <label class="form-label fw-bold">4. อีเมลผู้ประเมิน:</label>
-              <input type="email" id="evaluatorEmail" class="form-control" placeholder="user@pt.co.th">
-            </div>
-          </div>
-        </div>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0;">
 
-        <form id="evaluationForm" onsubmit="handleFormSubmit(event)">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-ol me-2 text-primary"></i>เกณฑ์การประเมิน</h5>
-            <span class="badge bg-info text-dark p-2 fs-7" id="liveScoreCounter">คะแนนฝ่ายนี้: 0.00 / 100%</span>
-          </div>
+            <!-- หัวข้อการประเมิน -->
+            <h3>การให้คะแนน (1 - 5 คะแนน)</h3>
 
-          <div id="rubricCardsContainer" class="d-flex flex-column gap-3 mb-4"></div>
-
-          <div class="card card-custom p-3 bg-white mb-4">
-            <label class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติม / Remark:</label>
-            <textarea id="evalComments" class="form-control mb-3" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
-            
-            <label class="form-label fw-bold d-flex justify-content-between align-items-center">
-              <span><i class="fa-solid fa-signature me-1 text-primary"></i> ลายเซ็นผู้ประเมิน (ลงนามออนไลน์):</span>
-              <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearSignature()">
-                <i class="fa-solid fa-eraser me-1"></i> ล้างลายเซ็น
-              </button>
-            </label>
-            <div class="signature-container">
-              <canvas id="signaturePad"></canvas>
+            <div class="form-group">
+                <label>1. วิศวกรควบคุมงาน / โฟร์แมน / จป.วิชาชีพ <span class="weight-badge">สัดส่วน 4.00%</span></label>
+                <select name="q1" required>
+                    <option value="">-- ให้คะแนน --</option>
+                    <option value="5">5 - ดีมาก</option>
+                    <option value="4">4 - ดี</option>
+                    <option value="3">3 - ปานกลาง</option>
+                    <option value="2">2 - ต้องปรับปรุง</option>
+                    <option value="1">1 - ไม่ผ่านเกณฑ์</option>
+                </select>
             </div>
-            <small class="text-muted mt-1">* ใช้นิ้วมือสัมผัสบนหน้าจอมือถือ หรือใช้นวดเมาส์ลากเพื่อเซ็นชื่อลงในกล่องด้านบน</small>
-          </div>
 
-          <div class="d-flex justify-content-end gap-2 mb-5">
-            <button type="submit" class="btn btn-success fw-bold px-5 py-2" id="btnSubmitForm">
-              <i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน
-            </button>
-          </div>
+            <div class="form-group">
+                <label>2. การส่งมอบงานตามระยะเวลาสัญญา <span class="weight-badge">สัดส่วน 35.00%</span></label>
+                <select name="q9" required>
+                    <option value="">-- ให้คะแนน --</option>
+                    <option value="5">5 - ดีมาก</option>
+                    <option value="4">4 - ดี</option>
+                    <option value="3">3 - ปานกลาง</option>
+                    <option value="2">2 - ต้องปรับปรุง</option>
+                    <option value="1">1 - ไม่ผ่านเกณฑ์</option>
+                </select>
+            </div>
+
+            <!-- หมายเหตุ: สามารถเพิ่มข้อ 2-12 ตามโครงสร้างตารางเดิมได้ที่นี่ -->
+
+            <button type="submit" class="submit-btn">บันทึกผลการประเมิน</button>
         </form>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- Modal ตั้งค่า Web App URL -->
-  <div class="modal fade" id="sheetApiModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title fw-bold">ตั้งค่า Google Apps Script Web App URL</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="text" id="scriptUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" onclick="saveSheetSettings()">บันทึก</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<script>
+    // **กำหนดโดเมนบริษัทที่อนุญาตให้ใช้งาน**
+    const ALLOWED_DOMAIN = "pt.co.th"; // เปลี่ยนเป็นโดเมนบริษัทของคุณ เช่น "yourcompany.com"
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIptaUP8FGBSnment5jDS_hq3MpyUofR9b_eIwjTHZhdtP4Ewbarws6Y50WI8Q7Hjp/exec";
-    const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
-    
-    // อัปเดตข้อมูลเกณฑ์การประเมิน 12 ข้อ ตามข้อกำหนดใหม่ 100%
-    const criteria12 = [
-      {
-        id: 1,
-        title: "1. วิศวกรควบคุมงาน / โฟร์แมนควบคุมงาน / เจ้าหน้าที่ความปลอดภัยระดับวิชาชีพ",
-        indicator: "การมีอยู่และการปฏิบัติงานประจำหน้างานของบุคลากร (หน่วย: ความครบถ้วนของตำแหน่งและเวลาสุ่มตรวจ)",
-        evidence: "ใบตารางรายงาน Manpower ประจำโครงการก่อสร้าง",
-        weights: { 1: 2.25, 2: 0, 3: 1.75, 4: 0 },
-        r5: "มีทั้ง Engineer, Foreman และ จป.วิชาชีพ ปฏิบัติงานประจำตลอดโครงการ",
-        r4: "มี Engineer หรือ Foreman ท่านใดท่านหนึ่ง + จป.วิชาชีพ ประจำตลอดโครงการ",
-        r3: "มี Engineer + จป.วิชาชีพ (ไม่ประจำ) แต่มี Foreman ประจำตลอดโครงการ",
-        r2: "มีเพียง Foreman ประจำโครงการ (ไม่มี Engineer และ จป.)",
-        r1: "มีเพียง Foreman แต่ไม่ได้อยู่ประจำโครงการ",
-        r0: "ไม่มีทั้ง Engineer, Foreman และ จป. อยู่ประจำโครงการ"
-      },
-      {
-        id: 2,
-        title: "2. เครื่องมือช่าง, เครื่องจักร และอุปกรณ์ที่จำเป็น",
-        indicator: "ความเพียงพอ ความพร้อมใช้งาน และการตรวจสอบ (หน่วย: สภาพความพร้อม + สัดส่วนการทำ Checklist & Tagging)",
-        evidence: "ใบตารางรายงาน เครื่องมือ เครื่องจักร และอุปกรณ์ประจำโครงการ",
-        weights: { 1: 0.50, 2: 0, 3: 0.50, 4: 0 },
-        r5: "มีครบถ้วน พร้อมใช้งานตลอด และตรวจเช็ก (Checklist + Tag) สม่ำเสมอ",
-        r4: "มีครบถ้วน พร้อมใช้งานตลอด แต่ขาดการตรวจเช็กสม่ำเสมอ",
-        r3: "จำเป็น/พร้อมใช้งานแต่ไม่เพียงพอ แต่มีการตรวจเช็กสม่ำเสมอ",
-        r2: "จำเป็น/พร้อมใช้งานแต่ไม่เพียงพอ และขาดการตรวจเช็กสม่ำเสมอ",
-        r1: "มีอุปกรณ์จำเป็น แต่ไม่เพียงพอและพร้อมใช้เพียงบางส่วน",
-        r0: "ไม่มีอุปกรณ์ที่จำเป็น และไม่พร้อมใช้งาน"
-      },
-      {
-        id: 3,
-        title: "3. ความพร้อมของผู้ปฏิบัติงาน พร้อมอุปกรณ์ PPE",
-        indicator: "การสวมใส่ PPE และจำนวนครั้งที่ตรวจพบการละเลย (หน่วย: จำนวนครั้งที่ตรวจพบไม่สวมใส่ PPE)",
-        evidence: "ใบตารางรายงานด้านความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนอุบัติเหตุ",
-        weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 },
-        r5: "PPE ครบถ้วน สวมใส่ทุกคน / ไม่พบรายงานการไม่สวมใส่ (0 ครั้ง)",
-        r4: "PPE ครบ / ตรวจพบไม่สวมใส่ ≤ 2 ครั้ง ตลอดโครงการ",
-        r3: "PPE พื้นฐานครบ แต่ PPE งานเสี่ยงไม่ครบ / ตรวจพบ 3 - 4 ครั้ง",
-        r2: "PPE พื้นฐานครบ แต่ PPE งานเสี่ยงไม่ครบ / ตรวจพบ 5 - 6 ครั้ง",
-        r1: "PPE ไม่ครบทั้งพื้นฐานและงานเสี่ยง / ตรวจพบ 7 - 8 ครั้ง",
-        r0: "ไม่สวมใส่ทุกคน / ตรวจพบ > 8 ครั้ง"
-      },
-      {
-        id: 4,
-        title: "4. การปฏิบัติตามระเบียบด้านความปลอดภัย PTG Group",
-        indicator: "การปฏิบัติตามระเบียบ และการตอบกลับรายงาน (หน่วย: จำนวนครั้งที่พบการฝ่าฝืน + จำนวนครั้งการทวงถาม)",
-        evidence: "ใบ Check List รายงานความปลอดภัยและสิ่งแวดล้อม / ใบแจ้งเตือนฝ่าฝืนระเบียบ",
-        weights: { 1: 1.00, 2: 0, 3: 1.00, 4: 0 },
-        r5: "ปฏิบัติตามข้อกำหนดตลอดระยะเวลา / ไม่พบข้อบกพร่อง (0 ครั้ง)",
-        r4: "ตรวจพบ ≤ 2 ครั้ง แก้ไขได้ตามกำหนด และตอบกลับตามเวลา",
-        r3: "ตรวจพบ ≤ 2 ครั้ง แก้ไขได้ตามกำหนด มีการทวงถาม 1 ครั้ง",
-        r2: "ตรวจพบ ≤ 3 ครั้ง แก้ไขได้ตามกำหนด มีการทวงถาม 2 ครั้ง",
-        r1: "ตรวจพบ ≤ 3 ครั้ง ไม่แก้ไขตามกำหนด / ไม่ตอบกลับรายงาน",
-        r0: "ไม่ปฏิบัติตามระเบียบตลอดโครงการ / ตรวจพบตลอดและไม่ตอบกลับ"
-      },
-      {
-        id: 5,
-        title: "5. คุณภาพงานก่อสร้างหลังส่งมอบงาน ก่อนปิดโครงการ",
-        indicator: "จำนวนรายการข้อบกพร่อง (Defect) (หน่วย: จำนวนรายการ Defect ที่ตรวจพบ)",
-        evidence: "ใบตรวจสอบออกรายการแก้ไข Defect หลังส่งมอบงาน ก่อนปิดโครงการ",
-        weights: { 1: 7.50, 2: 0, 3: 0, 4: 7.50 },
-        r5: "ไม่พบรายการ Defect (0 รายการ)",
-        r4: "ตรวจพบ Defect ≤ 30 รายการ",
-        r3: "ตรวจพบ Defect 30 - 50 รายการ",
-        r2: "ตรวจพบ Defect 51 - 70 รายการ",
-        r1: "ตรวจพบ Defect 71 - 80 รายการ",
-        r0: "ตรวจพบ Defect > 80 รายการ"
-      },
-      {
-        id: 6,
-        title: "6. การก่อสร้าง/ซ่อมบำรุง ใช้วัสดุตรงตามข้อกำหนด",
-        indicator: "การใช้วัสดุ การส่งใบรับรอง และจำนวนใบขอเปลี่ยนวัสดุ (หน่วย: จำนวนเอกสาร SR Form + การส่งใบรับรอง)",
-        evidence: "เอกสารขออนุมัติใช้วัสดุ / ใบรับรองวัสดุ / ใบขอเปลี่ยนแปลงวัสดุ (SR Form)",
-        weights: { 1: 10.00, 2: 0, 3: 0, 4: 0 },
-        r5: "วัสดุตรงตามข้อกำหนด มีใบรับรอง ถูกต้องตามหลักวิศวกรรม",
-        r4: "ตรงข้อกำหนด มีใบรับรอง ปรับปรุงตามหลักวิศวกรรม/มี SR Form ≤ 5 รายการ",
-        r3: "ตรงข้อกำหนด มีใบรับรอง ปรับปรุงตามหลักวิศวกรรม/มี SR Form 5 - 10 รายการ",
-        r2: "ตรงข้อกำหนด แต่ไม่ส่งใบรับรอง/มี SR Form > 3 รายการ โดยไม่ส่งอนุมัติ",
-        r1: "ตรงบางส่วน (ไม่ขออนุมัติ) แต่ไม่กระทบมาตรฐาน/ไม่มีเอกสารขอเปลี่ยน",
-        r0: "ไม่ตรงตามข้อกำหนด (ไม่ขออนุมัติ) ส่งผลกระทบต่อคุณภาพ/ไม่มีเอกสาร"
-      },
-      {
-        id: 7,
-        title: "7. การก่อสร้างตรงตามแบบมาตรฐาน (Drawing)",
-        indicator: "การตรวจสอบแบบก่อนเริ่มงาน และระดับผลกระทบกรณีไม่ตรงแบบ (หน่วย: การตอบกลับ E-mail KOM 10 วัน + ความรุนแรงของผลกระทบ)",
-        evidence: "E-mail ตอบกลับการตรวจสอบแบบก่อสร้าง (ภายใน/หลัง KOM 10 วัน)",
-        weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 },
-        r5: "ตรวจสอบแบบก่อนเริ่มงาน ไม่พบ/แจ้งข้อขัดแย้งล่วงหน้า ก่อสร้างตรงตามแบบ",
-        r4: "ไม่ได้ตรวจแบบก่อนเริ่มงาน แต่ก่อสร้างตรงตามแบบที่อนุมัติ",
-        r3: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบบางส่วน (ผลกระทบไม่รุนแรง)",
-        r2: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบบางส่วน (ผลกระทบส่งผลรุนแรง)",
-        r1: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบส่วนใหญ่ (ผลกระทบไม่รุนแรง)",
-        r0: "ไม่ได้ตรวจแบบก่อนเริ่มงาน ก่อสร้างไม่ตรงแบบส่วนใหญ่ (ผลกระทบส่งผลรุนแรง)"
-      },
-      {
-        id: 8,
-        title: "8. การจัดส่งรายงานประจำวัน และรายงานความก้าวหน้า (S-Curve) ประจำสัปดาห์",
-        indicator: "สัดส่วนจำนวนวันที่จัดส่งรายงานตรงเวลา (หน่วย: ร้อยละ (%) ของจำนวนวันตามสัญญา)",
-        evidence: "เอกสารการจัดส่งรายงานประจำวันของโครงการก่อสร้าง",
-        weights: { 1: 4.00, 2: 0, 3: 0, 4: 1.00 },
-        r5: "ส่งตรงเวลาสม่ำเสมอ ถูกต้อง > 90% ของจำนวนวันตามสัญญา",
-        r4: "ส่งตรงเวลาสม่ำเสมอ มีผิดพลาดบางครั้ง 80% - 89%",
-        r3: "ส่งตรงเวลา แต่ต้องติดตามเป็นบางครั้ง 60% - 79%",
-        r2: "ส่งตรงเวลา แต่ต้องติดตามเป็นบางครั้ง 40% - 59%",
-        r1: "ส่งตรงเวลา แต่ต้องติดตามเป็นบางครั้ง 20% - 39%",
-        r0: "ไม่ส่งตามกำหนด ไม่ตอบสนองการติดตาม 0% - 19%"
-      },
-      {
-        id: 9,
-        title: "9. การส่งมอบงาน ตามระยะเวลาสัญญาก่อสร้าง",
-        indicator: "ระยะเวลาส่งมอบงานเทียบกับสัญญาก่อสร้าง (หน่วย: ร้อยละ (%) ของระยะเวลาตามสัญญา)",
-        evidence: "เอกสารบันทึกระยะเวลาสัญญาก่อสร้าง และการรับมอบงาน",
-        weights: { 1: 25.00, 2: 7.00, 3: 0, 4: 3.00 },
-        r5: "ส่งมอบงานก่อนเวลา > 10% ของระยะเวลาตามสัญญา",
-        r4: "ส่งมอบงานก่อนเวลา 5% - 9.99%",
-        r3: "ส่งมอบงานก่อนเวลา 0% - 4.99%",
-        r2: "ส่งมอบงานล่าช้ากว่าเวลา 0.1% - 4.99%",
-        r1: "ส่งมอบงานล่าช้ากว่าเวลา 5% - 9.99%",
-        r0: "ส่งมอบงานล่าช้ากว่าเวลา > 10%"
-      },
-      {
-        id: 10,
-        title: "10. การจัดส่งแผนงาน, เอกสารประกอบ KOM 10 วัน และงานเพิ่ม-ลด",
-        indicator: "จำนวนวันที่จัดส่งเอกสารหลังรับมอบพื้นที่ (หน่วย: จำนวนวันหลังวันรับมอบพื้นที่หน้างาน)",
-        evidence: "E-mail การจัดส่งเอกสาร KOM 10 วัน หลังวันรับมอบพื้นที่หน้างาน",
-        weights: { 1: 2.75, 2: 0, 3: 2.75, 4: 0 },
-        r5: "ส่งแผนงานและเอกสาร KOM เร็วกว่า 4 วัน หลังรับมอบพื้นที่",
-        r4: "ส่งแผนงานและเอกสาร KOM ภายใน 4 - 7 วัน",
-        r3: "ส่งแผนงานและเอกสาร KOM ภายใน 8 - 10 วัน",
-        r2: "ส่งแผนงานและเอกสาร KOM ล่าช้า ภายใน 11 - 13 วัน",
-        r1: "ส่งแผนงานและเอกสาร KOM ล่าช้า ภายใน 14 - 17 วัน",
-        r0: "ส่งแผนงานและเอกสาร KOM ล่าช้า มากกว่า 18 วันขึ้นไป"
-      },
-      {
-        id: 11,
-        title: "11. การแก้ไขข้อบกพร่องของงาน (Defect Work)",
-        indicator: "ระยะเวลาการแก้ไข Defect แล้วเสร็จเทียบกับสัญญา (หน่วย: จำนวนวันเทียบกับวันสิ้นสุดสัญญา)",
-        evidence: "ใบตรวจสอบรายการ Defect และวันที่ดำเนินการแล้วเสร็จ",
-        weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 },
-        r5: "แก้ไข Defect แล้วเสร็จ ก่อนสิ้นสุดสัญญา ≥ 15 วัน",
-        r4: "แก้ไข Defect แล้วเสร็จ ก่อนสิ้นสุดสัญญา 1 - 15 วัน",
-        r3: "แก้ไข Defect แล้วเสร็จ เท่ากับวันสิ้นสุดสัญญาพอดี",
-        r2: "แก้ไข Defect แล้วเสร็จ หลังสิ้นสุดสัญญา 1 - 15 วัน",
-        r1: "แก้ไข Defect แล้วเสร็จ หลังสิ้นสุดสัญญา 16 - 30 วัน",
-        r0: "แก้ไข Defect แล้วเสร็จ หลังสิ้นสุดสัญญา > 30 วันขึ้นไป"
-      },
-      {
-        id: 12,
-        title: "12. การให้ความร่วมมือ ในระหว่างดำเนินการโครงการกับ PTG",
-        indicator: "สัดส่วนการเข้าร่วมประชุมติดตามความคืบหน้า (หน่วย: ร้อยละ (%) ของจำนวนครั้งที่นัดหมายประชุม)",
-        evidence: "E-mail นัดหมายประชุมติดตามงาน / รายงานวาระการประชุม",
-        weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 },
-        r5: "ร่วมประชุมติดตามความคืบหน้า > 90% ของจำนวนครั้งที่นัดหมาย",
-        r4: "ร่วมประชุมติดตามความคืบหน้า 80% - 89%",
-        r3: "ร่วมประชุมติดตามความคืบหน้า 60% - 79%",
-        r2: "ร่วมประชุมติดตามความคืบหน้า 40% - 59%",
-        r1: "ร่วมประชุมติดตามความคืบหน้า 20% - 39%",
-        r0: "ร่วมประชุมติดตามความคืบหน้า 0% - 19% (ควรพิจารณาการจ่ายงาน)"
-      }
-    ];
-
-    let projectsData = [];
-    let currentSelectedRatings = {};
-    let currentScriptUrl = "";
-    let myContractorChart = null;
-    
-    // Canvas Signature State
-    let canvas, ctx, isDrawing = false, hasSigned = false;
-
-    window.onload = function() {
-      currentScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
-      document.getElementById("scriptUrlInput").value = currentScriptUrl;
-      initCanvas();
-      fetchDataFromGoogleSheet();
-      window.addEventListener('resize', resizeCanvas);
-    };
-
-    function handleEvalTabOpen() {
-      setTimeout(resizeCanvas, 150);
+    // แกะรหัส JWT Token จาก Google
+    function parseJwt(token) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
     }
 
-    function getGradeInfo(scoreNum) {
-      if (scoreNum >= 80) {
-        return { grade: 'A', class: 'grade-A' };
-      } else if (scoreNum >= 70) {
-        return { grade: 'B', class: 'grade-B' };
-      } else if (scoreNum >= 60) {
-        return { grade: 'C', class: 'grade-C' };
-      } else if (scoreNum >= 50) {
-        return { grade: 'D', class: 'grade-D' };
-      } else {
-        return { grade: 'F', class: 'grade-F' };
-      }
-    }
+    // ฟังก์ชันจัดการหลังผู้ใช้กด Login
+    function handleCredentialResponse(response) {
+        const data = parseJwt(response.credential);
+        const userEmail = data.email;
 
-    // Canvas Signature Functionality
-    function initCanvas() {
-      canvas = document.getElementById("signaturePad");
-      ctx = canvas.getContext("2d");
-      resizeCanvas();
-
-      canvas.addEventListener("mousedown", startDrawing);
-      canvas.addEventListener("mousemove", draw);
-      canvas.addEventListener("mouseup", stopDrawing);
-      canvas.addEventListener("mouseleave", stopDrawing);
-
-      canvas.addEventListener("touchstart", (e) => { 
-        startDrawing(getTouchPos(e)); 
-        e.preventDefault(); 
-      }, { passive: false });
-
-      canvas.addEventListener("touchmove", (e) => { 
-        draw(getTouchPos(e)); 
-        e.preventDefault(); 
-      }, { passive: false });
-
-      canvas.addEventListener("touchend", stopDrawing);
-    }
-
-    function resizeCanvas() {
-      if (!canvas) return;
-      const rect = canvas.parentElement.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      
-      let tempImg = null;
-      if (hasSigned) {
-        tempImg = canvas.toDataURL();
-      }
-
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-
-      ctx.lineWidth = 2.5;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "#0f2b48";
-
-      if (tempImg) {
-        loadSignatureImage(tempImg);
-      }
-    }
-
-    function getMousePos(e) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-    }
-
-    function getTouchPos(e) {
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.touches[0];
-      return {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
-      };
-    }
-
-    function startDrawing(pos) {
-      isDrawing = true;
-      hasSigned = true;
-      ctx.beginPath();
-      const coords = pos.clientX ? getMousePos(pos) : pos;
-      ctx.moveTo(coords.x, coords.y);
-    }
-
-    function draw(pos) {
-      if (!isDrawing) return;
-      const coords = pos.clientX ? getMousePos(pos) : pos;
-      ctx.lineTo(coords.x, coords.y);
-      ctx.stroke();
-    }
-
-    function stopDrawing() { 
-      if (isDrawing) {
-        ctx.closePath();
-        isDrawing = false; 
-      }
-    }
-
-    function clearSignature() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      hasSigned = false;
-    }
-
-    function loadSignatureImage(dataUrl) {
-      clearSignature();
-      if (!dataUrl) return;
-      const img = new Image();
-      img.onload = function() {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        hasSigned = true;
-      };
-      img.src = dataUrl;
-    }
-
-    function saveSheetSettings() {
-      currentScriptUrl = document.getElementById("scriptUrlInput").value.trim();
-      localStorage.setItem("SCRIPT_URL", currentScriptUrl);
-      fetchDataFromGoogleSheet();
-    }
-
-    async function fetchDataFromGoogleSheet() {
-      if (!currentScriptUrl) return;
-      try {
-        const res = await fetch(currentScriptUrl);
-        const data = await res.json();
-        if (data && data.status === 'success') {
-          projectsData = data.projects;
-          setupFilterOptions();
-          renderDashboardTable();
-          renderContractorChart();
-          populateProjectSelectOptions();
-        }
-      } catch (err) { console.error("Fetch Error:", err); }
-    }
-
-    function setupFilterOptions() {
-      const buSet = new Set();
-      const zoneSet = new Set();
-      const contractorSet = new Set();
-
-      projectsData.forEach(p => {
-        if (p.bu) buSet.add(p.bu);
-        if (p.zone) zoneSet.add(p.zone);
-        if (p.contractor) contractorSet.add(p.contractor);
-      });
-
-      const buSelect = document.getElementById("filterBU");
-      const zoneSelect = document.getElementById("filterZone");
-      const contractorSelect = document.getElementById("filterContractor");
-
-      buSelect.innerHTML = `<option value="">-- BU ทั้งหมด --</option>`;
-      buSet.forEach(bu => buSelect.innerHTML += `<option value="${bu}">${bu}</option>`);
-
-      zoneSelect.innerHTML = `<option value="">-- Zone ทั้งหมด --</option>`;
-      zoneSet.forEach(z => zoneSelect.innerHTML += `<option value="${z}">${z}</option>`);
-
-      contractorSelect.innerHTML = `<option value="">-- แสดงผู้รับเหมาทั้งหมด --</option>`;
-      contractorSet.forEach(c => contractorSelect.innerHTML += `<option value="${c}">${c}</option>`);
-    }
-
-    function calculateProjectScore(prj) {
-      let count = 0;
-      let totalWeightedScore = 0;
-      for (let deptId = 1; deptId <= 4; deptId++) {
-        if (prj.evaluations && prj.evaluations[deptId]) {
-          count++;
-          let deptScore = parseFloat(prj.evaluations[deptId].totalDeptScore) || 0;
-          totalWeightedScore += deptScore * deptWeightRatios[deptId];
-        }
-      }
-      return { count: count, completed: count === 4, score: totalWeightedScore.toFixed(2), rawScore: totalWeightedScore };
-    }
-
-    function renderDashboardTable() {
-      const selectedBU = document.getElementById("filterBU").value;
-      const selectedZone = document.getElementById("filterZone").value;
-      const selectedContractor = document.getElementById("filterContractor").value;
-      
-      const tbody = document.getElementById("projectTableBody");
-      tbody.innerHTML = "";
-
-      let opened2026Count = 0;
-      let completedCount = 0;
-      let pendingCount = 0;
-
-      const filteredProjects = projectsData.filter(prj => {
-        const matchBU = !selectedBU || prj.bu === selectedBU;
-        const matchZone = !selectedZone || prj.zone === selectedZone;
-        const matchContractor = !selectedContractor || prj.contractor === selectedContractor;
-        return matchBU && matchZone && matchContractor;
-      });
-
-      filteredProjects.forEach((prj) => {
-        const scoreInfo = calculateProjectScore(prj);
-
-        if (String(prj.status).trim() === "1 Complete 26") opened2026Count++;
-        if (scoreInfo.completed) completedCount++;
-        else pendingCount++;
-
-        const tr = document.createElement("tr");
-        let deptScoresHtml = "";
-        const maxWeights = { 1: 65, 2: 10, 3: 10, 4: 15 };
-        
-        for (let d = 1; d <= 4; d++) {
-          if (prj.evaluations && prj.evaluations[d]) {
-            let deptScore = parseFloat(prj.evaluations[d].totalDeptScore) || 0;
-            let actualVal = (deptScore * (maxWeights[d] / 100)).toFixed(1);
-            deptScoresHtml += `<td class="text-center"><span class="badge bg-success-subtle text-success border border-success dept-score-badge">${actualVal}% / ${maxWeights[d]}%</span></td>`;
-          } else {
-            deptScoresHtml += `<td class="text-center"><span class="badge bg-light text-muted border dept-score-badge">ยังไม่ประเมิน</span></td>`;
-          }
+        // ตรวจสอบโดเมนอีเมลบริษัท
+        if (ALLOWED_DOMAIN && !userEmail.endsWith("@" + ALLOWED_DOMAIN)) {
+            alert(`เข้าสู่ระบบไม่สำเร็จ: ยอมรับเฉพาะอีเมลองค์กร (@${ALLOWED_DOMAIN}) เท่านั้น`);
+            return;
         }
 
-        let gradeHtml = "-";
-        if (scoreInfo.count > 0) {
-          const gInfo = getGradeInfo(scoreInfo.rawScore);
-          gradeHtml = `<span class="badge ${gInfo.class} fs-6">${gInfo.grade}</span>`;
-        }
+        // แสดงข้อมูลผู้ใช้งาน
+        document.getElementById("userName").innerText = data.name;
+        document.getElementById("userEmail").innerText = userEmail;
+        document.getElementById("userImg").src = data.picture;
 
-        tr.innerHTML = `
-          <td>
-            <div class="fw-bold text-dark">${prj.branchName}</div>
-            <div class="fs-7 text-muted">รหัส: ${prj.id}</div>
-          </td>
-          <td>
-            <div class="fs-7 fw-bold text-secondary">${prj.bu || '-'}</div>
-            <div class="fs-7 text-muted">${prj.zone || '-'}</div>
-          </td>
-          <td><span class="badge bg-light text-dark border">${prj.model}</span></td>
-          <td class="fw-bold text-dark">${prj.contractor}</td>
-          ${deptScoresHtml}
-          <td class="text-center fw-bold fs-6 text-primary">${scoreInfo.count > 0 ? scoreInfo.score + " %" : "-"}</td>
-          <td class="text-center">${gradeHtml}</td>
-          <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary" onclick="openEvalTabForProject('${prj.id}')">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+        // Auto-fill ข้อมูลผู้ประเมินในฟอร์ม
+        document.getElementById("evaluatorName").value = data.name;
+        document.getElementById("evaluatorEmail").value = userEmail;
 
-      document.getElementById("cardOpenedCount").innerText = opened2026Count;
-      document.getElementById("cardCompletedCount").innerText = completedCount;
-      document.getElementById("cardPendingCount").innerText = pendingCount;
-
-      calculateBestContractor();
+        // สลับหน้าจอ Login -> Form
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("appScreen").classList.remove("hidden");
     }
 
-    function renderContractorChart() {
-      const selectedContractor = document.getElementById("filterContractor").value;
-      const contractorStats = {};
-
-      projectsData.forEach(p => {
-        if (!p.contractor) return;
-        if (!contractorStats[p.contractor]) {
-          contractorStats[p.contractor] = { branches: 0, totalScore: 0, evaluatedCount: 0 };
-        }
-        contractorStats[p.contractor].branches++;
-        
-        const scoreInfo = calculateProjectScore(p);
-        if (scoreInfo.count > 0) {
-          contractorStats[p.contractor].totalScore += scoreInfo.rawScore;
-          contractorStats[p.contractor].evaluatedCount++;
-        }
-      });
-
-      let labels = [];
-      let branchCounts = [];
-      let avgScores = [];
-
-      if (selectedContractor) {
-        labels = [selectedContractor];
-        const stat = contractorStats[selectedContractor] || { branches: 0, totalScore: 0, evaluatedCount: 0 };
-        branchCounts = [stat.branches];
-        avgScores = [stat.evaluatedCount > 0 ? (stat.totalScore / stat.evaluatedCount).toFixed(2) : 0];
-      } else {
-        labels = Object.keys(contractorStats);
-        branchCounts = labels.map(c => contractorStats[c].branches);
-        avgScores = labels.map(c => contractorStats[c].evaluatedCount > 0 ? (contractorStats[c].totalScore / contractorStats[c].evaluatedCount).toFixed(2) : 0);
-      }
-
-      const ctxChart = document.getElementById('contractorChart').getContext('2d');
-      if (myContractorChart) {
-        myContractorChart.destroy();
-      }
-
-      myContractorChart = new Chart(ctxChart, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'จำนวนสาขาที่รับงาน',
-              data: branchCounts,
-              backgroundColor: 'rgba(2, 132, 199, 0.7)',
-              borderColor: '#0284c7',
-              borderWidth: 1,
-              yAxisID: 'y'
-            },
-            {
-              label: 'คะแนนเฉลี่ย (%)',
-              data: avgScores,
-              backgroundColor: 'rgba(16, 185, 129, 0.7)',
-              borderColor: '#10b981',
-              borderWidth: 1,
-              type: 'line',
-              yAxisID: 'y1'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: { display: true, text: 'จำนวนสาขา' }
-            },
-            y1: {
-              beginAtZero: true,
-              max: 100,
-              position: 'right',
-              title: { display: true, text: 'คะแนนเฉลี่ย (%)' },
-              grid: { drawOnChartArea: false }
-            }
-          }
-        }
-      });
+    // ฟังก์ชัน Logout
+    function logout() {
+        document.getElementById("loginScreen").classList.remove("hidden");
+        document.getElementById("appScreen").classList.add("hidden");
+        document.getElementById("evalForm").reset();
     }
 
-    function calculateBestContractor() {
-      const contractorScores = {};
-
-      projectsData.forEach(p => {
-        if (!p.contractor) return;
-        const scoreInfo = calculateProjectScore(p);
-        if (scoreInfo.count > 0) {
-          if (!contractorScores[p.contractor]) {
-            contractorScores[p.contractor] = { totalScore: 0, count: 0 };
-          }
-          contractorScores[p.contractor].totalScore += scoreInfo.rawScore;
-          contractorScores[p.contractor].count++;
-        }
-      });
-
-      let bestContractor = "-";
-      let maxAvgScore = -1;
-
-      Object.keys(contractorScores).forEach(c => {
-        const avg = contractorScores[c].totalScore / contractorScores[c].count;
-        if (avg > maxAvgScore) {
-          maxAvgScore = avg;
-          bestContractor = c;
-        }
-      });
-
-      if (maxAvgScore >= 0) {
-        const gInfo = getGradeInfo(maxAvgScore);
-        document.getElementById("cardBestContractor").innerText = bestContractor;
-        document.getElementById("cardBestContractorScore").innerText = `เกรด ${gInfo.grade} (${maxAvgScore.toFixed(1)}%)`;
-      } else {
-        document.getElementById("cardBestContractor").innerText = "-";
-        document.getElementById("cardBestContractorScore").innerText = "ยังไม่มีผลประเมิน";
-      }
+    // ฟังก์ชันกดส่งแบบฟอร์ม
+    function submitForm(e) {
+        e.preventDefault();
+        alert("บันทึกข้อมูลการประเมินเรียบร้อยแล้ว!");
+        // สามารถเขียน fetch() หรือ google.script.run เพื่อส่งข้อมูลไปบันทึกใน Sheet/Database ได้ที่นี่
     }
+</script>
 
-    function populateProjectSelectOptions() {
-      const select = document.getElementById("evalProjectSelect");
-      select.innerHTML = `<option value="">-- กรุณาเลือกสาขา --</option>`;
-      projectsData.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.id;
-        opt.innerText = `[${p.id}] ${p.branchName} - ${p.contractor}`;
-        select.appendChild(opt);
-      });
-    }
-
-    function openEvalTabForProject(projectId) {
-      document.getElementById("evalProjectSelect").value = projectId;
-      onProjectSelectChange();
-      new bootstrap.Tab(document.getElementById('eval-tab')).show();
-      setTimeout(resizeCanvas, 150);
-    }
-
-    function onProjectSelectChange() {
-      const prjId = document.getElementById("evalProjectSelect").value;
-      const deptId = document.getElementById("evalDeptSelect").value;
-      currentSelectedRatings = {};
-      clearSignature();
-
-      if (prjId) {
-        const prj = projectsData.find(p => String(p.id) === String(prjId));
-        if (prj && prj.evaluations && prj.evaluations[deptId]) {
-          const deptEval = prj.evaluations[deptId];
-          currentSelectedRatings = { ...deptEval.scores };
-          document.getElementById("evaluatorName").value = deptEval.evaluatorName || "";
-          document.getElementById("evaluatorEmail").value = deptEval.evaluatorEmail || "";
-          document.getElementById("evalComments").value = deptEval.comments || "";
-          if (deptEval.signatureData) loadSignatureImage(deptEval.signatureData);
-        }
-      }
-      renderRubricCards();
-    }
-
-    function getFilteredCriteria(deptId) {
-      return criteria12.filter(c => (c.weights[deptId] || 0) > 0);
-    }
-
-    function renderRubricCards() {
-      const container = document.getElementById("rubricCardsContainer");
-      const deptId = parseInt(document.getElementById("evalDeptSelect").value);
-      const filteredCriteria = getFilteredCriteria(deptId);
-      container.innerHTML = "";
-
-      filteredCriteria.forEach(c => {
-        const selectedVal = currentSelectedRatings[c.id] !== undefined ? currentSelectedRatings[c.id] : -1;
-        const weight = c.weights[deptId];
-        const card = document.createElement("div");
-        card.className = `card card-custom rubric-card p-3 ${selectedVal >= 0 ? 'selected' : ''}`;
-        
-        let optionsHtml = "";
-        for (let lvl = 5; lvl >= 0; lvl--) {
-          const isActive = selectedVal === lvl;
-          optionsHtml += `
-            <div class="rubric-option ${isActive ? 'active' : ''}" onclick="selectRating(${c.id}, ${lvl})">
-              <div class="d-flex align-items-start">
-                <input class="form-check-input me-2 mt-1" type="radio" name="topic_${c.id}" value="${lvl}" ${isActive ? 'checked' : ''}>
-                <div><span class="fw-bold me-2">${lvl} คะแนน:</span><span class="fs-7">${c['r'+lvl]}</span></div>
-              </div>
-            </div>
-          `;
-        }
-
-        card.innerHTML = `
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <div>
-              <h6 class="fw-bold text-dark mb-1">${c.title}</h6>
-              <div class="text-primary small mb-1"><i class="fa-solid fa-bullseye me-1"></i><b>ตัวชี้วัด:</b> ${c.indicator}</div>
-              <div class="text-muted small"><i class="fa-solid fa-file-lines me-1"></i><b>เอกสารประกอบ:</b> ${c.evidence}</div>
-            </div>
-            <span class="badge bg-secondary ms-2">${weight.toFixed(2)}%</span>
-          </div>
-          <div class="mt-2">${optionsHtml}</div>
-        `;
-        container.appendChild(card);
-      });
-      calculateLiveDeptScore();
-    }
-
-    function selectRating(topicId, level) {
-      currentSelectedRatings[topicId] = level;
-      renderRubricCards();
-    }
-
-    function calculateLiveDeptScore() {
-      const deptId = parseInt(document.getElementById("evalDeptSelect").value);
-      const filteredCriteria = getFilteredCriteria(deptId);
-      let totalWeightedScore = 0;
-      let totalWeight = 0;
-
-      filteredCriteria.forEach(c => {
-        const score = currentSelectedRatings[c.id] !== undefined ? currentSelectedRatings[c.id] : 0;
-        const weight = c.weights[deptId];
-        totalWeight += weight;
-        totalWeightedScore += (score / 5) * weight;
-      });
-
-      const finalScore = totalWeight > 0 ? (totalWeightedScore / totalWeight) * 100 : 0;
-      document.getElementById("liveScoreCounter").innerText = `คะแนนฝ่ายนี้: ${finalScore.toFixed(2)} / 100%`;
-      return finalScore;
-    }
-
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      const prjId = document.getElementById("evalProjectSelect").value;
-      const deptId = document.getElementById("evalDeptSelect").value;
-      const evalName = document.getElementById("evaluatorName").value.trim();
-      const evalEmail = document.getElementById("evaluatorEmail").value.trim();
-      const comments = document.getElementById("evalComments").value.trim();
-
-      if (!prjId || !evalName) {
-        alert("กรุณาเลือกสาขาและใส่ชื่อผู้ประเมิน");
-        return;
-      }
-
-      if (!hasSigned) {
-        alert("กรุณาลงนามลายเซ็นออนไลน์ก่อนบันทึกข้อมูล");
-        return;
-      }
-
-      const signatureDataUrl = canvas.toDataURL("image/png");
-      const prj = projectsData.find(p => String(p.id) === String(prjId));
-      const deptScore = calculateLiveDeptScore();
-      
-      const evalRecord = {
-        eval_id: `${prjId}-DEPT-${deptId}`,
-        timestamp: new Date().toLocaleString("th-TH"),
-        project_id: prjId,
-        dept_id: parseInt(deptId),
-        evaluator_name: evalName,
-        evaluator_email: evalEmail,
-        scores_json: JSON.stringify(currentSelectedRatings),
-        dept_weighted_score: deptScore,
-        signature_data: signatureDataUrl,
-        branch_name: prj ? prj.branchName : "",
-        remarks: comments
-      };
-
-      if (prj) {
-        if (!prj.evaluations) prj.evaluations = {};
-        prj.evaluations[deptId] = {
-          evaluatorName: evalName,
-          evaluatorEmail: evalEmail,
-          scores: { ...currentSelectedRatings },
-          totalDeptScore: deptScore,
-          signatureData: signatureDataUrl,
-          comments: comments
-        };
-      }
-      renderDashboardTable();
-      renderContractorChart();
-
-      if (currentScriptUrl) {
-        await fetch(currentScriptUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(evalRecord)
-        });
-        alert("บันทึกข้อมูลและลายเซ็นสำเร็จ!");
-        setTimeout(fetchDataFromGoogleSheet, 2000);
-      }
-      
-      new bootstrap.Tab(document.getElementById('dashboard-tab')).show();
-    }
-  </script>
 </body>
 </html>
