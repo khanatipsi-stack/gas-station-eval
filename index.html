@@ -98,7 +98,7 @@
     .nav-pills .nav-link { color: var(--text-muted); font-weight: 600; border-radius: 8px; padding: 8px 18px; }
     .nav-pills .nav-link.active { background-color: var(--primary-navy); color: #ffffff; }
 
-    /* SIGNATURE CANVAS STYLES (ปรับความสูงกระชับขึ้นสำหรับพิมพ์รายงาน) */
+    /* SIGNATURE CANVAS STYLES */
     .signature-container {
       border: 2px dashed #cbd5e1;
       border-radius: 8px;
@@ -106,8 +106,8 @@
       touch-action: none;
       position: relative;
       width: 100%;
-      max-width: 400px; /* จำกัดขนาดให้พอดีการพิมพ์ */
-      height: 110px;     /* ปรับความสูงพอดีลายเซ็น */
+      max-width: 400px;
+      height: 110px;
       margin: 0 auto;
     }
     canvas#signaturePad { width: 100%; height: 100%; border-radius: 8px; cursor: crosshair; display: block; }
@@ -155,6 +155,8 @@
       backdrop-filter: blur(2px);
     }
 
+    .fs-8 { font-size: 0.75rem; }
+
     @media print {
       body * { visibility: hidden; }
       #printReportSection, #printReportSection * { visibility: visible; }
@@ -176,7 +178,6 @@
       <div id="loginAlert" class="alert alert-danger fs-7 d-none mb-3" role="alert"></div>
 
       <div class="d-flex justify-content-center mb-3">
-        <!-- GOOGLE SIGN IN BUTTON CONTAINER -->
         <div id="g_id_onload"
              data-client_id="422862728427-nvp3gq9athb91se9on4a3qs0rgb09fvf.apps.googleusercontent.com"
              data-context="signin"
@@ -201,7 +202,7 @@
     </div>
   </div>
 
-  <!-- APP MAIN CONTENT (HIDDEN BEFORE LOGIN) -->
+  <!-- APP MAIN CONTENT -->
   <div id="appContent" class="d-none">
 
     <!-- LOADING OVERLAY -->
@@ -334,7 +335,17 @@
           <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">
               <div class="card card-custom h-100 p-3">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-trophy text-warning me-2"></i>🏆 Top Performers</h6>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                  <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-trophy text-warning me-2"></i>🏆 Top Performers</h6>
+                  <!-- แถบเลือกด้านต่าง ๆ ของ Top Performers -->
+                  <div class="d-flex flex-wrap gap-1" id="topPerformersTabs">
+                    <button type="button" class="btn btn-sm btn-outline-primary active py-0 px-2 fs-8" onclick="switchTopTab('overall', this)">ภาพรวม</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fs-8" onclick="switchTopTab('safety', this)">ความปลอดภัย</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fs-8" onclick="switchTopTab('quality', this)">คุณภาพงาน</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fs-8" onclick="switchTopTab('spec', this)">ข้อกำหนด</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 fs-8" onclick="switchTopTab('ops', this)">การดำเนินงานฯ</button>
+                  </div>
+                </div>
                 <div class="table-responsive">
                   <table class="table table-hover align-middle mb-0 fs-7">
                     <thead class="table-light">
@@ -510,7 +521,6 @@
               <label class="form-label fw-bold">ข้อเสนอแนะเพิ่มเติม / Remark:</label>
               <textarea id="evalComments" class="form-control mb-3" rows="2" placeholder="ระบุข้อสังเกต..."></textarea>
               
-              <!-- ปรับปรุงส่วนลายเซ็น: กรอบขนาดพอดี + แสดงชื่อผู้ประเมินใต้ลายเซ็น -->
               <div class="text-center mx-auto" style="max-width: 420px;">
                 <label class="form-label fw-bold d-flex justify-content-between align-items-center mb-1">
                   <span><i class="fa-solid fa-signature me-1 text-primary"></i> ลายเซ็นผู้ประเมิน (ลงนามออนไลน์):</span>
@@ -523,7 +533,6 @@
                   <canvas id="signaturePad"></canvas>
                 </div>
 
-                <!-- แสดงชื่อผู้ประเมินใต้ลายเซ็น -->
                 <div class="mt-2 text-center">
                   <span class="fs-7 fw-bold text-dark" id="liveSignatureNameDisplay">( ............................................................ )</span>
                   <small class="text-muted d-block fs-8">ชื่อผู้ลงนามรับรอง</small>
@@ -574,6 +583,15 @@
       { id: 11, title: "11. การแก้ไขข้อบกพร่อง (Defect Work)", indicator: "ระยะเวลาแก้ไขแล้วเสร็จเทียบสัญญา", evidence: "ใบตรวจสอบรายการ Defect", weights: { 1: 2.50, 2: 0, 3: 0, 4: 2.50 }, r5: "แก้ไขแล้วเสร็จก่อนสิ้นสุดสัญญา ≥ 15 วัน", r4: "แก้ไขเสร็จก่อนสิ้นสุดสัญญา 1-15 วัน", r3: "แก้ไขเสร็จตรงวันสิ้นสุดสัญญา", r2: "แก้ไขเสร็จหลังสิ้นสุดสัญญา 1-15 วัน", r1: "แก้ไขเสร็จหลังสิ้นสุดสัญญา 16-30 วัน", r0: "แก้ไขเสร็จหลังสิ้นสุดสัญญา > 30 วัน" },
       { id: 12, title: "12. การให้ความร่วมมือกับ PTG", indicator: "สัดส่วนการเข้าร่วมประชุมติดตามงาน", evidence: "รายงานวาระการประชุม", weights: { 1: 4.50, 2: 3.00, 3: 3.00, 4: 0 }, r5: "เข้าร่วมประชุม > 90% ของการนัดหมาย", r4: "เข้าร่วมประชุม 80% - 89%", r3: "เข้าร่วมประชุม 60% - 79%", r2: "เข้าร่วมประชุม 40% - 59%", r1: "เข้าร่วมประชุม 20% - 39%", r0: "เข้าร่วมประชุม < 20%" }
     ];
+
+    let currentTopTab = 'overall';
+    const topCategoryTopics = {
+      overall: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      safety: [1, 2, 3, 4],
+      quality: [5],
+      spec: [6, 7],
+      ops: [9, 10, 11, 12]
+    };
 
     let projectsData = [];
     let currentSelectedRatings = {};
@@ -662,7 +680,6 @@
         imgEl.style.display = "block";
       }
 
-      // Auto-fill evaluator fields in form
       document.getElementById("evaluatorName").value = currentUser.name || "";
       document.getElementById("evaluatorEmail").value = currentUser.email || "";
       updateSignatureNameDisplay();
@@ -767,6 +784,33 @@
       return { count: count, completed: count === 4, score: totalWeightedScore.toFixed(1), rawScore: totalWeightedScore };
     }
 
+    // คำนวณคะแนนตามหมวดหัวข้อที่เลือกสำหรับแต่ละโครงการ
+    function calculateCategoryScoreForProject(prj, topicIds) {
+      let achievedWeight = 0;
+      let maxWeight = 0;
+
+      topicIds.forEach(id => {
+        const c = criteria12.find(item => item.id === id);
+        if (!c) return;
+
+        for (let deptId = 1; deptId <= 4; deptId++) {
+          const w = c.weights[deptId] || 0;
+          if (w > 0) {
+            maxWeight += w;
+            const deptEval = getDeptEval(prj, deptId);
+            if (deptEval) {
+              const scores = getScoresObject(deptEval);
+              if (scores[c.id] !== undefined) {
+                achievedWeight += (parseFloat(scores[c.id]) / 5) * w;
+              }
+            }
+          }
+        }
+      });
+
+      return maxWeight > 0 ? (achievedWeight / maxWeight) * 100 : 0;
+    }
+
     function getGradeInfo(scoreNum) {
       if (scoreNum >= 80) return { grade: 'A', class: 'grade-A' };
       if (scoreNum >= 70) return { grade: 'B', class: 'grade-B' };
@@ -848,52 +892,81 @@
       document.getElementById("kpiAvgVariance").innerText = "-2.5 Days";
     }
 
+    // ฟังก์ชันสำหรับสลับแท็บด้านต่างๆ ของ Top Performers
+    function switchTopTab(tabKey, btnElement) {
+      currentTopTab = tabKey;
+      const container = document.getElementById("topPerformersTabs");
+      if (container) {
+        container.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      }
+      if (btnElement) {
+        btnElement.classList.add("active");
+      }
+      const filtered = getFilteredProjects();
+      const completedFiltered = filtered.filter(p => calculateProjectScore(p).completed);
+      renderTopPerformersAndNeedAttention(completedFiltered);
+    }
+
     function renderTopPerformersAndNeedAttention(completedData) {
       const contractorStats = {};
+      const topicIds = topCategoryTopics[currentTopTab] || topCategoryTopics.overall;
+
       completedData.forEach(p => {
         if (!p.contractor) return;
         if (!contractorStats[p.contractor]) {
-          contractorStats[p.contractor] = { contractor: p.contractor, totalScore: 0, count: 0, delaySum: 0 };
+          contractorStats[p.contractor] = { 
+            contractor: p.contractor, 
+            totalScore: 0, 
+            catScoreSum: 0,
+            count: 0, 
+            delaySum: 0 
+          };
         }
         const sc = calculateProjectScore(p);
+        const catScore = calculateCategoryScoreForProject(p, topicIds);
+
         contractorStats[p.contractor].totalScore += sc.rawScore;
+        contractorStats[p.contractor].catScoreSum += catScore;
         contractorStats[p.contractor].count++;
         contractorStats[p.contractor].delaySum += 2;
       });
 
       const list = Object.values(contractorStats).map(c => ({
         ...c,
-        avgScore: c.count > 0 ? (c.totalScore / c.count) : 0,
+        avgOverallScore: c.count > 0 ? (c.totalScore / c.count) : 0,
+        avgCategoryScore: c.count > 0 ? (c.catScoreSum / c.count) : 0,
         avgDelay: c.count > 0 ? (c.delaySum / c.count).toFixed(1) : 0
       })).filter(c => c.count > 0);
 
-      const topSorted = [...list].sort((a, b) => b.avgScore - a.avgScore).slice(0, 5);
+      // Top Performers จัดอันดับตามหมวดหมู่ที่เลือก
+      const topSorted = [...list].sort((a, b) => b.avgCategoryScore - a.avgCategoryScore).slice(0, 5);
       const topBody = document.getElementById("topPerformersBody");
       topBody.innerHTML = topSorted.length ? "" : `<tr><td colspan="5" class="text-center text-muted">ไม่มีข้อมูลที่ประเมินครบ 4 ฝ่าย</td></tr>`;
       topSorted.forEach((item, index) => {
-        const g = getGradeInfo(item.avgScore);
+        const g = getGradeInfo(item.avgCategoryScore);
         topBody.innerHTML += `
           <tr>
             <td><b>${index + 1}</b></td>
             <td class="fw-bold text-primary">${item.contractor}</td>
             <td class="text-center">${item.count}</td>
-            <td class="text-center fw-bold">${item.avgScore.toFixed(1)}%</td>
+            <td class="text-center fw-bold">${item.avgCategoryScore.toFixed(1)}%</td>
             <td class="text-center"><span class="badge ${g.class}">${g.grade}</span></td>
           </tr>
         `;
       });
 
-      const bottomSorted = [...list].sort((a, b) => a.avgScore - b.avgScore).slice(0, 5);
+      // Need Attention จัดอันดับตามภาพรวมผลการดำเนินงาน
+      const bottomSorted = [...list].sort((a, b) => a.avgOverallScore - b.avgOverallScore).slice(0, 5);
       const needBody = document.getElementById("needAttentionBody");
       needBody.innerHTML = bottomSorted.length ? "" : `<tr><td colspan="5" class="text-center text-muted">ไม่มีข้อมูลที่ประเมินครบ 4 ฝ่าย</td></tr>`;
       bottomSorted.forEach((item, index) => {
-        const g = getGradeInfo(item.avgScore);
+        const g = getGradeInfo(item.avgOverallScore);
         needBody.innerHTML += `
           <tr>
             <td><b>${index + 1}</b></td>
             <td class="fw-bold text-dark">${item.contractor}</td>
             <td class="text-center text-danger">+${item.avgDelay} Days</td>
-            <td class="text-center fw-bold">${item.avgScore.toFixed(1)}%</td>
+            <td class="text-center fw-bold">${item.avgOverallScore.toFixed(1)}%</td>
             <td class="text-center"><span class="badge ${g.class}">${g.grade}</span></td>
           </tr>
         `;
@@ -1088,7 +1161,6 @@
 
     function closeReportPrintView() { document.getElementById("printReportSection").classList.add("d-none"); }
 
-    // --- ข้อ 1: ปรับปรุงการแสดงผลสาขาใน Select (แสดงเฉพาะสาขาที่ยังไม่ได้ประเมิน) ---
     function populateProjectSelectOptions() {
       const deptId = document.getElementById("evalDeptSelect").value;
       const select = document.getElementById("evalProjectSelect");
@@ -1100,7 +1172,6 @@
       projectsData.forEach(p => {
         const isEvaluatedByDept = getDeptEval(p, deptId) !== null;
         
-        // กรองแสดงเฉพาะสาขาที่ยังไม่ได้ประเมินเท่านั้น
         if (!isEvaluatedByDept) {
           pendingCount++;
           const opt = document.createElement("option");
@@ -1121,7 +1192,6 @@
       }
     }
 
-    // --- ข้อ 2: อัปเดตแสดงชื่อผู้ประเมินใต้กรอบลายเซ็นแบบ Real-time ---
     function updateSignatureNameDisplay() {
       const nameVal = document.getElementById("evaluatorName").value.trim();
       const displayEl = document.getElementById("liveSignatureNameDisplay");
@@ -1367,7 +1437,7 @@
       }
 
       refreshDashboardViews();
-      populateProjectSelectOptions(); // อัปเดตรีเฟรชดรอปดาวน์ทันทีเพื่อตัดสาขาที่เพิ่งประเมินออก
+      populateProjectSelectOptions();
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
       alert("บันทึกผลการประเมินเรียบร้อยแล้ว!");
