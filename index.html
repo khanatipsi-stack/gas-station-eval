@@ -566,7 +566,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxo0tKm_HDrPnFAX3HHVA0LNKHNHM__Lb6-pnhAW-E0mZc0gXTA6VuuqPk2lfHHcxfm/exec";
+    let DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWTAOaZqcj1SRdeeGHWXD4Jv3CDuctHcPb0_W6oCJmmRmNIlizb98JAvlFYMd2VqVv/exec";
     const deptWeightRatios = { 1: 0.65, 2: 0.10, 3: 0.10, 4: 0.15 };
     
     const criteria12 = [
@@ -684,7 +684,7 @@
       document.getElementById("evaluatorEmail").value = currentUser.email || "";
       updateSignatureNameDisplay();
 
-      currentScriptUrl = localStorage.getItem("SCRIPT_URL") || DEFAULT_SCRIPT_URL;
+      currentScriptUrl = localStorage.getItem("SCRIPT_URL_V2") || DEFAULT_SCRIPT_URL;
       document.getElementById("scriptUrlInput").value = currentScriptUrl;
       
       initCanvas();
@@ -1369,6 +1369,20 @@
       return finalScore;
     }
 
+    // ย่อลายเซ็นให้เล็กลง (Google Sheet จำกัด 50,000 ตัวอักษรต่อ 1 เซลล์)
+    function getCompactSignature() {
+      const maxW = 300;
+      const scale = Math.min(1, maxW / canvas.width);
+      const off = document.createElement("canvas");
+      off.width = Math.round(canvas.width * scale);
+      off.height = Math.round(canvas.height * scale);
+      const octx = off.getContext("2d");
+      octx.fillStyle = "#fff";
+      octx.fillRect(0, 0, off.width, off.height);
+      octx.drawImage(canvas, 0, 0, off.width, off.height);
+      return off.toDataURL("image/jpeg", 0.6);
+    }
+
     async function handleFormSubmit(e) {
       e.preventDefault();
       const prjId = document.getElementById("evalProjectSelect").value;
@@ -1398,7 +1412,7 @@
         evaluator_email: evalEmail,
         comments: comments,
         scores_json: currentSelectedRatings,
-        signature_data: canvas.toDataURL("image/png")
+        signature_data: getCompactSignature()
       };
 
       if (selectedPrj) {
@@ -1421,18 +1435,24 @@
         }
       }
 
-      if (currentScriptUrl) {
+      let syncOk = false, syncMsg = "";
+      if (!currentScriptUrl) {
+        syncMsg = "ยังไม่ได้ตั้งค่า Web App URL";
+      } else {
         try {
           const formData = new URLSearchParams();
           formData.append("data", JSON.stringify(payload));
-
-          await fetch(currentScriptUrl, {
+          const res = await fetch(currentScriptUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: formData.toString()
           });
+          const result = await res.json();
+          if (result && result.status === 'success') syncOk = true;
+          else syncMsg = (result && (result.message || result.error)) || "Server ตอบกลับไม่ใช่ success";
         } catch (err) {
           console.error("Submit Error:", err);
+          syncMsg = String(err && err.message || err);
         }
       }
 
@@ -1440,14 +1460,19 @@
       populateProjectSelectOptions();
       btnSubmit.disabled = false;
       btnSubmit.innerHTML = `<i class="fa-solid fa-cloud-arrow-up me-2"></i>บันทึกผลการประเมิน`;
-      alert("บันทึกผลการประเมินเรียบร้อยแล้ว!");
+      if (syncOk) {
+        alert("บันทึกลง Google Sheet เรียบร้อยแล้ว!");
+        fetchDataFromGoogleSheet();
+      } else {
+        alert("⚠️ บันทึกในหน้าเว็บแล้ว แต่ยังไม่ซิงค์ไป Google Sheet\nสาเหตุ: " + syncMsg);
+      }
 
       new bootstrap.Tab(document.getElementById('dashboard-tab')).show();
     }
 
     function saveSheetSettings() {
       currentScriptUrl = document.getElementById("scriptUrlInput").value.trim();
-      localStorage.setItem("SCRIPT_URL", currentScriptUrl);
+      localStorage.setItem("SCRIPT_URL_V2", currentScriptUrl);
       fetchDataFromGoogleSheet();
     }
   </script>
