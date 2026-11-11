@@ -399,7 +399,7 @@
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 fs-7" id="mainDataTable">
                 <thead class="table-light">
-                  <tr><th>Branch / Project</th><th>Zone / Contractor</th><th>Model</th><th class="text-center">Grade</th><th class="text-center">Score (%)</th><th class="text-center">Status</th><th class="text-center">Report</th></tr>
+                  <tr><th>Branch / Project</th><th>BU</th><th>Zone / Contractor</th><th>Model</th><th class="text-center">Grade</th><th class="text-center">Score (%)</th><th class="text-center">Status</th><th class="text-center">Report</th></tr>
                 </thead>
                 <tbody id="projectTableBody"></tbody>
               </table>
@@ -732,6 +732,7 @@
               branchName: p.branchName || p.branch_name || p.project_name || "ไม่ระบุชื่อสาขา",
               zone: zoneVal,
               contractor: contractorVal,
+              bu: String(p.bu || p.BU || "").trim(),
               model: typeVal
             };
           });
@@ -1047,6 +1048,7 @@
         tbody.innerHTML += `
           <tr>
             <td class="fw-bold text-primary">${p.branchName}</td>
+            <td><span class="badge bg-info text-dark">${p.bu || '-'}</span></td>
             <td><span class="badge bg-secondary me-1">${p.zone || '-'}</span> <b>${p.contractor}</b></td>
             <td><span class="badge bg-light text-dark border">${p.model}</span></td>
             <td class="text-center"><span class="badge ${gInfo.class}">${sc.count > 0 ? gInfo.grade : '-'}</span></td>
@@ -1187,7 +1189,7 @@
           pendingCount++;
           const opt = document.createElement("option");
           opt.value = p.project_id;
-          opt.innerText = `[${p.project_id}] ${p.branchName} (${p.contractor})`;
+          opt.innerText = `[${p.project_id}] ${p.branchName}${p.bu ? ' [' + p.bu + ']' : ''} (${p.contractor})`;
           select.appendChild(opt);
         }
       });
