@@ -717,13 +717,24 @@
         const res = await fetch(currentScriptUrl);
         const data = await res.json();
         if (data && data.status === 'success') {
-          projectsData = data.projects.map(p => ({
-            ...p,
-            project_id: String(p.project_id || p.id || "").padStart(3, '0'),
-            branchName: p.branchName || p.branch_name || p.project_name || "ไม่ระบุชื่อสาขา",
-            contractor: p.contractor_name || p.contractor || "ไม่ระบุผู้รับเหมา",
-            model: p.type || p.model || "-"
-          }));
+          projectsData = data.projects.map(p => {
+            // จับคู่ค่า Zone / Type / Contractor ให้ตรงกับฐานข้อมูล (กันกรณีคอลัมน์ใน Sheet เลื่อนตำแหน่ง)
+            const vals = Object.values(p).filter(v => typeof v === 'string').map(v => v.trim());
+            const isZone = v => /^zone\s*\d+/i.test(v || "");
+            const isType = v => /^(newstation|renovate)$/i.test(v || "");
+            const isContractor = v => /^(บจก|หจก|บมจ|บริษัท|ห้างหุ้นส่วน)/.test(v || "");
+            const zoneVal = vals.find(isZone) || (isType(p.zone) ? p.type : p.zone) || "-";
+            const typeVal = vals.find(isType) || (isZone(p.type) ? p.zone : p.type) || p.model || "-";
+            const contractorVal = vals.find(isContractor) || p.contractor_name || p.contractor || "ไม่ระบุผู้รับเหมา";
+            return {
+              ...p,
+              project_id: String(p.project_id || p.id || "").padStart(3, '0'),
+              branchName: p.branchName || p.branch_name || p.project_name || "ไม่ระบุชื่อสาขา",
+              zone: zoneVal,
+              contractor: contractorVal,
+              model: typeVal
+            };
+          });
           
           setupTopFilterDropdowns();
           refreshDashboardViews();
