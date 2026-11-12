@@ -281,6 +281,12 @@
             <i class="fa-solid fa-clipboard-check me-2"></i>ทำแบบประเมินผู้รับเหมา
           </button>
         </li>
+        <li class="nav-item">
+          <button class="nav-link" id="status-tab" data-bs-toggle="pill" data-bs-target="#status-view" type="button" onclick="renderStatusTracking()">
+            <i class="fa-solid fa-list-check me-2"></i>ติดตามสถานะการประเมิน
+            <span class="badge bg-danger ms-1" id="statusTabBadge" title="จำนวนรายการที่ยังไม่ได้ประเมิน">0</span>
+          </button>
+        </li>
       </ul>
 
       <div class="tab-content">
@@ -546,6 +552,72 @@
               </button>
             </div>
           </form>
+        </div>
+
+        <!-- STATUS TRACKING VIEW -->
+        <div class="tab-pane fade" id="status-view" role="tabpanel">
+
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+            <div>
+              <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-list-check text-primary me-2"></i>ติดตามสถานะการประเมิน</h5>
+              <small class="text-muted">ดูว่าฝ่ายไหน / ผู้ประเมินท่านไหน ยังประเมินไม่ครบกี่สาขา (ตามตัวกรอง Zone / Model / ผู้รับเหมา ด้านบน)</small>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()"><i class="fa-solid fa-rotate me-1"></i>รีเฟรชข้อมูลล่าสุด</button>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3"><div class="kpi-card"><div class="kpi-title">สาขาทั้งหมด</div><div class="kpi-value text-dark" id="stTotal">0</div><small class="text-muted">ที่ต้องประเมิน</small></div></div>
+            <div class="col-6 col-lg-3"><div class="kpi-card"><div class="kpi-title">ประเมินครบ 4 ฝ่าย</div><div class="kpi-value" style="color: var(--color-green);" id="stComplete">0</div><small class="text-muted">สาขาที่เสร็จสมบูรณ์</small></div></div>
+            <div class="col-6 col-lg-3"><div class="kpi-card"><div class="kpi-title">ยังไม่ครบ</div><div class="kpi-value" style="color: var(--color-amber);" id="stIncomplete">0</div><small class="text-muted">สาขาที่ยังขาดอย่างน้อย 1 ฝ่าย</small></div></div>
+            <div class="col-6 col-lg-3"><div class="kpi-card"><div class="kpi-title">รายการค้างประเมิน</div><div class="kpi-value" style="color: var(--color-red-muted);" id="stPendingTotal">0</div><small class="text-muted" id="stPendingSub">จากทั้งหมด 0 รายการ</small></div></div>
+          </div>
+
+          <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-building-user me-2 text-primary"></i>สถานะรายฝ่าย</h6>
+          <div class="row g-3 mb-4" id="statusDeptCards"></div>
+
+          <div class="card card-custom p-4 mb-4">
+            <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-user-check me-2 text-primary"></i>สถานะรายผู้ประเมิน</h6>
+            <small class="text-muted d-block mb-3">แสดงชื่อผู้ที่เคยส่งผลประเมินแล้วอย่างน้อย 1 สาขา — "ยังไม่ได้ประเมิน" คือจำนวนสาขาที่ฝ่ายนั้นยังไม่มีผลประเมินคงเหลือ</small>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 fs-7">
+                <thead class="table-light">
+                  <tr><th>ผู้ประเมิน</th><th>ฝ่าย</th><th class="text-center">ประเมินแล้ว</th><th class="text-center">ยังไม่ได้ประเมิน</th><th style="min-width:160px;">ความคืบหน้าของฝ่าย</th><th class="text-center">สาขาที่ค้าง</th></tr>
+                </thead>
+                <tbody id="statusEvaluatorBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card card-custom p-4 mb-4" id="statusMatrixCard">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2 mb-3">
+              <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-table-cells me-2 text-primary"></i>สถานะรายสาขา</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <select class="form-select form-select-sm" id="statusFilterSelect" style="width: 220px;" onchange="renderStatusTracking()">
+                  <option value="incomplete">เฉพาะสาขาที่ยังไม่ครบ</option>
+                  <option value="all">ทุกสาขา</option>
+                  <option value="d1">ค้างฝ่ายวิศวกรรม</option>
+                  <option value="d2">ค้างฝ่ายจัดซื้อจัดจ้าง</option>
+                  <option value="d3">ค้างฝ่าย Safety</option>
+                  <option value="d4">ค้างฝ่ายบริหารสถานี BU</option>
+                </select>
+                <input type="text" id="statusSearch" class="form-control form-control-sm" style="width: 200px;" placeholder="🔍 ค้นหาสาขา / ผู้รับเหมา" oninput="renderStatusTracking()">
+                <button class="btn btn-sm btn-outline-success" onclick="exportStatusCsv()"><i class="fa-solid fa-file-csv me-1"></i>Export CSV</button>
+              </div>
+            </div>
+            <div class="fs-8 text-muted mb-2" id="statusMatrixCount"></div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0 fs-7">
+                <thead class="table-light">
+                  <tr>
+                    <th>สาขา / โครงการ</th><th>ผู้รับเหมา</th>
+                    <th class="text-center">วิศวกรรม</th><th class="text-center">จัดซื้อ</th><th class="text-center">Safety</th><th class="text-center">BU</th>
+                    <th class="text-center">ครบ</th><th class="text-center">ดำเนินการ</th>
+                  </tr>
+                </thead>
+                <tbody id="statusMatrixBody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -882,6 +954,7 @@
       renderTrendAndScheduleCharts();
       renderMainDataTable(filtered);
       renderReportList();
+      renderStatusTracking();
     }
 
     function renderKPICards(completedData, totalProjectsCount) {
@@ -1481,6 +1554,184 @@
       }
 
       new bootstrap.Tab(document.getElementById('dashboard-tab')).show();
+    }
+
+
+    // ===================== STATUS TRACKING =====================
+    const statusDeptNames = { 1: "วิศวกรรม", 2: "จัดซื้อจัดจ้าง", 3: "Safety", 4: "บริหารสถานี BU" };
+    let lastStatusRows = [];
+
+    function escHtml(s) {
+      return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    // ใช้ตัวกรอง Zone / Model / ผู้รับเหมา เดียวกับด้านบน (ไม่ใช้ตัวกรอง Grade เพราะสาขาที่ยังไม่ประเมินไม่มีเกรด)
+    function getStatusScopeProjects() {
+      const z = document.getElementById("filterZone").value;
+      const m = document.getElementById("filterContractor").value;
+      const c = document.getElementById("filterBU").value;
+      return projectsData.filter(p => (!z || p.zone === z) && (!m || p.model === m) && (!c || p.contractor === c));
+    }
+
+    function renderStatusTracking() {
+      if (!document.getElementById("statusDeptCards")) return;
+      const projects = getStatusScopeProjects();
+      const total = projects.length;
+
+      const deptDone = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      const pendingByDept = { 1: [], 2: [], 3: [], 4: [] };
+      const evaluators = {};
+      let completeCount = 0;
+
+      const rows = projects.map(p => {
+        const cells = {};
+        let cnt = 0;
+        for (let d = 1; d <= 4; d++) {
+          const ev = getDeptEval(p, d);
+          if (ev) {
+            cnt++;
+            deptDone[d]++;
+            const name = ev.evaluatorName || ev.evaluator_name || "";
+            const email = ev.evaluatorEmail || ev.evaluator_email || "";
+            cells[d] = { name, email, time: ev.timestamp || "" };
+            const key = d + "|" + (email || name || "unknown").toLowerCase();
+            if (!evaluators[key]) evaluators[key] = { dept: d, name: name || "(ไม่ระบุชื่อ)", email, done: 0 };
+            evaluators[key].done++;
+          } else {
+            cells[d] = null;
+            pendingByDept[d].push(p);
+          }
+        }
+        if (cnt === 4) completeCount++;
+        return { p, cells, cnt };
+      });
+
+      const pendingTotal = total * 4 - (deptDone[1] + deptDone[2] + deptDone[3] + deptDone[4]);
+
+      // KPI
+      document.getElementById("stTotal").innerText = total;
+      document.getElementById("stComplete").innerText = completeCount;
+      document.getElementById("stIncomplete").innerText = total - completeCount;
+      document.getElementById("stPendingTotal").innerText = pendingTotal;
+      document.getElementById("stPendingSub").innerText = `จากทั้งหมด ${total * 4} รายการ (${total} สาขา × 4 ฝ่าย)`;
+      document.getElementById("statusTabBadge").innerText = pendingTotal;
+
+      // Dept cards
+      const deptBox = document.getElementById("statusDeptCards");
+      deptBox.innerHTML = "";
+      for (let d = 1; d <= 4; d++) {
+        const done = deptDone[d];
+        const pending = total - done;
+        const pct = total > 0 ? (done / total) * 100 : 0;
+        const barClass = pending === 0 ? "bg-success" : (pct >= 50 ? "bg-warning" : "bg-danger");
+        deptBox.innerHTML += `
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="kpi-card" style="gap:8px;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="fw-bold text-dark">ฝ่ายที่ ${d}: ${statusDeptNames[d]}</div>
+                ${pending === 0 ? '<span class="badge bg-success">ครบแล้ว</span>' : `<span class="badge bg-danger">ค้าง ${pending}</span>`}
+              </div>
+              <div class="progress" style="height: 10px;"><div class="progress-bar ${barClass}" style="width:${pct.toFixed(1)}%"></div></div>
+              <div class="d-flex justify-content-between fs-8 text-muted">
+                <span>ประเมินแล้ว ${done} / ${total} สาขา</span><span>${pct.toFixed(0)}%</span>
+              </div>
+              ${pending > 0 ? `<button class="btn btn-sm btn-outline-primary py-0" onclick="filterStatusByDept(${d})">ดูสาขาที่ค้าง (${pending})</button>` : ''}
+            </div>
+          </div>`;
+      }
+
+      // Evaluator table
+      const evBody = document.getElementById("statusEvaluatorBody");
+      const evList = Object.values(evaluators).sort((a, b) => a.dept - b.dept || b.done - a.done);
+      evBody.innerHTML = "";
+      if (evList.length === 0) {
+        evBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">ยังไม่มีผู้ส่งผลประเมิน</td></tr>`;
+      }
+      evList.forEach((e, i) => {
+        const pending = pendingByDept[e.dept].length;
+        const pct = total > 0 ? (deptDone[e.dept] / total) * 100 : 0;
+        const isMe = currentUser && e.email && currentUser.email && e.email.toLowerCase() === currentUser.email.toLowerCase();
+        const chips = pendingByDept[e.dept].map(p =>
+          `<a href="#" class="badge text-bg-light border text-decoration-none fw-normal me-1 mb-1" onclick="goToEval(${e.dept}, '${escHtml(p.project_id)}'); return false;">${escHtml(p.branchName)}</a>`
+        ).join("");
+        evBody.innerHTML += `
+          <tr>
+            <td><div class="fw-bold">${escHtml(e.name)} ${isMe ? '<span class="badge bg-primary ms-1">คุณ</span>' : ''}</div><small class="text-muted">${escHtml(e.email)}</small></td>
+            <td><span class="badge bg-secondary">${statusDeptNames[e.dept]}</span></td>
+            <td class="text-center fw-bold text-success">${e.done}</td>
+            <td class="text-center"><span class="badge ${pending === 0 ? 'bg-success' : 'bg-danger'} fs-7">${pending === 0 ? 'ครบแล้ว' : pending + ' สาขา'}</span></td>
+            <td><div class="progress" style="height:8px;"><div class="progress-bar ${pending === 0 ? 'bg-success' : 'bg-warning'}" style="width:${pct.toFixed(1)}%"></div></div><small class="text-muted fs-8">${deptDone[e.dept]}/${total} สาขา</small></td>
+            <td class="text-center">${pending > 0 ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="document.getElementById('evPend${i}').classList.toggle('d-none')">แสดง/ซ่อน</button>` : '-'}</td>
+          </tr>
+          ${pending > 0 ? `<tr id="evPend${i}" class="d-none"><td colspan="6" class="bg-light"><div class="fs-8 text-muted mb-1">คลิกชื่อสาขาเพื่อไปทำแบบประเมินทันที:</div><div style="max-height:150px; overflow-y:auto;">${chips}</div></td></tr>` : ''}
+        `;
+      });
+
+      // Branch matrix
+      const mode = document.getElementById("statusFilterSelect").value;
+      const q = (document.getElementById("statusSearch").value || "").toLowerCase().trim();
+      const shown = rows.filter(r => {
+        if (mode === "incomplete" && r.cnt === 4) return false;
+        if (/^d[1-4]$/.test(mode) && r.cells[mode.slice(1)]) return false;
+        if (q && !(`${r.p.branchName} ${r.p.contractor} ${r.p.project_id} ${r.p.bu}`.toLowerCase().includes(q))) return false;
+        return true;
+      }).sort((a, b) => a.cnt - b.cnt);
+      lastStatusRows = shown;
+
+      document.getElementById("statusMatrixCount").innerText = `แสดง ${shown.length} จาก ${total} สาขา`;
+      const mBody = document.getElementById("statusMatrixBody");
+      mBody.innerHTML = shown.length ? "" : `<tr><td colspan="8" class="text-center text-muted py-3">ไม่พบรายการ</td></tr>`;
+      shown.forEach(r => {
+        let tds = "";
+        for (let d = 1; d <= 4; d++) {
+          const c = r.cells[d];
+          tds += c
+            ? `<td class="text-center"><span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i></span><div class="fs-8 text-muted">${escHtml(c.name)}</div></td>`
+            : `<td class="text-center"><span class="badge bg-danger-subtle text-danger border border-danger-subtle">ยังไม่ประเมิน</span></td>`;
+        }
+        const missing = [1, 2, 3, 4].filter(d => !r.cells[d]);
+        const actionBtns = missing.map(d => `<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" title="ทำแบบประเมินฝ่าย${statusDeptNames[d]}" onclick="goToEval(${d}, '${escHtml(r.p.project_id)}')">ฝ่าย ${d}</button>`).join("");
+        mBody.innerHTML += `
+          <tr>
+            <td><div class="fw-bold text-primary">${escHtml(r.p.branchName)}</div><small class="text-muted">[${escHtml(r.p.project_id)}] ${r.p.bu ? escHtml(r.p.bu) : ''}</small></td>
+            <td>${escHtml(r.p.contractor)}</td>
+            ${tds}
+            <td class="text-center"><span class="badge ${r.cnt === 4 ? 'bg-success' : 'bg-warning text-dark'}">${r.cnt}/4</span></td>
+            <td class="text-center text-nowrap">${actionBtns || '<span class="text-success fs-8">เสร็จสมบูรณ์</span>'}</td>
+          </tr>`;
+      });
+    }
+
+    function filterStatusByDept(d) {
+      document.getElementById("statusFilterSelect").value = "d" + d;
+      renderStatusTracking();
+      document.getElementById("statusMatrixCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // ข้ามไปหน้าทำแบบประเมิน พร้อมเลือกฝ่าย + สาขาให้
+    function goToEval(deptId, prjId) {
+      document.getElementById("evalDeptSelect").value = String(deptId);
+      populateProjectSelectOptions();
+      new bootstrap.Tab(document.getElementById('eval-tab')).show();
+      document.getElementById("evalProjectSelect").value = prjId || "";
+      onProjectSelectChange();
+      setTimeout(resizeCanvas, 150);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function exportStatusCsv() {
+      const q = v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+      const head = ["รหัส", "สาขา", "BU", "ผู้รับเหมา", "วิศวกรรม", "จัดซื้อจัดจ้าง", "Safety", "BU(ฝ่าย)", "ประเมินแล้ว(จาก 4)"];
+      const lines = [head.map(q).join(",")];
+      lastStatusRows.forEach(r => {
+        const dep = d => r.cells[d] ? ("ประเมินแล้ว - " + (r.cells[d].name || "")) : "ยังไม่ประเมิน";
+        lines.push([r.p.project_id, r.p.branchName, r.p.bu, r.p.contractor, dep(1), dep(2), dep(3), dep(4), r.cnt].map(q).join(","));
+      });
+      const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "evaluation_status_" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(a); a.click(); a.remove();
     }
 
     function saveSheetSettings() {
