@@ -565,6 +565,8 @@
             <button class="btn btn-sm btn-outline-secondary" onclick="fetchDataFromGoogleSheet()"><i class="fa-solid fa-rotate me-1"></i>รีเฟรชข้อมูลล่าสุด</button>
           </div>
 
+          <div id="statusBuWarning" class="alert alert-warning py-2 fs-7 d-none"><i class="fa-solid fa-triangle-exclamation me-2"></i>ไม่พบคอลัมน์ <b>MANAGER_BU_Region_EMAILS</b> ในข้อมูลที่ Server ส่งมา — ต้องให้ Apps Script ส่งคอลัมน์นี้มาด้วย (ตอนนี้ฝ่าย BU จึงแสดงเฉพาะผู้ที่เคยส่งผลประเมินแล้ว)</div>
+
           <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3"><div class="kpi-card"><div class="kpi-title">สาขาทั้งหมด</div><div class="kpi-value text-dark" id="stTotal">0</div><small class="text-muted">ที่ต้องประเมิน</small></div></div>
             <div class="col-6 col-lg-3"><div class="kpi-card"><div class="kpi-title">ประเมินครบ 4 ฝ่าย</div><div class="kpi-value" style="color: var(--color-green);" id="stComplete">0</div><small class="text-muted">สาขาที่เสร็จสมบูรณ์</small></div></div>
@@ -577,11 +579,11 @@
 
           <div class="card card-custom p-4 mb-4">
             <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-user-check me-2 text-primary"></i>สถานะรายผู้ประเมิน</h6>
-            <small class="text-muted d-block mb-3">แสดงชื่อผู้ที่เคยส่งผลประเมินแล้วอย่างน้อย 1 สาขา — "ยังไม่ได้ประเมิน" คือจำนวนสาขาที่ฝ่ายนั้นยังไม่มีผลประเมินคงเหลือ</small>
+            <small class="text-muted d-block mb-3">ฝ่าย BU อ้างอิงผู้ประเมินจากคอลัมน์ MANAGER_BU_Region_EMAILS (sheet Projects) จึงเห็นครบทุกท่านแม้ยังไม่เคยประเมิน · ฝ่ายอื่นแสดงเฉพาะผู้ที่เคยส่งผลประเมินแล้วอย่างน้อย 1 สาขา</small>
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 fs-7">
                 <thead class="table-light">
-                  <tr><th>ผู้ประเมิน</th><th>ฝ่าย</th><th class="text-center">ประเมินแล้ว</th><th class="text-center">ยังไม่ได้ประเมิน</th><th style="min-width:160px;">ความคืบหน้าของฝ่าย</th><th class="text-center">สาขาที่ค้าง</th></tr>
+                  <tr><th>ผู้ประเมิน</th><th>ฝ่าย</th><th class="text-center">ประเมินแล้ว</th><th class="text-center">ยังไม่ได้ประเมิน</th><th style="min-width:160px;">ความคืบหน้า</th><th class="text-center">สาขาที่ค้าง</th></tr>
                 </thead>
                 <tbody id="statusEvaluatorBody"></tbody>
               </table>
@@ -1573,6 +1575,15 @@
       return projectsData.filter(p => (!z || p.zone === z) && (!m || p.model === m) && (!c || p.contractor === c));
     }
 
+    // อ่านอีเมลผู้ประเมินฝ่าย BU จากคอลัมน์ MANAGER_BU_Region_EMAILS (sheet Projects)
+    // คืน null = ไม่พบคอลัมน์นี้ในข้อมูลที่ Server ส่งมา, [] = พบแต่ว่าง
+    function getBuRegionEmails(p) {
+      const norm = x => String(x).toLowerCase().replace(/[^a-z0-9]/g, '');
+      const key = Object.keys(p).find(k => norm(k) === 'managerburegionemails');
+      if (!key) return null;
+      return String(p[key] == null ? "" : p[key]).split(/[,;\s]+/).map(x => x.trim().toLowerCase()).filter(x => x.includes('@'));
+    }
+
     function renderStatusTracking() {
       if (!document.getElementById("statusDeptCards")) return;
       const projects = getStatusScopeProjects();
@@ -1586,6 +1597,7 @@
       const rows = projects.map(p => {
         const cells = {};
         let cnt = 0;
+        const assigned = getBuRegionEmails(p);
         for (let d = 1; d <= 4; d++) {
           const ev = getDeptEval(p, d);
           if (ev) {
@@ -1603,7 +1615,7 @@
           }
         }
         if (cnt === 4) completeCount++;
-        return { p, cells, cnt };
+        return { p, cells, cnt, assigned };
       });
 
       const pendingTotal = total * 4 - (deptDone[1] + deptDone[2] + deptDone[3] + deptDone[4]);
@@ -1641,26 +1653,57 @@
       }
 
       // Evaluator table
+      const buFieldFound = rows.some(r => r.assigned !== null);
+      const warn = document.getElementById("statusBuWarning");
+      if (warn) warn.classList.toggle("d-none", buFieldFound || rows.length === 0);
+
+      const nameByEmail = {};
+      Object.values(evaluators).forEach(e => { if (e.email) nameByEmail[e.email.toLowerCase()] = e.name; });
+
+      const items = [];
+      Object.values(evaluators).forEach(e => {
+        if (e.dept === 4 && buFieldFound) return; // ฝ่าย BU ใช้รายชื่อจากคอลัมน์ MANAGER_BU_Region_EMAILS แทน
+        items.push({ dept: e.dept, name: e.name, email: e.email, done: e.done, pendingList: pendingByDept[e.dept], progDone: deptDone[e.dept], progTotal: total, note: "" });
+      });
+      if (buFieldFound) {
+        const byEmail = {}, unassigned = [];
+        rows.forEach(r => {
+          if (!r.assigned || r.assigned.length === 0) { if (!r.cells[4]) unassigned.push(r.p); return; }
+          r.assigned.forEach(em => {
+            if (!byEmail[em]) byEmail[em] = { total: 0, done: 0, pend: [] };
+            byEmail[em].total++;
+            if (r.cells[4]) byEmail[em].done++; else byEmail[em].pend.push(r.p);
+          });
+        });
+        Object.keys(byEmail).forEach(em => {
+          const b = byEmail[em];
+          items.push({ dept: 4, name: nameByEmail[em] || em, email: em, done: b.done, pendingList: b.pend, progDone: b.done, progTotal: b.total, note: `รับผิดชอบ ${b.total} สาขา` });
+        });
+        if (unassigned.length) {
+          items.push({ dept: 4, name: "(ยังไม่ระบุผู้ประเมิน BU)", email: "ไม่มีอีเมลในคอลัมน์ MANAGER_BU_Region_EMAILS", done: 0, pendingList: unassigned, progDone: 0, progTotal: unassigned.length, note: "สาขาที่ยังไม่มีผู้รับผิดชอบ", unassigned: true });
+        }
+      }
+      items.sort((a, b) => a.dept - b.dept || b.pendingList.length - a.pendingList.length);
+
       const evBody = document.getElementById("statusEvaluatorBody");
-      const evList = Object.values(evaluators).sort((a, b) => a.dept - b.dept || b.done - a.done);
       evBody.innerHTML = "";
-      if (evList.length === 0) {
+      if (items.length === 0) {
         evBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">ยังไม่มีผู้ส่งผลประเมิน</td></tr>`;
       }
-      evList.forEach((e, i) => {
-        const pending = pendingByDept[e.dept].length;
-        const pct = total > 0 ? (deptDone[e.dept] / total) * 100 : 0;
+      items.forEach((e, i) => {
+        const pending = e.pendingList.length;
+        const pct = e.progTotal > 0 ? (e.progDone / e.progTotal) * 100 : 0;
         const isMe = currentUser && e.email && currentUser.email && e.email.toLowerCase() === currentUser.email.toLowerCase();
-        const chips = pendingByDept[e.dept].map(p =>
+        const chips = e.pendingList.map(p =>
           `<a href="#" class="badge text-bg-light border text-decoration-none fw-normal me-1 mb-1" onclick="goToEval(${e.dept}, '${escHtml(p.project_id)}'); return false;">${escHtml(p.branchName)}</a>`
         ).join("");
         evBody.innerHTML += `
           <tr>
-            <td><div class="fw-bold">${escHtml(e.name)} ${isMe ? '<span class="badge bg-primary ms-1">คุณ</span>' : ''}</div><small class="text-muted">${escHtml(e.email)}</small></td>
+            <td><div class="fw-bold">${escHtml(e.name)} ${isMe ? '<span class="badge bg-primary ms-1">คุณ</span>' : ''}</div><small class="text-muted">${escHtml(e.email)}${e.note ? ' · ' + escHtml(e.note) : ''}</small></td>
             <td><span class="badge bg-secondary">${statusDeptNames[e.dept]}</span></td>
             <td class="text-center fw-bold text-success">${e.done}</td>
             <td class="text-center"><span class="badge ${pending === 0 ? 'bg-success' : 'bg-danger'} fs-7">${pending === 0 ? 'ครบแล้ว' : pending + ' สาขา'}</span></td>
-            <td><div class="progress" style="height:8px;"><div class="progress-bar ${pending === 0 ? 'bg-success' : 'bg-warning'}" style="width:${pct.toFixed(1)}%"></div></div><small class="text-muted fs-8">${deptDone[e.dept]}/${total} สาขา</small></td>
+            <td><div class="progress" style="height:8px;"><div class="progress-bar ${pending === 0 ? 'bg-success' : 'bg-warning'}" style="width:${pct.toFixed(1)}%"></div></div><small class="text-muted fs-8">${e.progDone}/${e.progTotal} สาขา</small></td>
             <td class="text-center">${pending > 0 ? `<button class="btn btn-sm btn-outline-secondary py-0" onclick="document.getElementById('evPend${i}').classList.toggle('d-none')">แสดง/ซ่อน</button>` : '-'}</td>
           </tr>
           ${pending > 0 ? `<tr id="evPend${i}" class="d-none"><td colspan="6" class="bg-light"><div class="fs-8 text-muted mb-1">คลิกชื่อสาขาเพื่อไปทำแบบประเมินทันที:</div><div style="max-height:150px; overflow-y:auto;">${chips}</div></td></tr>` : ''}
@@ -1687,7 +1730,7 @@
           const c = r.cells[d];
           tds += c
             ? `<td class="text-center"><span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-1"></i></span><div class="fs-8 text-muted">${escHtml(c.name)}</div></td>`
-            : `<td class="text-center"><span class="badge bg-danger-subtle text-danger border border-danger-subtle">ยังไม่ประเมิน</span></td>`;
+            : `<td class="text-center"><span class="badge bg-danger-subtle text-danger border border-danger-subtle">ยังไม่ประเมิน</span>${d === 4 && r.assigned && r.assigned.length ? '<div class="fs-8 text-muted">รอ: ' + escHtml(r.assigned.join(", ")) + '</div>' : ''}</td>`;
         }
         const missing = [1, 2, 3, 4].filter(d => !r.cells[d]);
         const actionBtns = missing.map(d => `<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" title="ทำแบบประเมินฝ่าย${statusDeptNames[d]}" onclick="goToEval(${d}, '${escHtml(r.p.project_id)}')">ฝ่าย ${d}</button>`).join("");
@@ -1724,7 +1767,7 @@
       const head = ["รหัส", "สาขา", "BU", "ผู้รับเหมา", "วิศวกรรม", "จัดซื้อจัดจ้าง", "Safety", "BU(ฝ่าย)", "ประเมินแล้ว(จาก 4)"];
       const lines = [head.map(q).join(",")];
       lastStatusRows.forEach(r => {
-        const dep = d => r.cells[d] ? ("ประเมินแล้ว - " + (r.cells[d].name || "")) : "ยังไม่ประเมิน";
+        const dep = d => r.cells[d] ? ("ประเมินแล้ว - " + (r.cells[d].name || "")) : ("ยังไม่ประเมิน" + (d === 4 && r.assigned && r.assigned.length ? " (ผู้ประเมิน: " + r.assigned.join(", ") + ")" : ""));
         lines.push([r.p.project_id, r.p.branchName, r.p.bu, r.p.contractor, dep(1), dep(2), dep(3), dep(4), r.cnt].map(q).join(","));
       });
       const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
